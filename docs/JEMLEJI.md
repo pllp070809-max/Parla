@@ -6,6 +6,7 @@
 
 ## Häzir
 - **Planning tamamlandy.** Režim: **implementasiýa** (plana görä kod). Teklipler: MVP_PLAN.md §4.
+- **Yza dolanmak:** Git ilkinji commit edildi (plan taýýar, kod başlamadyk). Bir zat ýalňyş bolsa: `git log` bilen commit gör, soň `git checkout 020b22a` ýa-da `git reset --hard 020b22a` bilen şu ýagdaýa dolan.
 
 ---
 
