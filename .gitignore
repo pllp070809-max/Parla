@@ -1,0 +1,25 @@
+# Build / cache
+parla_app/build/
+parla_app/.dart_tool/
+parla_app/.flutter-plugins
+parla_app/.flutter-plugins-dependencies
+parla_app/.pub-cache/
+parla_app/.pub/
+**/__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+*.db
+*.sqlite
+parla_backend/*.db
+parla_backend/*.sqlite
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
