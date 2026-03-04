@@ -9,6 +9,8 @@ class SalonList(BaseModel):
     address: str | None
     category: str | None
     image_key: str | None
+    latitude: float | None
+    longitude: float | None
 
     class Config:
         from_attributes = True

@@ -20,6 +20,8 @@ async def seed():
             address="Asgabat, Görogly 1",
             category="salon",
             image_key="salon1",
+            latitude=37.9500,
+            longitude=58.3800,
         )
         db.add(s1)
         await db.flush()
@@ -32,6 +34,8 @@ async def seed():
             address="Asgabat, Magtymguly 15",
             category="barber",
             image_key="salon2",
+            latitude=37.9450,
+            longitude=58.3900,
         )
         db.add(s2)
         await db.flush()
@@ -43,6 +47,8 @@ async def seed():
             address="Asgabat, Bitarap Türkmenistan 22",
             category="spa",
             image_key="salon3",
+            latitude=37.9420,
+            longitude=58.3750,
         )
         db.add(s3)
         await db.flush()

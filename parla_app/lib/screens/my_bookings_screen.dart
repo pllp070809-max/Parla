@@ -1,155 +1,167 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/providers.dart';
 import '../models/booking.dart';
 import '../theme.dart';
+import '../widgets/shared_widgets.dart';
 
-class MyBookingsScreen extends ConsumerStatefulWidget {
+class MyBookingsScreen extends ConsumerWidget {
   const MyBookingsScreen({super.key});
 
   @override
-  ConsumerState<MyBookingsScreen> createState() => _MyBookingsScreenState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final phone = ref.watch(userPhoneProvider);
+    final hasPhone = phone != null && phone.isNotEmpty;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Meniň bronlarym'),
+        actions: [
+          if (hasPhone)
+            IconButton(
+              icon: const Icon(Icons.refresh_rounded),
+              tooltip: 'Täzelemek',
+              onPressed: () => ref.invalidate(myBookingsProvider),
+            ),
+        ],
+      ),
+      body: !hasPhone
+          ? _NoPhoneView(ref: ref)
+          : _BookingsBody(ref: ref),
+    );
+  }
 }
 
-class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
-  final _phoneCtrl = TextEditingController();
-  List<Booking>? _bookings;
-  bool _loading = false;
-  String? _error;
-  bool _searched = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadSavedPhone();
-  }
-
-  Future<void> _loadSavedPhone() async {
-    final prefs = await SharedPreferences.getInstance();
-    final phone = prefs.getString('profile_phone') ?? '';
-    if (phone.isNotEmpty) {
-      _phoneCtrl.text = phone;
-      _search();
-    }
-  }
-
-  Future<void> _search() async {
-    final phone = _phoneCtrl.text.trim();
-    if (phone.isEmpty) return;
-    setState(() { _loading = true; _error = null; _searched = true; });
-    try {
-      final bookings = await ref.read(apiServiceProvider).getBookings(phone);
-      if (!mounted) return;
-      setState(() { _bookings = bookings; _loading = false; });
-    } catch (e) {
-      if (!mounted) return;
-      setState(() { _error = e.toString(); _loading = false; });
-    }
-  }
-
-  @override
-  void dispose() {
-    _phoneCtrl.dispose();
-    super.dispose();
-  }
+class _NoPhoneView extends StatelessWidget {
+  final WidgetRef ref;
+  const _NoPhoneView({required this.ref});
 
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
-    final now = DateTime.now();
-
-    return Scaffold(
-      appBar: AppBar(title: const Text('Meniň bronlarym')),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _phoneCtrl,
-                    decoration: const InputDecoration(
-                      hintText: '+993...',
-                      prefixIcon: Icon(Icons.phone_outlined),
-                    ),
-                    keyboardType: TextInputType.phone,
-                    onSubmitted: (_) => _search(),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                FilledButton(onPressed: _loading ? null : _search, child: const Text('Görmek')),
-              ],
-            ),
-          ),
-
-          Expanded(
-            child: _loading
-                ? const Center(child: CircularProgressIndicator())
-                : _error != null
-                    ? Center(child: Text('Ýalňyşlyk: $_error', style: tt.bodyMedium))
-                    : !_searched
-                        ? _emptyPlaceholder(context, ref, tt, 'Telefon nomeriňizi giriziň we "Görmek" basyň', showSalonButton: false)
-                        : (_bookings == null || _bookings!.isEmpty)
-                            ? _emptyPlaceholder(context, ref, tt, 'Siziň entäk bronyňyz ýok', showSalonButton: true)
-                            : _buildList(tt, now),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _emptyPlaceholder(BuildContext context, WidgetRef ref, TextTheme tt, String msg, {required bool showSalonButton}) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
+        padding: const EdgeInsets.symmetric(horizontal: kSpace3xl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.calendar_today_outlined, size: 72, color: kPrimary.withValues(alpha: 0.25)),
-            const SizedBox(height: 24),
-            Text(msg, style: tt.bodyLarge?.copyWith(height: 1.4), textAlign: TextAlign.center),
-            if (showSalonButton) ...[
-              const SizedBox(height: 28),
-              FilledButton.icon(
-                onPressed: () => ref.read(selectedTabIndexProvider.notifier).state = 0,
-                icon: const Icon(Icons.storefront_rounded, size: 20),
-                label: const Text('Salonlara geçmek'),
+            Container(
+              width: 96, height: 96,
+              decoration: BoxDecoration(
+                color: kPrimary.withValues(alpha: 0.08),
+                shape: BoxShape.circle,
               ),
-            ],
+              child: Icon(Icons.person_outline_rounded, size: 48, color: kPrimary.withValues(alpha: 0.5)),
+            ),
+            const SizedBox(height: kSpace2xl),
+            Text('Profiliňizi dolduryň', style: tt.titleLarge, textAlign: TextAlign.center),
+            const SizedBox(height: kSpaceSm),
+            Text(
+              'Bronlaryňyzy görmek üçin ilki Profil sahypasynda telefon nomeriňizi ýazyň.',
+              style: tt.bodyMedium, textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: kSpace2xl),
+            FilledButton.icon(
+              onPressed: () => ref.read(selectedTabIndexProvider.notifier).state = 2,
+              icon: const Icon(Icons.person_rounded, size: 20),
+              label: const Text('Profile geçmek'),
+            ),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildList(TextTheme tt, DateTime now) {
-    final upcoming = <Booking>[];
-    final past = <Booking>[];
-    for (final b in _bookings!) {
-      if (b.slotAt.isAfter(now)) {
-        upcoming.add(b);
-      } else {
-        past.add(b);
-      }
-    }
+class _BookingsBody extends StatelessWidget {
+  final WidgetRef ref;
+  const _BookingsBody({required this.ref});
 
-    return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+  @override
+  Widget build(BuildContext context) {
+    final bookingsAsync = ref.watch(myBookingsProvider);
+    final now = DateTime.now();
+
+    return bookingsAsync.when(
+      loading: () => ListView.separated(
+        padding: const EdgeInsets.all(kSpaceXl),
+        itemCount: 4,
+        separatorBuilder: (_, __) => const SizedBox(height: kSpaceSm + 2),
+        itemBuilder: (_, __) => const _BookingTileSkeleton(),
+      ),
+      error: (e, _) => ErrorRetryWidget(
+        message: 'Bronlary ýükläp bolmady',
+        onRetry: () => ref.invalidate(myBookingsProvider),
+      ),
+      data: (bookings) {
+        if (bookings.isEmpty) {
+          return EmptyStateWidget(
+            icon: Icons.calendar_today_outlined,
+            title: 'Siziň entäk bronyňyz ýok',
+            subtitle: 'Salon tapyp bron ediň – bronlaryňyz bu ýerde awtomatiki görüner',
+            actionLabel: 'Salonlara geçmek',
+            onAction: () => ref.read(selectedTabIndexProvider.notifier).state = 0,
+          );
+        }
+
+        final upcoming = <Booking>[];
+        final past = <Booking>[];
+        for (final b in bookings) {
+          (b.slotAt.isAfter(now) ? upcoming : past).add(b);
+        }
+
+        return RefreshIndicator(
+          color: kPrimary,
+          onRefresh: () async => ref.invalidate(myBookingsProvider),
+          child: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: kSpaceXl, vertical: kSpaceSm),
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: [
+              if (upcoming.isNotEmpty) ...[
+                _SectionHeader(title: 'Geljekki', count: upcoming.length),
+                const SizedBox(height: kSpaceSm),
+                ...upcoming.map((b) => _BookingTile(booking: b, isPast: false)),
+              ],
+              if (past.isNotEmpty) ...[
+                SizedBox(height: upcoming.isNotEmpty ? kSpaceXl : 0),
+                _SectionHeader(title: 'Tamamlandy', count: past.length, muted: true),
+                const SizedBox(height: kSpaceSm),
+                ...past.map((b) => _BookingTile(booking: b, isPast: true)),
+              ],
+              const SizedBox(height: kSpaceXl),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  final int count;
+  final bool muted;
+  const _SectionHeader({required this.title, required this.count, this.muted = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    return Row(
       children: [
-        if (upcoming.isNotEmpty) ...[
-          Text('Geljekki', style: tt.titleMedium),
-          const SizedBox(height: 8),
-          ...upcoming.map((b) => _BookingTile(booking: b, isPast: false)),
-        ],
-        if (past.isNotEmpty) ...[
-          const SizedBox(height: 20),
-          Text('Tamamlandy', style: tt.titleMedium?.copyWith(color: Colors.grey)),
-          const SizedBox(height: 8),
-          ...past.map((b) => _BookingTile(booking: b, isPast: true)),
-        ],
+        Text(title, style: tt.titleMedium?.copyWith(color: muted ? kTextSecondary : null)),
+        const SizedBox(width: kSpaceSm),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: kSpaceSm, vertical: 2),
+          decoration: BoxDecoration(
+            color: (muted ? kTextSecondary : kPrimary).withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(kRadiusSm),
+          ),
+          child: Text(
+            '$count',
+            style: tt.labelLarge?.copyWith(fontSize: 12, color: muted ? kTextSecondary : kPrimary),
+          ),
+        ),
       ],
     );
   }
@@ -168,17 +180,16 @@ class _BookingTile extends StatelessWidget {
     return Opacity(
       opacity: isPast ? 0.55 : 1.0,
       child: Card(
-        margin: const EdgeInsets.only(bottom: 10),
+        margin: const EdgeInsets.only(bottom: kSpaceSm + 2),
         child: Padding(
           padding: const EdgeInsets.all(14),
           child: Row(
             children: [
               Container(
-                width: 48,
-                height: 48,
+                width: 48, height: 48,
                 decoration: BoxDecoration(
                   color: (isPast ? Colors.grey : kPrimary).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(kRadiusMd),
                 ),
                 child: Icon(
                   isPast ? Icons.check_circle_outline : Icons.calendar_today,
@@ -191,29 +202,54 @@ class _BookingTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Bron #${booking.id}', style: tt.titleMedium),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: kSpaceXs),
                     Text(dateStr, style: tt.bodyMedium),
                   ],
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: kSpaceXs),
                 decoration: BoxDecoration(
-                  color: isPast
-                      ? Colors.grey.withValues(alpha: 0.15)
-                      : kPrimary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  color: isPast ? Colors.grey.withValues(alpha: 0.15) : kPrimary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(kRadiusSm),
                 ),
                 child: Text(
                   isPast ? 'Tamamlandy' : booking.status,
-                  style: tt.labelLarge?.copyWith(
-                    color: isPast ? Colors.grey : kPrimary,
-                    fontSize: 12,
-                  ),
+                  style: tt.labelLarge?.copyWith(color: isPast ? Colors.grey : kPrimary, fontSize: 12),
                 ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BookingTileSkeleton extends StatelessWidget {
+  const _BookingTileSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          children: const [
+            SkeletonBox(width: 48, height: 48, radius: kRadiusMd),
+            SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SkeletonBox(width: 100, height: 16),
+                  SizedBox(height: kSpaceSm),
+                  SkeletonBox(width: 160, height: 14),
+                ],
+              ),
+            ),
+            SkeletonBox(width: 72, height: 24, radius: kRadiusSm),
+          ],
         ),
       ),
     );

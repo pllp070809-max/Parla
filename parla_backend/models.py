@@ -12,6 +12,8 @@ class Salon(Base):
     address = Column(String(512))
     category = Column(String(64))
     image_key = Column(String(128))
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
 
     services = relationship("Service", back_populates="salon")
 

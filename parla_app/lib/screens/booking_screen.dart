@@ -34,9 +34,11 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
   bool _loadingSlots = false;
   String? _slotsError;
 
+  final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
   bool _submitting = false;
+  bool _autoValidate = false;
 
   late List<DateTime> _days;
 
@@ -63,9 +65,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
     try {
       final dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate);
       final slots = await ref.read(apiServiceProvider).getSlots(
-        salonId: widget.salonId,
-        date: dateStr,
-        serviceId: _selectedServiceId,
+        salonId: widget.salonId, date: dateStr, serviceId: _selectedServiceId,
       );
       if (!mounted) return;
       setState(() { _slots = slots; _loadingSlots = false; });
@@ -75,45 +75,96 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
     }
   }
 
+  String? _validateName(String? v) {
+    if (v == null || v.trim().isEmpty) return 'Adyňyzy ýazyň';
+    if (v.trim().length < 2) return 'Iň az 2 harp bolmaly';
+    return null;
+  }
+
+  String? _validatePhone(String? v) {
+    if (v == null || v.trim().isEmpty) return 'Telefon nomeriňizi ýazyň';
+    final digits = v.replaceAll(RegExp(r'[^\d]'), '');
+    if (digits.length < 8) return 'Nädogry telefon nomeri';
+    return null;
+  }
+
   Future<void> _submit() async {
-    final name = _nameCtrl.text.trim();
-    final phone = _phoneCtrl.text.trim();
-    if (name.isEmpty || phone.isEmpty || _selectedSlot == null) {
+    setState(() => _autoValidate = true);
+    if (!_formKey.currentState!.validate()) return;
+    if (_selectedSlot == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Ähli meýdanlary dolduryň')),
+        SnackBar(
+          content: const Text('Wagty saýlaň'),
+          backgroundColor: kError,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kRadiusMd)),
+        ),
       );
       return;
     }
+
     setState(() => _submitting = true);
     try {
       final booking = await ref.read(apiServiceProvider).createBooking(
         salonId: widget.salonId,
         serviceId: _selectedServiceId,
-        guestName: name,
-        guestPhone: phone,
+        guestName: _nameCtrl.text.trim(),
+        guestPhone: _phoneCtrl.text.trim(),
         slotAt: _selectedSlot!,
       );
       if (!mounted) return;
+      ref.invalidate(myBookingsProvider);
       final svc = widget.services.firstWhere((s) => s.id == _selectedServiceId);
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (_) => ConfirmationScreen(
-            booking: booking,
-            salonName: widget.salonName,
-            serviceName: svc.name,
-          ),
-        ),
+        fadeSlideRoute(ConfirmationScreen(booking: booking, salonName: widget.salonName, serviceName: svc.name)),
       );
     } on ApiException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+      if (e.statusCode == 409) {
+        _showConflictDialog();
+      } else {
+        _showErrorSnackBar(e.message);
+      }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+      _showErrorSnackBar('$e');
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
+  }
+
+  void _showConflictDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kRadiusLg)),
+        icon: Container(
+          width: 56, height: 56,
+          decoration: BoxDecoration(color: Colors.orange.withValues(alpha: 0.12), shape: BoxShape.circle),
+          child: const Icon(Icons.event_busy_rounded, color: Colors.orange, size: 28),
+        ),
+        title: const Text('Wagt eýýäm bronlandy'),
+        content: const Text('Bu wagt eýýäm başga müşderi tarapyndan saýlandy. Başga wagt synap görüň.'),
+        actions: [
+          FilledButton(
+            onPressed: () { Navigator.pop(ctx); _loadSlots(); },
+            child: const Text('Wagtlary täzelemek'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showErrorSnackBar(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: kError,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kRadiusMd)),
+      ),
+    );
   }
 
   @override
@@ -130,135 +181,140 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text(widget.salonName)),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        children: [
-          Text('Hyzmat saýlaň', style: tt.titleMedium),
-          const SizedBox(height: 10),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: widget.services.map((svc) {
-              final selected = svc.id == _selectedServiceId;
-              return ChoiceChip(
-                label: Text(svc.name),
-                selected: selected,
-                selectedColor: kPrimary.withValues(alpha: 0.15),
-                onSelected: (_) {
-                  setState(() => _selectedServiceId = svc.id);
-                  _loadSlots();
-                },
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '${selectedSvc.durationMinutes} min'
-            '${selectedSvc.price != null ? '  •  ${selectedSvc.price!.toStringAsFixed(0)} TMT' : ''}',
-            style: tt.bodyMedium,
-          ),
-
-          const SizedBox(height: 24),
-          Text('Gün saýlaň', style: tt.titleMedium),
-          const SizedBox(height: 10),
-          SizedBox(
-            height: 76,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: _days.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 10),
-              itemBuilder: (_, i) {
-                final d = _days[i];
-                final selected = DateFormat('yyyy-MM-dd').format(d) ==
-                    DateFormat('yyyy-MM-dd').format(_selectedDate);
-                final dayLabel = i == 0
-                    ? 'Şu gün'
-                    : i == 1
-                        ? 'Ertir'
-                        : DateFormat('dd MMM').format(d);
-                final weekday = DateFormat('EEE').format(d);
-                return GestureDetector(
-                  onTap: () {
-                    setState(() => _selectedDate = d);
-                    _loadSlots();
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: 64,
-                    decoration: BoxDecoration(
-                      color: selected ? kPrimary : kPrimary.withValues(alpha: 0.06),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(weekday, style: tt.bodyMedium?.copyWith(
-                          color: selected ? Colors.white70 : null, fontSize: 12)),
-                        const SizedBox(height: 4),
-                        Text(dayLabel, textAlign: TextAlign.center,
-                          style: tt.labelLarge?.copyWith(
-                            color: selected ? Colors.white : kPrimary, fontSize: 13)),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-
-          const SizedBox(height: 24),
-          Text('Wagt saýlaň', style: tt.titleMedium),
-          const SizedBox(height: 10),
-          if (_loadingSlots)
-            const Padding(padding: EdgeInsets.all(20), child: Center(child: CircularProgressIndicator()))
-          else if (_slotsError != null)
-            Text('Ýalňyşlyk: $_slotsError', style: tt.bodyMedium)
-          else if (_slots != null && _slots!.isEmpty)
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text('Bu gün üçin boş wagt ýok', style: tt.bodyMedium, textAlign: TextAlign.center),
-            )
-          else if (_slots != null)
+      body: Form(
+        key: _formKey,
+        autovalidateMode: _autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+        child: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: kSpaceXl, vertical: kSpaceLg),
+          children: [
+            Text('Hyzmat saýlaň', style: tt.titleMedium),
+            const SizedBox(height: kSpaceSm + 2),
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: _slots!.map((slot) {
-                final t = DateTime.parse(slot);
-                final label = DateFormat('HH:mm').format(t);
-                final selected = slot == _selectedSlot;
+              spacing: kSpaceSm,
+              runSpacing: kSpaceSm,
+              children: widget.services.map((svc) {
+                final selected = svc.id == _selectedServiceId;
                 return ChoiceChip(
-                  label: Text(label),
+                  label: Text(svc.name),
                   selected: selected,
                   selectedColor: kPrimary.withValues(alpha: 0.15),
-                  onSelected: (_) => setState(() => _selectedSlot = slot),
+                  onSelected: (_) {
+                    setState(() => _selectedServiceId = svc.id);
+                    _loadSlots();
+                  },
                 );
               }).toList(),
             ),
+            const SizedBox(height: kSpaceSm),
+            Text(
+              '${selectedSvc.durationMinutes} min'
+              '${selectedSvc.price != null ? '  •  ${selectedSvc.price!.toStringAsFixed(0)} TMT' : ''}',
+              style: tt.bodyMedium,
+            ),
 
-          const SizedBox(height: 24),
-          Text('Siziň maglumatlaryňyz', style: tt.titleMedium),
-          const SizedBox(height: 10),
-          TextField(
-            controller: _nameCtrl,
-            decoration: const InputDecoration(labelText: 'Adyňyz', prefixIcon: Icon(Icons.person_outline)),
-            textCapitalization: TextCapitalization.words,
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _phoneCtrl,
-            decoration: const InputDecoration(labelText: 'Telefon', prefixIcon: Icon(Icons.phone_outlined), hintText: '+993...'),
-            keyboardType: TextInputType.phone,
-          ),
+            const SizedBox(height: kSpace2xl),
+            Text('Gün saýlaň', style: tt.titleMedium),
+            const SizedBox(height: kSpaceSm + 2),
+            SizedBox(
+              height: 76,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: _days.length,
+                separatorBuilder: (_, __) => const SizedBox(width: kSpaceSm + 2),
+                itemBuilder: (_, i) {
+                  final d = _days[i];
+                  final selected = DateFormat('yyyy-MM-dd').format(d) ==
+                      DateFormat('yyyy-MM-dd').format(_selectedDate);
+                  final dayLabel = i == 0 ? 'Şu gün' : i == 1 ? 'Ertir' : DateFormat('dd MMM').format(d);
+                  final weekday = DateFormat('EEE').format(d);
+                  return GestureDetector(
+                    onTap: () { setState(() => _selectedDate = d); _loadSlots(); },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeOutCubic,
+                      width: 64,
+                      decoration: BoxDecoration(
+                        color: selected ? kPrimary : kPrimary.withValues(alpha: 0.06),
+                        borderRadius: BorderRadius.circular(kRadiusMd + 2),
+                        boxShadow: selected ? kShadowMd : null,
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(weekday, style: tt.bodyMedium?.copyWith(
+                            color: selected ? Colors.white70 : null, fontSize: 12)),
+                          const SizedBox(height: kSpaceXs),
+                          Text(dayLabel, textAlign: TextAlign.center,
+                            style: tt.labelLarge?.copyWith(
+                              color: selected ? Colors.white : kPrimary, fontSize: 13)),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
 
-          const SizedBox(height: 28),
-          ElevatedButton(
-            onPressed: _submitting ? null : _submit,
-            child: _submitting
-                ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                : const Text('Tassyklamak'),
-          ),
-          const SizedBox(height: 24),
-        ],
+            const SizedBox(height: kSpace2xl),
+            Text('Wagt saýlaň', style: tt.titleMedium),
+            const SizedBox(height: kSpaceSm + 2),
+            if (_loadingSlots)
+              const Padding(padding: EdgeInsets.all(kSpaceXl), child: Center(child: CircularProgressIndicator(color: kPrimary)))
+            else if (_slotsError != null)
+              Text('Ýalňyşlyk: $_slotsError', style: tt.bodyMedium?.copyWith(color: kError))
+            else if (_slots != null && _slots!.isEmpty)
+              Padding(
+                padding: const EdgeInsets.all(kSpaceLg),
+                child: Text('Bu gün üçin boş wagt ýok', style: tt.bodyMedium, textAlign: TextAlign.center),
+              )
+            else if (_slots != null)
+              Wrap(
+                spacing: kSpaceSm,
+                runSpacing: kSpaceSm,
+                children: _slots!.map((slot) {
+                  final t = DateTime.parse(slot);
+                  final label = DateFormat('HH:mm').format(t);
+                  final selected = slot == _selectedSlot;
+                  return ChoiceChip(
+                    label: Text(label),
+                    selected: selected,
+                    selectedColor: kPrimary.withValues(alpha: 0.15),
+                    onSelected: (_) => setState(() => _selectedSlot = slot),
+                  );
+                }).toList(),
+              ),
+
+            const SizedBox(height: kSpace2xl),
+            Text('Siziň maglumatlaryňyz', style: tt.titleMedium),
+            const SizedBox(height: kSpaceSm + 2),
+            TextFormField(
+              controller: _nameCtrl,
+              decoration: const InputDecoration(labelText: 'Adyňyz', prefixIcon: Icon(Icons.person_outline)),
+              textCapitalization: TextCapitalization.words,
+              validator: _validateName,
+            ),
+            const SizedBox(height: kSpaceMd),
+            TextFormField(
+              controller: _phoneCtrl,
+              decoration: const InputDecoration(labelText: 'Telefon', prefixIcon: Icon(Icons.phone_outlined), hintText: '+993...'),
+              keyboardType: TextInputType.phone,
+              validator: _validatePhone,
+            ),
+
+            const SizedBox(height: kSpace3xl - 4),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              height: 52,
+              child: ElevatedButton(
+                onPressed: _submitting ? null : _submit,
+                child: _submitting
+                    ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : const Text('Tassyklamak'),
+              ),
+            ),
+            const SizedBox(height: kSpace2xl),
+          ],
+        ),
       ),
     );
   }

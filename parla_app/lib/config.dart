@@ -1,18 +1,16 @@
-import 'dart:io' show Platform;
+// Web-de dart:io ýok, şonuň üçin conditional import.
+import 'config_stub.dart' if (dart.library.io) 'config_io.dart' as platform;
 
-const String _androidEmulatorHost = '10.0.2.2';
-const String _defaultHost = 'localhost';
 const int apiPort = 8000;
 
-/// Fiziki telefonda synag: kompýuteriň WiFi IP salgysyny goýuň (mysal: '192.168.1.100').
-/// Telefon we kompýuter bir WiFi-de bolmaly. Null bolsa: emulator = 10.0.2.2, beýlekiler = localhost.
-/// Fiziki tel üçin: kompýuteriň WiFi IP-si. Boş goýsa emulator/localhost ulanylýar.
-const String kApiHostOverride = '192.168.31.165';
+/// Fiziki telefonda synag: kompýuteriň WiFi IP salgysyny goýuň.
+/// Chrome / Windows üçin boş goýuň (localhost ulanylýar).
+const String kApiHostOverride = '192.168.137.1';
 
 String get apiBaseUrl {
   if (kApiHostOverride.isNotEmpty) {
     return 'http://$kApiHostOverride:$apiPort';
   }
-  final host = Platform.isAndroid ? _androidEmulatorHost : _defaultHost;
+  final host = platform.apiHostFromPlatform;
   return 'http://$host:$apiPort';
 }
