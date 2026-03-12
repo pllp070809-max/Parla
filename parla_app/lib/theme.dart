@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-// ── Colors ──
-const Color kPrimary = Color(0xFF00ACC1);
-const Color kSecondary = Color(0xFF00BCD4);
-const Color kAccentLight = Color(0xFF26C6DA);
-const Color kScaffoldBg = Color(0xFFF5F7F9);
-const Color kCardBg = Color(0xFFFFFFFF);
+// ── Colors (Fresha style, cyan variant) ──
+const Color kPrimary = Color(0xFF00ACC1);       // Fresha #7C40F6 → cyan
+const Color kSecondary = Color(0xFF0097A7);      // goýuraq cyan
+const Color kAccentLight = Color(0xFF26C6DA);    // açyk cyan
+const Color kScaffoldBg = Color(0xFFFFFFFF);     // Fresha: ak fon
+const Color kSurfaceBg = Color(0xFFF8F8F8);      // Fresha: çeýe fon
+const Color kCardBg = Color(0xFFFFFFFF);         // karta fony
 const Color kError = Color(0xFFE53935);
 const Color kSuccess = Color(0xFF43A047);
-const Color kTextPrimary = Color(0xFF1A1D1E);
-const Color kTextSecondary = Color(0xFF5F6368);
+const Color kStar = Color(0xFFFFB800);           // Fresha: reýting ýyldyzy
+const Color kTextPrimary = Color(0xFF1C1C1C);    // Fresha: esasy tekst
+const Color kTextSecondary = Color(0xFF757575);   // Fresha: ikinji tekst
+const Color kTextTertiary = Color(0xFF9E9E9E);    // Fresha: üçünji tekst
+const Color kBorder = Color(0xFFF0F0F0);          // Fresha: gyra/border
+const Color kBorderMedium = Color(0xFFBDBDBD);     // Fresha: orta gyra
 
 // ── Spacing scale ──
 const double kSpaceXs = 4;
@@ -21,18 +26,19 @@ const double kSpaceXl = 20;
 const double kSpace2xl = 24;
 const double kSpace3xl = 32;
 
-// ── Radius ──
+// ── Radius (Fresha: 12–14px tegelekler) ──
 const double kRadiusSm = 8;
 const double kRadiusMd = 12;
-const double kRadiusLg = 16;
-const double kRadiusXl = 24;
+const double kRadiusLg = 14;
+const double kRadiusXl = 20;
+const double kRadiusPill = 24;
 
 // ── Shadows ──
 List<BoxShadow> kShadowSm = [
   BoxShadow(
     color: Colors.black.withValues(alpha: 0.04),
-    blurRadius: 8,
-    offset: const Offset(0, 2),
+    blurRadius: 6,
+    offset: const Offset(0, 1),
   ),
 ];
 
@@ -87,30 +93,39 @@ ThemeData buildParlaTheme() {
     fontFamilyFallback: const ['Roboto', 'sans-serif'],
   );
 
+  // Fresha: aýdyň ierarhiýa, 20–24px sözbaşy, 15–16px atlar, 13px çal tekst
   final textTheme = GoogleFonts.interTextTheme().copyWith(
     headlineLarge: GoogleFonts.inter(
-      fontSize: 28, fontWeight: FontWeight.w700,
-      color: kTextPrimary, letterSpacing: -0.5, height: 1.2,
+      fontSize: 26, fontWeight: FontWeight.w700,
+      color: kTextPrimary, letterSpacing: -0.6, height: 1.22,
     ).merge(baseTextStyle),
     headlineMedium: GoogleFonts.inter(
-      fontSize: 22, fontWeight: FontWeight.w600,
-      color: kTextPrimary, height: 1.3,
+      fontSize: 22, fontWeight: FontWeight.w700,
+      color: kTextPrimary, height: 1.25,
     ).merge(baseTextStyle),
     titleLarge: GoogleFonts.inter(
-      fontSize: 18, fontWeight: FontWeight.w600,
-      color: kTextPrimary, height: 1.3,
+      fontSize: 20, fontWeight: FontWeight.w700,
+      color: kTextPrimary, height: 1.28,
     ).merge(baseTextStyle),
     titleMedium: GoogleFonts.inter(
-      fontSize: 16, fontWeight: FontWeight.w500,
+      fontSize: 16, fontWeight: FontWeight.w600,
+      color: kTextPrimary, height: 1.3,
+    ).merge(baseTextStyle),
+    titleSmall: GoogleFonts.inter(
+      fontSize: 15, fontWeight: FontWeight.w600,
       color: kTextPrimary, height: 1.3,
     ).merge(baseTextStyle),
     bodyLarge: GoogleFonts.inter(
-      fontSize: 16, fontWeight: FontWeight.w400,
-      color: kTextPrimary, height: 1.5,
+      fontSize: 15, fontWeight: FontWeight.w400,
+      color: kTextPrimary, height: 1.45,
     ).merge(baseTextStyle),
     bodyMedium: GoogleFonts.inter(
       fontSize: 14, fontWeight: FontWeight.w400,
-      color: kTextSecondary, height: 1.5,
+      color: kTextSecondary, height: 1.45,
+    ).merge(baseTextStyle),
+    bodySmall: GoogleFonts.inter(
+      fontSize: 13, fontWeight: FontWeight.w400,
+      color: kTextSecondary, height: 1.4,
     ).merge(baseTextStyle),
     labelLarge: GoogleFonts.inter(
       fontSize: 14, fontWeight: FontWeight.w600,
@@ -123,11 +138,12 @@ ThemeData buildParlaTheme() {
     colorScheme: colorScheme,
     textTheme: textTheme,
     scaffoldBackgroundColor: kScaffoldBg,
+    dividerColor: kBorder,
     appBarTheme: AppBarTheme(
       backgroundColor: kScaffoldBg,
       foregroundColor: kTextPrimary,
       elevation: 0,
-      scrolledUnderElevation: 1,
+      scrolledUnderElevation: 0.5,
       centerTitle: true,
       titleTextStyle: textTheme.titleLarge,
       iconTheme: const IconThemeData(color: kTextPrimary, size: 24),
@@ -175,14 +191,14 @@ ThemeData buildParlaTheme() {
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: kCardBg,
+      fillColor: kSurfaceBg,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(kRadiusMd),
-        borderSide: BorderSide(color: colorScheme.outlineVariant.withValues(alpha: 0.6)),
+        borderSide: const BorderSide(color: kBorder),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(kRadiusMd),
-        borderSide: BorderSide(color: colorScheme.outlineVariant.withValues(alpha: 0.6)),
+        borderSide: const BorderSide(color: kBorder),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(kRadiusMd),

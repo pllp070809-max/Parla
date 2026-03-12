@@ -385,7 +385,6 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-
 class _GenderSelector extends StatelessWidget {
   final String? value;
   final ValueChanged<String?> onChanged;

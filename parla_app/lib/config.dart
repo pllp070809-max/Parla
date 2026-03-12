@@ -5,7 +5,7 @@ const int apiPort = 8000;
 
 /// Fiziki telefonda synag: kompýuteriň WiFi IP salgysyny goýuň.
 /// Chrome / Windows üçin boş goýuň (localhost ulanylýar).
-const String kApiHostOverride = '192.168.137.1';
+const String kApiHostOverride = '';
 
 String get apiBaseUrl {
   if (kApiHostOverride.isNotEmpty) {

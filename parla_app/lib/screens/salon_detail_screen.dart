@@ -9,6 +9,9 @@ import '../models/salon.dart';
 import '../theme.dart';
 import '../widgets/shared_widgets.dart';
 import 'booking_screen.dart';
+import 'salon_gallery_screen.dart';
+import 'salon_reviews_screen.dart';
+import 'salon_staff_screen.dart';
 
 Future<LatLng?> _getUserLocation() async {
   bool enabled = await Geolocator.isLocationServiceEnabled();
@@ -81,24 +84,46 @@ class _SalonDetailScreenState extends ConsumerState<SalonDetailScreen> {
                 pinned: true,
                 flexibleSpace: FlexibleSpaceBar(
                   title: Text(salon.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                  background: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      if (hasImage)
-                        Image.asset(_imageMap[salon.imageKey]!, fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => _bgPlaceholder())
-                      else
-                        _bgPlaceholder(),
-                      const DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [Colors.transparent, Colors.black54],
+                  background: GestureDetector(
+                    onTap: () => Navigator.push(context, fadeSlideRoute(SalonGalleryScreen(salon: salon))),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        if (hasImage)
+                          Image.asset(_imageMap[salon.imageKey]!, fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => _bgPlaceholder())
+                        else
+                          _bgPlaceholder(),
+                        const DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [Colors.transparent, Colors.black54],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                        Positioned(
+                          bottom: 12,
+                          right: 12,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.black54,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.photo_library_rounded, size: 18, color: Colors.white),
+                                SizedBox(width: 6),
+                                Text('Suratlary gör', style: TextStyle(color: Colors.white, fontSize: 12)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -118,10 +143,34 @@ class _SalonDetailScreenState extends ConsumerState<SalonDetailScreen> {
                         const SizedBox(height: kSpaceXl),
                       ],
 
+                      _OpeningHoursTile(salonName: salon.name),
+                      const SizedBox(height: kSpaceXl),
+
                       if (salon.hasLocation) ...[
                         _SalonMapSection(salon: salon),
                         const SizedBox(height: kSpaceXl),
                       ],
+
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _DetailNavTile(
+                              icon: Icons.star_rounded,
+                              label: 'Synlar',
+                              onTap: () => Navigator.push(context, fadeSlideRoute(SalonReviewsScreen(salonName: salon.name))),
+                            ),
+                          ),
+                          const SizedBox(width: kSpaceMd),
+                          Expanded(
+                            child: _DetailNavTile(
+                              icon: Icons.people_rounded,
+                              label: 'Topar',
+                              onTap: () => Navigator.push(context, fadeSlideRoute(SalonStaffScreen(salonName: salon.name))),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: kSpaceXl),
 
                       Text('Hyzmatlar', style: tt.titleLarge),
                       const SizedBox(height: kSpaceMd),
@@ -662,6 +711,111 @@ class _TrianglePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _OpeningHoursTile extends StatelessWidget {
+  final String salonName;
+  const _OpeningHoursTile({required this.salonName});
+
+  static const _mockHours = [
+    'Duşenbe – Şenbe: 09:00 – 20:00',
+    'Ýekşenbe: 10:00 – 18:00',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => showModalBottomSheet(
+          context: context,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          builder: (_) => Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Iş wagty', style: tt.titleLarge),
+                const SizedBox(height: 16),
+                ..._mockHours.map((h) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Text(h, style: tt.bodyLarge),
+                    )),
+                SizedBox(height: MediaQuery.of(context).padding.bottom),
+              ],
+            ),
+          ),
+        ),
+        borderRadius: BorderRadius.circular(kRadiusMd),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: kSpaceSm),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: kPrimary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(kRadiusSm),
+                ),
+                child: const Icon(Icons.schedule_rounded, size: 22, color: kPrimary),
+              ),
+              const SizedBox(width: kSpaceMd),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Iş wagty', style: tt.titleMedium),
+                    Text('Duş–Şen: 09:00–20:00', style: tt.bodySmall?.copyWith(color: kTextSecondary)),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right_rounded, color: kTextTertiary),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DetailNavTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  const _DetailNavTile({required this.icon, required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(kRadiusMd),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+          decoration: BoxDecoration(
+            color: kSurfaceBg,
+            borderRadius: BorderRadius.circular(kRadiusMd),
+            border: Border.all(color: kBorder),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 20, color: kPrimary),
+              const SizedBox(width: 8),
+              Text(label, style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _ServiceTile extends StatelessWidget {
