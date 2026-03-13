@@ -15,8 +15,11 @@ class SalonsListScreen extends ConsumerStatefulWidget {
   ConsumerState<SalonsListScreen> createState() => _SalonsListScreenState();
 }
 
+enum _SortOrder { none, aToZ, zToA }
+
 class _SalonsListScreenState extends ConsumerState<SalonsListScreen> {
   late Future<List<Salon>> _future;
+  _SortOrder _sortOrder = _SortOrder.none;
 
   @override
   void initState() {
@@ -37,10 +40,33 @@ class _SalonsListScreenState extends ConsumerState<SalonsListScreen> {
     return 'Salonlar';
   }
 
+  List<Salon> _sorted(List<Salon> list) {
+    if (_sortOrder == _SortOrder.none) return list;
+    final copy = List<Salon>.from(list);
+    copy.sort((a, b) => a.name.compareTo(b.name));
+    return _sortOrder == _SortOrder.zToA ? copy.reversed.toList() : copy;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final favourites = ref.watch(favouriteSalonsProvider);
     return Scaffold(
-      appBar: AppBar(title: Text(_title)),
+      appBar: AppBar(
+        title: Text(_title),
+        actions: [
+          PopupMenuButton<_SortOrder>(
+            icon: const Icon(Icons.sort_rounded),
+            tooltip: 'Ad boýunça tertiple',
+            initialValue: _sortOrder,
+            onSelected: (v) => setState(() => _sortOrder = v),
+            itemBuilder: (_) => [
+              const PopupMenuItem(value: _SortOrder.none, child: Text('Tertipsiz')),
+              const PopupMenuItem(value: _SortOrder.aToZ, child: Text('A → Z')),
+              const PopupMenuItem(value: _SortOrder.zToA, child: Text('Z → A')),
+            ],
+          ),
+        ],
+      ),
       body: FutureBuilder<List<Salon>>(
         future: _future,
         builder: (context, snap) {
@@ -63,6 +89,7 @@ class _SalonsListScreenState extends ConsumerState<SalonsListScreen> {
               (s.address ?? '').toLowerCase().contains(q)
             ).toList();
           }
+          salons = _sorted(salons);
           if (salons.isEmpty) {
             return const EmptyStateWidget(
               icon: Icons.search_off_rounded,
@@ -78,6 +105,8 @@ class _SalonsListScreenState extends ConsumerState<SalonsListScreen> {
               final s = salons[i];
               return _SalonTile(
                 salon: s,
+                isFavourite: favourites.contains(s.id),
+                onFavouriteToggle: () => ref.read(favouriteSalonsProvider.notifier).toggle(s.id),
                 onTap: () => Navigator.push(context, fadeSlideRoute(SalonDetailScreen(salonId: s.id))),
               );
             },
@@ -90,8 +119,15 @@ class _SalonsListScreenState extends ConsumerState<SalonsListScreen> {
 
 class _SalonTile extends StatelessWidget {
   final Salon salon;
+  final bool isFavourite;
+  final VoidCallback onFavouriteToggle;
   final VoidCallback onTap;
-  const _SalonTile({required this.salon, required this.onTap});
+  const _SalonTile({
+    required this.salon,
+    required this.isFavourite,
+    required this.onFavouriteToggle,
+    required this.onTap,
+  });
 
   static const _imageMap = {
     'salon1': 'images/salon1.png',
@@ -134,6 +170,11 @@ class _SalonTile extends StatelessWidget {
                     ],
                   ],
                 ),
+              ),
+              IconButton(
+                icon: Icon(isFavourite ? Icons.favorite : Icons.favorite_border, color: isFavourite ? Colors.red : kTextSecondary),
+                onPressed: onFavouriteToggle,
+                tooltip: isFavourite ? 'Saýlananlardan aýyr' : 'Saýlananlara goş',
               ),
               const Icon(Icons.chevron_right, color: kTextSecondary),
             ],

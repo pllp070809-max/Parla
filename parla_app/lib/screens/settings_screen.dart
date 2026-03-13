@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/providers.dart';
 import '../theme.dart';
+import 'privacy_policy_screen.dart';
+import 'help_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -57,13 +59,13 @@ class SettingsScreen extends ConsumerWidget {
               _SettingsTile(
                 icon: Icons.shield_rounded,
                 label: 'Gizlinlik syýasaty',
-                onTap: () {},
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen())),
               ),
               const Divider(height: 1),
               _SettingsTile(
                 icon: Icons.help_rounded,
                 label: 'Kömek / Habarlaşmak',
-                onTap: () {},
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const HelpScreen())),
               ),
             ],
           ),

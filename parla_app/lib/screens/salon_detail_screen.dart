@@ -8,6 +8,7 @@ import '../providers/providers.dart';
 import '../models/salon.dart';
 import '../theme.dart';
 import '../widgets/shared_widgets.dart';
+import '../utils/launch_utils.dart';
 import 'booking_screen.dart';
 import 'salon_gallery_screen.dart';
 import 'salon_reviews_screen.dart';
@@ -435,7 +436,7 @@ class _SalonMapSectionState extends State<_SalonMapSection> {
                     ),
                     const SizedBox(width: kSpaceSm),
                     FilledButton.tonalIcon(
-                      onPressed: () {},
+                      onPressed: () => openMapsDirection(salon),
                       icon: const Icon(Icons.directions_rounded, size: 18),
                       label: const Text('Ugur'),
                       style: FilledButton.styleFrom(
@@ -621,7 +622,7 @@ class _FullScreenMapPageState extends State<_FullScreenMapPage> {
                   const SizedBox(width: kSpaceSm),
                   FloatingActionButton.small(
                     heroTag: 'directions', backgroundColor: kPrimary,
-                    onPressed: () {},
+                    onPressed: () => openMapsDirection(salon),
                     child: const Icon(Icons.directions_rounded, color: Colors.white, size: 20),
                   ),
                 ],

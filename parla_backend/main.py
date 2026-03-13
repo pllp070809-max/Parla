@@ -9,7 +9,7 @@ from sqlalchemy.orm import selectinload
 
 from database import get_db, engine, Base
 from models import Salon, Service, Booking
-from schemas import SalonList, SalonDetail, ServiceOut, BookingCreate, BookingOut
+from schemas import SalonList, SalonDetail, ServiceOut, BookingCreate, BookingOut, BookingStatusUpdate
 
 PHONE_PREFIX = "+993"
 SLOT_START = time(9, 0)
@@ -169,8 +169,61 @@ async def list_bookings_by_phone(
 ):
     normalized = normalize_phone(phone)
     r = await db.execute(
-        select(Booking)
+        select(Booking, Salon.name, Service.name)
+        .join(Salon, Booking.salon_id == Salon.id)
+        .join(Service, Booking.service_id == Service.id)
         .where(Booking.guest_phone == normalized)
         .order_by(Booking.slot_at.desc())
     )
-    return list(r.scalars().all())
+    return [
+        BookingOut(
+            id=b.id,
+            salon_id=b.salon_id,
+            service_id=b.service_id,
+            guest_name=b.guest_name,
+            guest_phone=b.guest_phone,
+            slot_at=b.slot_at,
+            status=b.status,
+            salon_name=salon_name,
+            service_name=service_name,
+        )
+        for b, salon_name, service_name in r.all()
+    ]
+
+
+@app.patch("/bookings/{booking_id}", response_model=BookingOut)
+async def cancel_booking(
+    booking_id: int,
+    body: BookingStatusUpdate,
+    phone: str = Query(..., description="Müşderi telefon nomeri – ygtyýarlyk üçin"),
+    db: AsyncSession = Depends(get_db),
+):
+    if body.status != "cancelled":
+        raise HTTPException(400, "Diňe status 'cancelled' rugsat berilýär")
+    normalized = normalize_phone(phone)
+    r = await db.execute(
+        select(Booking, Salon.name, Service.name)
+        .join(Salon, Booking.salon_id == Salon.id)
+        .join(Service, Booking.service_id == Service.id)
+        .where(Booking.id == booking_id)
+    )
+    row = r.one_or_none()
+    if not row:
+        raise HTTPException(404, "Bron tapylmady")
+    b, salon_name, service_name = row
+    if b.guest_phone != normalized:
+        raise HTTPException(403, "Bu bron siziň nomeriňize degişli däl")
+    b.status = "cancelled"
+    await db.commit()
+    await db.refresh(b)
+    return BookingOut(
+        id=b.id,
+        salon_id=b.salon_id,
+        service_id=b.service_id,
+        guest_name=b.guest_name,
+        guest_phone=b.guest_phone,
+        slot_at=b.slot_at,
+        status=b.status,
+        salon_name=salon_name,
+        service_name=service_name,
+    )

@@ -18,7 +18,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   final _queryCtrl = TextEditingController();
   final _focusNode = FocusNode();
 
-  static const _recentSearches = ['Saç kesmek', 'Barberhana', 'Dyrnak', 'Massage'];
   static const _popularSearches = ['Gözellik salony', 'Spa', 'Kirpik', 'Makiýaž'];
 
   @override
@@ -29,10 +28,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   void _onSearch(String query) {
-    if (query.trim().isEmpty) return;
+    final q = query.trim();
+    if (q.isEmpty) return;
+    ref.read(recentSearchQueriesProvider.notifier).add(q);
     Navigator.pushReplacement(
       context,
-      fadeSlideRoute(SalonsListScreen(searchQuery: query.trim())),
+      fadeSlideRoute(SalonsListScreen(searchQuery: q)),
     );
   }
 
@@ -97,14 +98,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   Widget _buildSuggestions(TextTheme tt) {
+    final recent = ref.watch(recentSearchQueriesProvider);
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       children: [
         const SizedBox(height: 8),
-        Text('Soňky gözlegler', style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
-        const SizedBox(height: 12),
-        ..._recentSearches.map((q) => _SuggestionChip(label: q, onTap: () => _onSearch(q))),
-        const SizedBox(height: 24),
+        if (recent.isNotEmpty) ...[
+          Text('Soňky gözlegler', style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+          const SizedBox(height: 12),
+          ...recent.map((q) => _SuggestionChip(label: q, onTap: () => _onSearch(q))),
+          const SizedBox(height: 24),
+        ],
         Text('Meşhur gözlegler', style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
         const SizedBox(height: 12),
         ..._popularSearches.map((q) => _SuggestionChip(label: q, onTap: () => _onSearch(q))),

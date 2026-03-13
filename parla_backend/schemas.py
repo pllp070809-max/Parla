@@ -38,6 +38,10 @@ class BookingCreate(BaseModel):
     slot_at: datetime
 
 
+class BookingStatusUpdate(BaseModel):
+    status: str  # "cancelled"
+
+
 class BookingOut(BaseModel):
     id: int
     salon_id: int
@@ -46,6 +50,8 @@ class BookingOut(BaseModel):
     guest_phone: str
     slot_at: datetime
     status: str
+    salon_name: str | None = None
+    service_name: str | None = None
 
     class Config:
         from_attributes = True

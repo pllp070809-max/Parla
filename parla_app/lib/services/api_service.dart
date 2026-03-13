@@ -69,6 +69,19 @@ class ApiService {
         .toList();
   }
 
+  Future<Booking> cancelBooking(int bookingId, String phone) async {
+    final uri = Uri.parse('$apiBaseUrl/bookings/$bookingId').replace(
+      queryParameters: {'phone': phone},
+    );
+    final res = await http.patch(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'status': 'cancelled'}),
+    );
+    _check(res);
+    return Booking.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
+  }
+
   void _check(http.Response res) {
     if (res.statusCode >= 400) {
       final msg = _tryParseDetail(res.body) ?? 'Ýalňyşlyk: ${res.statusCode}';

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/providers.dart';
 import '../models/salon.dart';
@@ -63,38 +64,82 @@ class HomeScreen extends ConsumerWidget {
                             const SizedBox(height: 2),
                             GestureDetector(
                               onTap: () => Navigator.push(context, fadeSlideRoute(const LocationPickerScreen())),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.location_on_rounded, size: 14, color: kTextSecondary),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    ref.watch(selectedLocationProvider),
-                                    style: tt.bodySmall?.copyWith(color: kTextSecondary, fontSize: 13),
-                                  ),
-                                  Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: kTextSecondary),
-                                ],
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: kSurfaceBg,
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(color: kBorder),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.location_on_rounded, size: 14, color: kTextSecondary),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      ref.watch(selectedLocationProvider),
+                                      style: tt.bodySmall?.copyWith(color: kTextSecondary, fontSize: 13),
+                                    ),
+                                    Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: kTextSecondary),
+                                  ],
+                                ),
                               ),
                             ),
                           ],
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.notifications_outlined, size: 24),
-                        onPressed: () => Navigator.push(context, fadeSlideRoute(const NotificationsScreen())),
-                        style: IconButton.styleFrom(foregroundColor: kTextPrimary),
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.notifications_outlined, size: 24),
+                            onPressed: () => Navigator.push(context, fadeSlideRoute(const NotificationsScreen())),
+                            style: IconButton.styleFrom(foregroundColor: kTextPrimary),
+                          ),
+                          if (ref.watch(hasUnreadNotificationsProvider))
+                            Positioned(
+                              top: 8,
+                              right: 8,
+                              child: Container(
+                                width: 8,
+                                height: 8,
+                                decoration: const BoxDecoration(
+                                  color: kError,
+                                  shape: BoxShape.circle,
+                                  border: Border.fromBorderSide(BorderSide(color: Colors.white, width: 1)),
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                       GestureDetector(
                         onTap: () => ref.read(selectedTabIndexProvider.notifier).state = 2,
-                        child: Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            color: kSurfaceBg,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: kBorder),
-                          ),
-                          child: const Icon(Icons.person_rounded, color: kPrimary, size: 20),
+                        child: Consumer(
+                          builder: (_, ref2, __) {
+                            final name = ref2.watch(profileNameProvider).valueOrNull?.trim();
+                            final initial = (name != null && name.isNotEmpty)
+                                ? name[0].toUpperCase()
+                                : 'P';
+                            return Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                color: kPrimary.withValues(alpha: 0.15),
+                                shape: BoxShape.circle,
+                                border: Border.all(color: kBorder),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  initial,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: kPrimary,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ],
@@ -102,29 +147,36 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ),
 
-              // ── Search bar (Fresha: doly giňlik, 14px radius) ──
+              // ── Search bar (pill + semantics) ──
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                  child: Material(
-                    color: const Color(0xFFF2F2F2),
-                    borderRadius: BorderRadius.circular(14),
-                    child: InkWell(
-                      onTap: () => Navigator.push(context, fadeSlideRoute(const SearchScreen())),
-                      borderRadius: BorderRadius.circular(14),
-                      child: Container(
-                        height: 44,
-                        padding: const EdgeInsets.symmetric(horizontal: 14),
-                        alignment: Alignment.centerLeft,
-                        child: Row(
-                          children: [
-                            Icon(Icons.search_rounded, color: kTextTertiary, size: 22),
-                            const SizedBox(width: 10),
-                            Text(
-                              'Salonlary we hyzmatlary gözle',
-                              style: tt.bodyMedium?.copyWith(color: kTextTertiary, fontSize: 15),
-                            ),
-                          ],
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+                  child: Semantics(
+                    label: 'Salonlary we hyzmatlary gözle',
+                    button: true,
+                    child: Material(
+                      color: const Color(0xFFF2F2F2),
+                      borderRadius: BorderRadius.circular(22),
+                      child: InkWell(
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          Navigator.push(context, fadeSlideRoute(const SearchScreen()));
+                        },
+                        borderRadius: BorderRadius.circular(22),
+                        child: Container(
+                          height: 44,
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          alignment: Alignment.centerLeft,
+                          child: Row(
+                            children: [
+                              Icon(Icons.search_rounded, color: kTextTertiary, size: 22),
+                              const SizedBox(width: 10),
+                              Text(
+                                'Salonlary we hyzmatlary gözle',
+                                style: tt.bodyMedium?.copyWith(color: kTextTertiary, fontSize: 15),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -132,43 +184,94 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ),
 
-              // ── Top categories (Fresha: "Top categories" + See all) ──
+              // ── Top categories ──
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 28, 20, 12),
+                  padding: const EdgeInsets.fromLTRB(20, 32, 20, 12),
                   child: _sectionHeader(context, tt, 'Esasy kategoriýalar', toAllCategories: true),
                 ),
               ),
 
-              // ── Category circles: ak fon, inje çyzyk, 60px tegelek ──
+              // ── Category circles + sag tarap fade (scroll görkezijisi) ──
               SliverToBoxAdapter(
                 child: SizedBox(
                   height: 92,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    itemCount: _categories.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 20),
-                    itemBuilder: (_, i) {
-                      final cat = _categories[i];
-                      return _CategoryCircle(
-                        label: cat.label,
-                        icon: cat.icon,
-                        onTap: () => Navigator.push(
-                          context,
-                          fadeSlideRoute(SalonsListScreen(category: cat.key)),
+                  child: Stack(
+                    children: [
+                      ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        itemCount: _categories.length,
+                        separatorBuilder: (_, __) => const SizedBox(width: 20),
+                        itemBuilder: (_, i) {
+                          final cat = _categories[i];
+                          return _CategoryCircle(
+                            label: cat.label,
+                            icon: cat.icon,
+                            onTap: () {
+                              HapticFeedback.lightImpact();
+                              Navigator.push(
+                                context,
+                                fadeSlideRoute(SalonsListScreen(category: cat.key)),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        bottom: 0,
+                        width: 24,
+                        child: IgnorePointer(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight,
+                                colors: [Colors.white.withValues(alpha: 0), Colors.white],
+                              ),
+                            ),
+                          ),
                         ),
-                      );
-                    },
+                      ),
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        bottom: 0,
+                        width: 24,
+                        child: IgnorePointer(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.centerRight,
+                                end: Alignment.centerLeft,
+                                colors: [Colors.white.withValues(alpha: 0), Colors.white],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
 
-              // ── Arzanladyşlar (Fresha promo carousel) ──
+              // ── Arzanladyşlar ──
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
-                  child: _sectionHeader(context, tt, 'Arzanladyşlar', toDeals: true),
+                  padding: const EdgeInsets.fromLTRB(20, 32, 20, 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _sectionHeader(context, tt, 'Arzanladyşlar', toDeals: true),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Täzelikler ýakyn',
+                        style: tt.bodySmall?.copyWith(color: kTextTertiary, fontSize: 12),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               SliverToBoxAdapter(
@@ -183,6 +286,9 @@ class HomeScreen extends ConsumerWidget {
                         child: _DealPreviewCard(
                           title: 'Ilkinji zyýaretde 20%',
                           onTap: () => Navigator.push(context, fadeSlideRoute(const DealsScreen())),
+                          showBadge: true,
+                          badgeText: '2 gün',
+                          gradientIndex: 0,
                         ),
                       ),
                       Padding(
@@ -190,11 +296,15 @@ class HomeScreen extends ConsumerWidget {
                         child: _DealPreviewCard(
                           title: 'Massage paketi 15%',
                           onTap: () => Navigator.push(context, fadeSlideRoute(const DealsScreen())),
+                          showBadge: false,
+                          gradientIndex: 1,
                         ),
                       ),
                       _DealPreviewCard(
                         title: 'Dyrnak + kirpik 10%',
                         onTap: () => Navigator.push(context, fadeSlideRoute(const DealsScreen())),
+                        showBadge: false,
+                        gradientIndex: 2,
                       ),
                     ],
                   ),
@@ -204,8 +314,21 @@ class HomeScreen extends ConsumerWidget {
               // ── Maslahat berilýän ──
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 28, 20, 12),
-                  child: _sectionHeader(context, tt, 'Maslahat berilýän'),
+                  padding: const EdgeInsets.fromLTRB(20, 32, 20, 12),
+                  child: Semantics(
+                    label: 'Maslahat berilýän salonlar',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _sectionHeader(context, tt, 'Maslahat berilýän'),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Saýlanan salonlar',
+                          style: tt.bodySmall?.copyWith(color: kTextTertiary, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
               _salonRow(salons, ref, context, cardW, false),
@@ -213,8 +336,21 @@ class HomeScreen extends ConsumerWidget {
               // ── Meşhur ──
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 28, 20, 12),
-                  child: _sectionHeader(context, tt, 'Meşhur'),
+                  padding: const EdgeInsets.fromLTRB(20, 32, 20, 12),
+                  child: Semantics(
+                    label: 'Meşhur salonlar',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _sectionHeader(context, tt, 'Meşhur'),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Ters tertipde',
+                          style: tt.bodySmall?.copyWith(color: kTextTertiary, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
               _salonRow(salons, ref, context, cardW, true),
@@ -222,13 +358,26 @@ class HomeScreen extends ConsumerWidget {
               // ── Täze Parla-da ──
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 28, 20, 12),
-                  child: _sectionHeader(context, tt, 'Täze Parla-da'),
+                  padding: const EdgeInsets.fromLTRB(20, 32, 20, 12),
+                  child: Semantics(
+                    label: 'Täze Parla-da goşulan salonlar',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _sectionHeader(context, tt, 'Täze Parla-da'),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Saýlanan salonlar',
+                          style: tt.bodySmall?.copyWith(color: kTextTertiary, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
               _salonRow(salons, ref, context, cardW, false),
 
-              const SliverToBoxAdapter(child: SizedBox(height: 24)),
+              const SliverToBoxAdapter(child: SizedBox(height: 32)),
             ],
           ),
         ),
@@ -277,7 +426,7 @@ class HomeScreen extends ConsumerWidget {
     return data.when(
       loading: () => SliverToBoxAdapter(
         child: SizedBox(
-          height: 262,
+          height: 300,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -297,10 +446,39 @@ class HomeScreen extends ConsumerWidget {
         ),
       ),
       data: (salons) {
-        final list = reversed ? salons.reversed.toList() : salons;
+        final location = ref.watch(selectedLocationProvider).trim().toLowerCase();
+        var list = salons.where((s) {
+          if (location.isEmpty) return true;
+          if (s.address != null && s.address!.toLowerCase().contains(location)) return true;
+          if (s.name.toLowerCase().contains(location)) return true;
+          return false;
+        }).toList();
+        if (list.isEmpty) list = List.from(salons);
+        if (reversed) list = list.reversed.toList();
+        if (list.isEmpty) {
+          return SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.storefront_outlined, size: 48, color: kTextTertiary),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Bu bölümde häzir salon ýok',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: kTextSecondary),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
         return SliverToBoxAdapter(
           child: SizedBox(
-            height: 262,
+            height: 300,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -314,6 +492,11 @@ class HomeScreen extends ConsumerWidget {
                     context,
                     fadeSlideRoute(SalonDetailScreen(salonId: list[i].id)),
                   ),
+                  onFavouriteTap: () {
+                    HapticFeedback.lightImpact();
+                    ref.read(favouriteSalonsProvider.notifier).toggle(list[i].id);
+                  },
+                  isFavourite: ref.watch(favouriteSalonsProvider).contains(list[i].id),
                 ),
               ),
             ),
@@ -343,23 +526,32 @@ class _CategoryCircle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
+    return Semantics(
+      label: label,
+      button: true,
       child: SizedBox(
         width: 64,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFFEEEEEE), width: 1),
-                boxShadow: kShadowSm,
+            Material(
+              color: Colors.white,
+              shape: const CircleBorder(),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: onTap,
+                customBorder: const CircleBorder(),
+                child: Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: const Color(0xFFEEEEEE), width: 1),
+                    boxShadow: kShadowSm,
+                  ),
+                  child: Icon(icon, color: kPrimary, size: 26),
+                ),
               ),
-              child: Icon(icon, color: kPrimary, size: 26),
             ),
             const SizedBox(height: 8),
             Text(
@@ -381,12 +573,19 @@ class _CategoryCircle extends StatelessWidget {
   }
 }
 
-// ── Venue Card (Fresha style) ──
+// ── Venue Card (Material+InkWell, ýürek animasiýa, semantics) ──
 
 class _VenueCard extends StatelessWidget {
   final Salon salon;
   final VoidCallback onTap;
-  const _VenueCard({required this.salon, required this.onTap});
+  final VoidCallback onFavouriteTap;
+  final bool isFavourite;
+  const _VenueCard({
+    required this.salon,
+    required this.onTap,
+    required this.onFavouriteTap,
+    required this.isFavourite,
+  });
 
   static const _images = {
     'salon1': 'images/salon1.png',
@@ -401,101 +600,153 @@ class _VenueCard extends StatelessWidget {
 
   int get _reviews => (salon.id * 127 + 42) % 500 + 10;
 
+  String get _distanceKm {
+    final km = (salon.id % 5 + 1) + (salon.id % 10) / 10.0;
+    return '${km.toStringAsFixed(1)} km';
+  }
+
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ── Image (Fresha: 14px radius, ýyldyz + salgy aşakda) ──
-          ClipRRect(
-            borderRadius: BorderRadius.circular(14),
-            child: SizedBox(
-              width: double.infinity,
-              height: 160,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  _images.containsKey(salon.imageKey)
-                      ? Image.asset(
-                          _images[salon.imageKey]!,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => _placeholder(),
-                        )
-                      : _placeholder(),
-                  Positioned(
-                    top: 10,
-                    right: 10,
-                    child: Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.08),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
+    return Semantics(
+      label: '${salon.name}, reýting $_rating, $_reviews syn, takmynan $_distanceKm. Bron etmek üçin basyň.',
+      button: true,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 160,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      _images.containsKey(salon.imageKey)
+                          ? Image.asset(
+                              _images[salon.imageKey]!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => _placeholder(),
+                            )
+                          : _placeholder(),
+                      Positioned(
+                        top: 10,
+                        right: 10,
+                        child: GestureDetector(
+                          onTap: onFavouriteTap,
+                          child: AnimatedScale(
+                            scale: isFavourite ? 1.15 : 1.0,
+                            duration: const Duration(milliseconds: 200),
+                            curve: Curves.easeOut,
+                            child: Container(
+                              width: 32,
+                              height: 32,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.08),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                isFavourite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                                size: 18,
+                                color: isFavourite ? Colors.red : kTextPrimary,
+                              ),
+                            ),
                           ),
-                        ],
+                        ),
                       ),
-                      child: const Icon(
-                        Icons.favorite_border_rounded,
-                        size: 18,
-                        color: kTextPrimary,
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+
+              Text(
+                salon.name,
+                style: tt.titleSmall?.copyWith(fontSize: 15, fontWeight: FontWeight.w600, color: kTextPrimary),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 4),
+
+              Tooltip(
+                message: 'Reýting we uzaklyk nümunä maglumat',
+                child: Row(
+                  children: [
+                    const Icon(Icons.star_rounded, size: 15, color: kStar),
+                    const SizedBox(width: 4),
+                    Text(
+                      _rating.toStringAsFixed(1),
+                      style: tt.bodySmall?.copyWith(color: kTextPrimary, fontWeight: FontWeight.w600, fontSize: 13),
+                    ),
+                    Text(
+                      ' ($_reviews)',
+                      style: tt.bodySmall?.copyWith(fontSize: 13, color: kTextSecondary),
+                    ),
+                    Text(
+                      ' • ~$_distanceKm',
+                      style: tt.bodySmall?.copyWith(fontSize: 13, color: kTextSecondary),
+                    ),
+                  ],
+                ),
+              ),
+              if (salon.address != null) ...[
+                const SizedBox(height: 2),
+                Text(
+                  salon.address!,
+                  style: tt.bodySmall?.copyWith(fontSize: 13, color: kTextSecondary),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+              if (salon.category != null) ...[
+                const SizedBox(height: 1),
+                Text(
+                  _catLabel(salon.category!),
+                  style: tt.bodySmall?.copyWith(fontSize: 12, color: kTextTertiary),
+                ),
+              ],
+              const SizedBox(height: 8),
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    onTap();
+                  },
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: kPrimary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: kPrimary.withValues(alpha: 0.3)),
+                    ),
+                    child: Text(
+                      'Bron et',
+                      style: tt.labelMedium?.copyWith(
+                        color: kPrimary,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
                       ),
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-
-          // ── Name (Fresha: 15–16px semibold) ──
-          Text(
-            salon.name,
-            style: tt.titleSmall?.copyWith(fontSize: 15, fontWeight: FontWeight.w600, color: kTextPrimary),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 4),
-
-          // ── Rating + syn sany ──
-          Row(
-            children: [
-              const Icon(Icons.star_rounded, size: 15, color: kStar),
-              const SizedBox(width: 4),
-              Text(
-                _rating.toStringAsFixed(1),
-                style: tt.bodySmall?.copyWith(color: kTextPrimary, fontWeight: FontWeight.w600, fontSize: 13),
-              ),
-              Text(
-                ' ($_reviews)',
-                style: tt.bodySmall?.copyWith(fontSize: 13, color: kTextSecondary),
+                ),
               ),
             ],
           ),
-          if (salon.address != null) ...[
-            const SizedBox(height: 2),
-            Text(
-              salon.address!,
-              style: tt.bodySmall?.copyWith(fontSize: 13, color: kTextSecondary),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-          if (salon.category != null) ...[
-            const SizedBox(height: 1),
-            Text(
-              _catLabel(salon.category!),
-              style: tt.bodySmall?.copyWith(fontSize: 12, color: kTextTertiary),
-            ),
-          ],
-        ],
+        ),
       ),
     );
   }
@@ -534,53 +785,99 @@ class _VenueCard extends StatelessWidget {
       );
 }
 
-// ── Deal preview card ──
+// ── Deal preview card (gradient üýtgeşigi + möhlet badge) ──
 
 class _DealPreviewCard extends StatelessWidget {
   final String title;
   final VoidCallback onTap;
-  const _DealPreviewCard({required this.title, required this.onTap});
+  final bool showBadge;
+  final String? badgeText;
+  final int gradientIndex;
+  const _DealPreviewCard({
+    required this.title,
+    required this.onTap,
+    this.showBadge = false,
+    this.badgeText,
+    this.gradientIndex = 0,
+  });
+
+  List<Color> _gradientColors() {
+    switch (gradientIndex % 3) {
+      case 1:
+        return [kPrimary.withValues(alpha: 0.22), kAccentLight.withValues(alpha: 0.08)];
+      case 2:
+        return [kSecondary.withValues(alpha: 0.2), kPrimary.withValues(alpha: 0.06)];
+      default:
+        return [kPrimary.withValues(alpha: 0.18), kPrimary.withValues(alpha: 0.08)];
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 260,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-            colors: [
-              kPrimary.withValues(alpha: 0.18),
-              kPrimary.withValues(alpha: 0.08),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(14),
-          boxShadow: kShadowSm,
-        ),
-        child: Row(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Stack(
+          clipBehavior: Clip.none,
           children: [
             Container(
-              width: 44,
-              height: 44,
+              width: 260,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
-                color: kPrimary.withValues(alpha: 0.25),
-                borderRadius: BorderRadius.circular(10),
+                gradient: LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: _gradientColors(),
+                ),
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: kShadowSm,
               ),
-              child: const Icon(Icons.local_offer_rounded, color: kPrimary, size: 24),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Text(
-                title,
-                style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w600, color: kTextPrimary),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+              child: Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: kPrimary.withValues(alpha: 0.25),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(Icons.local_offer_rounded, color: kPrimary, size: 24),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w600, color: kTextPrimary),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
             ),
+            if (showBadge && badgeText != null)
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: kError,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    badgeText!,
+                    style: tt.bodySmall?.copyWith(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),

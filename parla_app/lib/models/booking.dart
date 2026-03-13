@@ -6,6 +6,8 @@ class Booking {
   final String guestPhone;
   final DateTime slotAt;
   final String status;
+  final String? salonName;
+  final String? serviceName;
 
   const Booking({
     required this.id,
@@ -15,6 +17,8 @@ class Booking {
     required this.guestPhone,
     required this.slotAt,
     required this.status,
+    this.salonName,
+    this.serviceName,
   });
 
   factory Booking.fromJson(Map<String, dynamic> json) => Booking(
@@ -25,5 +29,7 @@ class Booking {
         guestPhone: json['guest_phone'] as String,
         slotAt: DateTime.parse(json['slot_at'] as String),
         status: json['status'] as String,
+        salonName: json['salon_name'] as String?,
+        serviceName: json['service_name'] as String?,
       );
 }

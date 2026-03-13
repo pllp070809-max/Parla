@@ -121,13 +121,24 @@ class _BookingsBody extends StatelessWidget {
               if (upcoming.isNotEmpty) ...[
                 _SectionHeader(title: 'Geljekki', count: upcoming.length),
                 const SizedBox(height: kSpaceSm),
-                ...upcoming.map((b) => _BookingTile(booking: b, isPast: false)),
+                ...upcoming.map((b) => _BookingTile(
+                      booking: b,
+                      isPast: false,
+                      onCancel: b.status == 'confirmed'
+                          ? () async {
+                              final phone = ref.read(userPhoneProvider);
+                              if (phone == null) return;
+                              await ref.read(apiServiceProvider).cancelBooking(b.id, phone);
+                              ref.invalidate(myBookingsProvider);
+                            }
+                          : null,
+                    )),
               ],
               if (past.isNotEmpty) ...[
                 SizedBox(height: upcoming.isNotEmpty ? kSpaceXl : 0),
                 _SectionHeader(title: 'Tamamlandy', count: past.length, muted: true),
                 const SizedBox(height: kSpaceSm),
-                ...past.map((b) => _BookingTile(booking: b, isPast: true)),
+                ...past.map((b) => _BookingTile(booking: b, isPast: true, onCancel: null)),
               ],
               const SizedBox(height: kSpaceXl),
             ],
@@ -170,12 +181,16 @@ class _SectionHeader extends StatelessWidget {
 class _BookingTile extends StatelessWidget {
   final Booking booking;
   final bool isPast;
-  const _BookingTile({required this.booking, required this.isPast});
+  final Future<void> Function()? onCancel;
+  const _BookingTile({required this.booking, required this.isPast, this.onCancel});
 
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
     final dateStr = DateFormat('dd MMM yyyy, HH:mm').format(booking.slotAt);
+    final salonLabel = booking.salonName ?? 'Salon #${booking.salonId}';
+    final serviceLabel = booking.serviceName ?? 'Hyzmat #${booking.serviceId}';
+    final canCancel = !isPast && booking.status == 'confirmed' && onCancel != null;
 
     return Opacity(
       opacity: isPast ? 0.55 : 1.0,
@@ -183,41 +198,63 @@ class _BookingTile extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: kSpaceSm + 2),
         child: Padding(
           padding: const EdgeInsets.all(14),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 48, height: 48,
-                decoration: BoxDecoration(
-                  color: (isPast ? Colors.grey : kPrimary).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(kRadiusMd),
-                ),
-                child: Icon(
-                  isPast ? Icons.check_circle_outline : Icons.calendar_today,
-                  color: isPast ? Colors.grey : kPrimary,
-                ),
+              Row(
+                children: [
+                  Container(
+                    width: 48, height: 48,
+                    decoration: BoxDecoration(
+                      color: (isPast ? Colors.grey : kPrimary).withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(kRadiusMd),
+                    ),
+                    child: Icon(
+                      isPast ? Icons.check_circle_outline : Icons.calendar_today,
+                      color: isPast ? Colors.grey : kPrimary,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Bron #${booking.id}', style: tt.titleMedium),
+                        const SizedBox(height: kSpaceXs),
+                        Text(salonLabel, style: tt.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
+                        if (serviceLabel.isNotEmpty)
+                          Text(serviceLabel, style: tt.bodySmall?.copyWith(color: kTextSecondary)),
+                        const SizedBox(height: kSpaceXs),
+                        Text(dateStr, style: tt.bodyMedium),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: kSpaceXs),
+                    decoration: BoxDecoration(
+                      color: isPast ? Colors.grey.withValues(alpha: 0.15) : kPrimary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(kRadiusSm),
+                    ),
+                    child: Text(
+                      isPast ? 'Tamamlandy' : (booking.status == 'cancelled' ? 'Ýatyryldy' : booking.status),
+                      style: tt.labelLarge?.copyWith(color: isPast ? Colors.grey : kPrimary, fontSize: 12),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Bron #${booking.id}', style: tt.titleMedium),
-                    const SizedBox(height: kSpaceXs),
-                    Text(dateStr, style: tt.bodyMedium),
-                  ],
+              if (canCancel) ...[
+                const SizedBox(height: 12),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    onPressed: () async {
+                      await onCancel?.call();
+                    },
+                    icon: const Icon(Icons.cancel_outlined, size: 18),
+                    label: const Text('Ýatyrmak'),
+                  ),
                 ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: kSpaceXs),
-                decoration: BoxDecoration(
-                  color: isPast ? Colors.grey.withValues(alpha: 0.15) : kPrimary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(kRadiusSm),
-                ),
-                child: Text(
-                  isPast ? 'Tamamlandy' : booking.status,
-                  style: tt.labelLarge?.copyWith(color: isPast ? Colors.grey : kPrimary, fontSize: 12),
-                ),
-              ),
+              ],
             ],
           ),
         ),

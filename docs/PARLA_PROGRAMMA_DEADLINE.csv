@@ -1,0 +1,17 @@
+Wepaly,Deadline,Bölüm,Dereje,Bellik
+"Production serwer (HTTPS we domain) – app internetden backend-e girebilmeli",2026-04-30,Backend,Ýokary,Serwer taýýar bolmaly
+"Giriş / tassyklama (SMS ýa-da Telegram jan) – bronlary diňe tassyklanandan soň görmek",2026-04-30,Backend,Ýokary,Auth API we flow
+"Backup we güvenlik: DB backup; CORS çäklemek; rate limiting",2026-04-30,Backend,Orta,
+"Bron ýatyrmak: PATCH/DELETE booking (ýagdaý = cancelled)",2026-05-15,Backend,Orta,
+"Bildirişler API (push / in-app) – bron yatladyryş we täzelikler",2026-05-31,Backend,Orta,
+"Reýting we syn API (salonlar üçin)",2026-06-30,Backend,Orta,
+"Arzanladyşlar API (deals backend-den)",2026-06-30,Backend,Pes,Islense
+"Production URL config – APK-da serwer adresi hardcoded bolmasyn",2026-04-30,App,Ýokary,Build flavor / remote config
+"APK ýaýlym – Play Store ýa-da direct link bilen ýüklenip biler",2026-04-30,App,Ýokary,
+"Giriş ekrany (SMS/jan tassyklama) – backend auth bilen",2026-04-30,App,Ýokary,
+"Bron ýatyrmak – Meniň bronlarym-da Ýatyrmak düwmäsi we API",2026-05-15,App,Orta,
+"Bildirişler – backend API bilen birikdirmek; push (FCM) islense",2026-05-31,App,Orta,
+"Reýting/syn – salon jikme-jik we listde görkezmek; syn ýazmak",2026-06-30,App,Orta,
+"Offline / internet ýok mesajy we täzeden synag",2026-05-31,App,Orta,
+"Arzanladyşlar backend-den çekmek (API bar bolsa)",2026-06-30,App,Pes,
+"Profil suraty (camera/gallery)",2026-06-30,App,Pes,Islense
