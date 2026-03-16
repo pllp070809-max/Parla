@@ -77,6 +77,9 @@ class _SalonDetailScreenState extends ConsumerState<SalonDetailScreen> {
             return ErrorRetryWidget(message: 'Salon ýüklenip bilmedi', onRetry: _load);
           }
           final salon = snap.data!;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ref.read(recentViewedSalonIdsProvider.notifier).add(salon.id);
+          });
           final hasImage = _imageMap.containsKey(salon.imageKey);
           return CustomScrollView(
             slivers: [

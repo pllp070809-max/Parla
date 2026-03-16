@@ -103,3 +103,32 @@ class RecentSearchQueriesNotifier extends StateNotifier<List<String>> {
     await prefs.setString(_kRecentSearchesKey, next.join('|'));
   }
 }
+
+/// Soňky görülen salonlaryň ID-leri (home "Soňky görülen salonlar" üçin).
+const _kRecentViewedSalonIdsKey = 'recent_viewed_salon_ids';
+const _kRecentViewedSalonIdsMax = 10;
+
+final recentViewedSalonIdsProvider = StateNotifierProvider<RecentViewedSalonIdsNotifier, List<int>>((ref) {
+  return RecentViewedSalonIdsNotifier();
+});
+
+class RecentViewedSalonIdsNotifier extends StateNotifier<List<int>> {
+  RecentViewedSalonIdsNotifier() : super([]) {
+    _load();
+  }
+
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_kRecentViewedSalonIdsKey);
+    if (raw == null || raw.isEmpty) return;
+    state = raw.split(',').map((e) => int.tryParse(e.trim())).whereType<int>().toList();
+  }
+
+  Future<void> add(int salonId) async {
+    final next = [salonId, ...state.where((id) => id != salonId)];
+    if (next.length > _kRecentViewedSalonIdsMax) next.length = _kRecentViewedSalonIdsMax;
+    state = next;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_kRecentViewedSalonIdsKey, next.join(','));
+  }
+}

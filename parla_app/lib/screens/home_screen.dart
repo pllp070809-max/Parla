@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../providers/providers.dart';
 import '../models/salon.dart';
 import '../theme.dart';
@@ -183,6 +184,12 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ),
               ),
+
+              // ── Siziň geljekki bronyňyz ──
+              _upcomingBookingStrip(ref, context, tt),
+
+              // ── Soňky görülen salonlar ──
+              _recentlyViewedRow(salons, ref, context, cardW),
 
               // ── Top categories ──
               SliverToBoxAdapter(
@@ -382,6 +389,119 @@ class HomeScreen extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _upcomingBookingStrip(WidgetRef ref, BuildContext context, TextTheme tt) {
+    final phone = ref.watch(userPhoneProvider);
+    if (phone == null || phone.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
+    final bookingsAsync = ref.watch(myBookingsProvider);
+    return bookingsAsync.when(
+      loading: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
+      error: (_, __) => const SliverToBoxAdapter(child: SizedBox.shrink()),
+      data: (bookings) {
+        final now = DateTime.now();
+        final upcoming = bookings
+            .where((b) => b.slotAt.isAfter(now) && b.status == 'confirmed')
+            .toList()
+          ..sort((a, b) => a.slotAt.compareTo(b.slotAt));
+        if (upcoming.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
+        final b = upcoming.first;
+        final dateStr = DateFormat('dd MMM, HH:mm').format(b.slotAt);
+        return SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+            child: Material(
+              color: kPrimary.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(kRadiusLg),
+              child: InkWell(
+                onTap: () => ref.read(selectedTabIndexProvider.notifier).state = 1,
+                borderRadius: BorderRadius.circular(kRadiusLg),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: kPrimary.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(kRadiusMd),
+                        ),
+                        child: const Icon(Icons.calendar_today_rounded, color: kPrimary, size: 24),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Siziň geljekki bronyňyz', style: tt.labelMedium?.copyWith(color: kTextSecondary)),
+                            const SizedBox(height: 2),
+                            Text(b.salonName ?? 'Salon #${b.salonId}', style: tt.titleSmall),
+                            if (b.serviceName != null) Text(b.serviceName!, style: tt.bodySmall?.copyWith(color: kTextSecondary)),
+                            const SizedBox(height: 2),
+                            Text(dateStr, style: tt.bodySmall?.copyWith(color: kPrimary, fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.chevron_right_rounded, color: kPrimary),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _recentlyViewedRow(AsyncValue<List<Salon>> salons, WidgetRef ref, BuildContext context, double cardW) {
+    final recentIds = ref.watch(recentViewedSalonIdsProvider);
+    if (recentIds.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
+    return salons.when(
+      loading: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
+      error: (_, __) => const SliverToBoxAdapter(child: SizedBox.shrink()),
+      data: (allSalons) {
+        final idToSalon = {for (var s in allSalons) s.id: s};
+        final list = recentIds.map((id) => idToSalon[id]).whereType<Salon>().toList();
+        if (list.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
+        return SliverToBoxAdapter(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 28, 20, 12),
+                child: Text(
+                  'Soňky görülen salonlar',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 20, fontWeight: FontWeight.w700, color: kTextPrimary),
+                ),
+              ),
+              SizedBox(
+                height: 300,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  itemCount: list.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 12),
+                  itemBuilder: (_, i) => SizedBox(
+                    width: cardW,
+                    child: _VenueCard(
+                      salon: list[i],
+                      onTap: () => Navigator.push(context, fadeSlideRoute(SalonDetailScreen(salonId: list[i].id))),
+                      onFavouriteTap: () {
+                        HapticFeedback.lightImpact();
+                        ref.read(favouriteSalonsProvider.notifier).toggle(list[i].id);
+                      },
+                      isFavourite: ref.watch(favouriteSalonsProvider).contains(list[i].id),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
