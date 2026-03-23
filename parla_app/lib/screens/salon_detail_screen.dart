@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
@@ -11,19 +12,44 @@ import '../widgets/shared_widgets.dart';
 import '../utils/launch_utils.dart';
 import 'booking_screen.dart';
 import 'salon_gallery_screen.dart';
-import 'salon_reviews_screen.dart';
-import 'salon_staff_screen.dart';
+
+// ── Mock data ──
+
+const _kMockRating = 4.5;
+const _kMockReviewCount = 18;
+const _kMockDescription =
+    'Biziň salonymyz 2018-nji ýyldan bäri müşderilere ýokary hilli gözellik hyzmatlary hödürleýär. '
+    'Tejribeli ussalar, arassa gurşaw we myhmansöýer hyzmat. Bize gelip görüň!';
+
+const _kMockStaff = [
+  {'name': 'Aýgözel', 'role': 'Saç ussasy', 'rating': 4.9, 'reviews': 142},
+  {'name': 'Mähri', 'role': 'Dyrnak ussasy', 'rating': 4.7, 'reviews': 98},
+];
+
+const _kOpeningHours = [
+  {'day': 'Duşenbe', 'hours': '10:00 - 21:00'},
+  {'day': 'Sişenbe', 'hours': '10:00 - 21:00'},
+  {'day': 'Çarşenbe', 'hours': '10:00 - 21:00'},
+  {'day': 'Penşenbe', 'hours': '10:00 - 21:00'},
+  {'day': 'Anna', 'hours': '10:00 - 21:00'},
+  {'day': 'Şenbe', 'hours': '10:00 - 21:00'},
+  {'day': 'Ýekşenbe', 'hours': '10:00 - 18:00'},
+];
+
+const _kAdditionalInfo = [
+  {'icon': Icons.verified_rounded, 'label': 'Tassyklama dessine'},
+  {'icon': Icons.pets_rounded, 'label': 'Haýwan kabul edilýär'},
+  {'icon': Icons.child_friendly_rounded, 'label': 'Çagalar üçin amatly'},
+];
+
+// ── Helpers ──
 
 Future<LatLng?> _getUserLocation() async {
   bool enabled = await Geolocator.isLocationServiceEnabled();
   if (!enabled) return null;
   LocationPermission perm = await Geolocator.checkPermission();
-  if (perm == LocationPermission.denied) {
-    perm = await Geolocator.requestPermission();
-  }
-  if (perm == LocationPermission.denied || perm == LocationPermission.deniedForever) {
-    return null;
-  }
+  if (perm == LocationPermission.denied) perm = await Geolocator.requestPermission();
+  if (perm == LocationPermission.denied || perm == LocationPermission.deniedForever) return null;
   try {
     final pos = await Geolocator.getCurrentPosition(
       locationSettings: const LocationSettings(accuracy: LocationAccuracy.medium, timeLimit: Duration(seconds: 5)),
@@ -34,10 +60,25 @@ Future<LatLng?> _getUserLocation() async {
   }
 }
 
+const _imageMap = <String, String>{
+  'salon1': 'images/salon1.png',
+  'salon2': 'images/salon2.png',
+  'salon3': 'images/salon3.png',
+};
+
+List<String> _portfolioImages(Salon salon) {
+  final all = _imageMap.values.toList(growable: false);
+  if (all.isEmpty) return ['images/salon1.png'];
+  final base = salon.id % all.length;
+  return [all[base], all[(base + 1) % all.length], all[(base + 2) % all.length]];
+}
+
+// ═════════════════════════════════════════════
+// Main screen
+// ═════════════════════════════════════════════
 class SalonDetailScreen extends ConsumerStatefulWidget {
   final int salonId;
   const SalonDetailScreen({super.key, required this.salonId});
-
   @override
   ConsumerState<SalonDetailScreen> createState() => _SalonDetailScreenState();
 }
@@ -56,16 +97,8 @@ class _SalonDetailScreenState extends ConsumerState<SalonDetailScreen> {
     setState(() {});
   }
 
-  static const _imageMap = {
-    'salon1': 'images/salon1.png',
-    'salon2': 'images/salon2.png',
-    'salon3': 'images/salon3.png',
-  };
-
   @override
   Widget build(BuildContext context) {
-    final tt = Theme.of(context).textTheme;
-
     return Scaffold(
       body: FutureBuilder<Salon>(
         future: _future,
@@ -80,234 +113,994 @@ class _SalonDetailScreenState extends ConsumerState<SalonDetailScreen> {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             ref.read(recentViewedSalonIdsProvider.notifier).add(salon.id);
           });
-          final hasImage = _imageMap.containsKey(salon.imageKey);
-          return CustomScrollView(
-            slivers: [
-              SliverAppBar(
-                expandedHeight: 220,
-                pinned: true,
-                flexibleSpace: FlexibleSpaceBar(
-                  title: Text(salon.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                  background: GestureDetector(
-                    onTap: () => Navigator.push(context, fadeSlideRoute(SalonGalleryScreen(salon: salon))),
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        if (hasImage)
-                          Image.asset(_imageMap[salon.imageKey]!, fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => _bgPlaceholder())
-                        else
-                          _bgPlaceholder(),
-                        const DecoratedBox(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [Colors.transparent, Colors.black54],
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          bottom: 12,
-                          right: 12,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: Colors.black54,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.photo_library_rounded, size: 18, color: Colors.white),
-                                SizedBox(width: 6),
-                                Text('Suratlary gör', style: TextStyle(color: Colors.white, fontSize: 12)),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(kSpaceXl),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (salon.address != null) ...[
-                        Row(children: [
-                          const Icon(Icons.location_on_outlined, size: 20, color: kPrimary),
-                          const SizedBox(width: kSpaceSm),
-                          Expanded(child: Text(salon.address!, style: tt.bodyLarge)),
-                        ]),
-                        const SizedBox(height: kSpaceXl),
-                      ],
-
-                      _OpeningHoursTile(salonName: salon.name),
-                      const SizedBox(height: kSpaceXl),
-
-                      if (salon.hasLocation) ...[
-                        _SalonMapSection(salon: salon),
-                        const SizedBox(height: kSpaceXl),
-                      ],
-
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _DetailNavTile(
-                              icon: Icons.star_rounded,
-                              label: 'Synlar',
-                              onTap: () => Navigator.push(context, fadeSlideRoute(SalonReviewsScreen(salonName: salon.name))),
-                            ),
-                          ),
-                          const SizedBox(width: kSpaceMd),
-                          Expanded(
-                            child: _DetailNavTile(
-                              icon: Icons.people_rounded,
-                              label: 'Topar',
-                              onTap: () => Navigator.push(context, fadeSlideRoute(SalonStaffScreen(salonName: salon.name))),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: kSpaceXl),
-
-                      Text('Hyzmatlar', style: tt.titleLarge),
-                      const SizedBox(height: kSpaceMd),
-                    ],
-                  ),
-                ),
-              ),
-
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: kSpaceXl),
-                sliver: SliverList.separated(
-                  itemCount: salon.services.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1),
-                  itemBuilder: (_, i) {
-                    final svc = salon.services[i];
-                    return _ServiceTile(
-                      service: svc,
-                      onBook: () => Navigator.push(
-                        context,
-                        fadeSlideRoute(BookingScreen(
-                          salonId: salon.id,
-                          salonName: salon.name,
-                          services: salon.services,
-                          preselectedServiceId: svc.id,
-                        )),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 100)),
-            ],
-          );
+          return _SalonDetailBody(salon: salon);
         },
       ),
     );
   }
-
-  Widget _bgPlaceholder() => Container(
-    color: kPrimary.withValues(alpha: 0.12),
-    child: const Center(child: Icon(Icons.storefront, size: 72, color: kPrimary)),
-  );
 }
 
-// ── Shared map layers builder ──
-List<Widget> _buildMapLayers(LatLng salonPoint, {LatLng? userLocation}) {
-  return [
-    TileLayer(
-      urlTemplate: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-      subdomains: const ['a', 'b', 'c', 'd'],
-      userAgentPackageName: 'com.parla.app',
-      maxZoom: 19,
-    ),
-    CircleLayer(
-      circles: [
-        CircleMarker(
-          point: salonPoint,
-          radius: 48,
-          color: kPrimary.withValues(alpha: 0.08),
-          borderColor: kPrimary.withValues(alpha: 0.2),
-          borderStrokeWidth: 1.5,
+// ═════════════════════════════════════════════
+// Body — chip bar + scrollable sections
+// ═════════════════════════════════════════════
+class _SalonDetailBody extends StatefulWidget {
+  final Salon salon;
+  const _SalonDetailBody({required this.salon});
+  @override
+  State<_SalonDetailBody> createState() => _SalonDetailBodyState();
+}
+
+class _SalonDetailBodyState extends State<_SalonDetailBody> {
+  final _scrollCtrl = ScrollController();
+  final _tabs = const ['Hyzmatlar', 'Topar', 'Portefolio', 'Barada'];
+  int _activeTab = 0;
+  bool _showTopBar = false;
+  int _heroPage = 0;
+
+  final _sectionKeys = List.generate(4, (_) => GlobalKey());
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollCtrl.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollCtrl.removeListener(_onScroll);
+    _scrollCtrl.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final offset = _scrollCtrl.offset;
+    final show = offset > 240;
+    if (show != _showTopBar) setState(() => _showTopBar = show);
+
+    for (int i = _sectionKeys.length - 1; i >= 0; i--) {
+      final key = _sectionKeys[i];
+      final ctx = key.currentContext;
+      if (ctx != null) {
+        final box = ctx.findRenderObject() as RenderBox;
+        final pos = box.localToGlobal(Offset.zero, ancestor: context.findRenderObject());
+        if (pos.dy < 160) {
+          if (_activeTab != i) setState(() => _activeTab = i);
+          return;
+        }
+      }
+    }
+    if (_activeTab != 0) setState(() => _activeTab = 0);
+  }
+
+  void _scrollToSection(int i) {
+    setState(() => _activeTab = i);
+    final ctx = _sectionKeys[i].currentContext;
+    if (ctx != null) {
+      Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 400), curve: Curves.easeOutCubic, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart);
+    }
+  }
+
+  void _openBooking({int? preselectedServiceId}) {
+    Navigator.push(context, fadeSlideRoute(BookingScreen(
+      salonId: widget.salon.id,
+      salonName: widget.salon.name,
+      services: widget.salon.services,
+      preselectedServiceId: preselectedServiceId,
+    )));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final salon = widget.salon;
+    final images = _portfolioImages(salon);
+    final minPrice = salon.services.isNotEmpty
+        ? salon.services.map((s) => s.price ?? 0).reduce((a, b) => a < b ? a : b)
+        : 0;
+
+    return Stack(
+      children: [
+        CustomScrollView(
+          controller: _scrollCtrl,
+          slivers: [
+            // ── Hero image ──
+            SliverToBoxAdapter(child: _HeroSection(
+              images: images,
+              salon: salon,
+              onPageChanged: (p) => setState(() => _heroPage = p),
+              currentPage: _heroPage,
+            )),
+
+            // ── Info block ──
+            SliverToBoxAdapter(child: _InfoBlock(salon: salon)),
+
+            // ── Sticky chip bar ──
+            SliverPersistentHeader(
+              pinned: true,
+              delegate: _ChipBarDelegate(
+                tabs: _tabs,
+                activeTab: _activeTab,
+                onTap: _scrollToSection,
+                salon: salon,
+                showTitle: _showTopBar,
+              ),
+            ),
+
+            // ── Hyzmatlar ──
+            SliverToBoxAdapter(
+              child: Padding(
+                key: _sectionKeys[0],
+                padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpaceLg, kSpaceXl, 0),
+                child: _ServicesSection(salon: salon, onBook: (svc) => _openBooking(preselectedServiceId: svc.id)),
+              ),
+            ),
+
+            // ── Topar ──
+            SliverToBoxAdapter(
+              child: Padding(
+                key: _sectionKeys[1],
+                padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpace2xl, kSpaceXl, 0),
+                child: _TeamSection(salon: salon, onBook: _openBooking),
+              ),
+            ),
+
+            // ── Portefolio ──
+            SliverToBoxAdapter(
+              child: Padding(
+                key: _sectionKeys[2],
+                padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpace2xl, kSpaceXl, 0),
+                child: _PortfolioSection(salon: salon, images: images),
+              ),
+            ),
+
+            // ── Barada ──
+            SliverToBoxAdapter(
+              child: Padding(
+                key: _sectionKeys[3],
+                padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpace2xl, kSpaceXl, 0),
+                child: _AboutSection(salon: salon),
+              ),
+            ),
+
+            // ── Map ──
+            if (salon.hasLocation)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpace2xl, kSpaceXl, 0),
+                  child: _SalonMapSection(salon: salon),
+                ),
+              ),
+
+            // ── Nearby ──
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpace2xl, kSpaceXl, 0),
+                child: _NearbySalonsSection(currentSalon: salon),
+              ),
+            ),
+
+            const SliverToBoxAdapter(child: SizedBox(height: 100)),
+          ],
+        ),
+
+        // ── Bottom bar ──
+        Positioned(
+          left: 0, right: 0, bottom: 0,
+          child: _BottomBookBar(
+            minPrice: minPrice.toDouble(),
+            salonName: salon.name,
+            onBook: () => _openBooking(),
+          ),
         ),
       ],
-    ),
-    if (userLocation != null)
-      MarkerLayer(
-        markers: [
-          Marker(
-            point: userLocation,
-            width: 28,
-            height: 28,
+    );
+  }
+}
+
+// ═════════════════════════════════════════════
+// Hero image section
+// ═════════════════════════════════════════════
+class _HeroSection extends StatelessWidget {
+  final List<String> images;
+  final Salon salon;
+  final ValueChanged<int> onPageChanged;
+  final int currentPage;
+
+  const _HeroSection({required this.images, required this.salon, required this.onPageChanged, required this.currentPage});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 300,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          PageView.builder(
+            itemCount: images.length,
+            onPageChanged: onPageChanged,
+            itemBuilder: (_, i) => Image.asset(
+              images[i], fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(color: kPrimary.withValues(alpha: 0.12), child: const Center(child: Icon(Icons.storefront, size: 72, color: kPrimary))),
+            ),
+          ),
+
+          // Gradient overlay
+          const Positioned(
+            left: 0, right: 0, top: 0, height: 100,
+            child: DecoratedBox(decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.black38, Colors.transparent]))),
+          ),
+
+          // Top buttons
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 8,
+            left: kSpaceMd, right: kSpaceMd,
+            child: Row(
+              children: [
+                _HeroBtn(icon: Icons.arrow_back_rounded, onTap: () => Navigator.pop(context)),
+                const Spacer(),
+                _HeroBtn(icon: Icons.ios_share_rounded, onTap: () {}),
+                const SizedBox(width: kSpaceSm),
+                _HeroBtn(icon: Icons.favorite_border_rounded, onTap: () {}),
+              ],
+            ),
+          ),
+
+          // Page counter
+          Positioned(
+            bottom: 12, right: 16,
             child: Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFF4285F4),
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 3),
-                boxShadow: [
-                  BoxShadow(color: const Color(0xFF4285F4).withValues(alpha: 0.4), blurRadius: 8, offset: const Offset(0, 2)),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(kRadiusSm)),
+              child: Text('${currentPage + 1}/${images.length}', style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeroBtn extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  const _HeroBtn({required this.icon, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 40, height: 40,
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: 0.35),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, color: Colors.white, size: 20),
+      ),
+    );
+  }
+}
+
+// ═════════════════════════════════════════════
+// Info block (name, rating, address, status)
+// ═════════════════════════════════════════════
+class _InfoBlock extends StatelessWidget {
+  final Salon salon;
+  const _InfoBlock({required this.salon});
+
+  @override
+  Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpaceLg, kSpaceXl, kSpaceSm),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(salon.name, style: tt.headlineMedium?.copyWith(fontWeight: FontWeight.w800)),
+          const SizedBox(height: kSpaceSm),
+          Row(
+            children: [
+              Text('$_kMockRating', style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
+              const SizedBox(width: 4),
+              ...List.generate(5, (i) {
+                if (i < _kMockRating.floor()) return const Icon(Icons.star_rounded, size: 18, color: kStar);
+                if (i < _kMockRating.ceil() && _kMockRating % 1 >= 0.3) return const Icon(Icons.star_half_rounded, size: 18, color: kStar);
+                return Icon(Icons.star_outline_rounded, size: 18, color: kStar.withValues(alpha: 0.4));
+              }),
+              const SizedBox(width: 6),
+              Text('($_kMockReviewCount)', style: tt.bodySmall?.copyWith(color: kTextTertiary)),
+            ],
+          ),
+          const SizedBox(height: kSpaceSm),
+          if (salon.address != null)
+            Text(salon.address!, style: tt.bodyMedium),
+          const SizedBox(height: kSpaceSm),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: kError.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(kRadiusPill),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(width: 7, height: 7, decoration: const BoxDecoration(color: kError, shape: BoxShape.circle)),
+                const SizedBox(width: 6),
+                Text('Ýapyk', style: tt.bodySmall?.copyWith(color: kError, fontWeight: FontWeight.w600)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ═════════════════════════════════════════════
+// Chip bar delegate
+// ═════════════════════════════════════════════
+class _ChipBarDelegate extends SliverPersistentHeaderDelegate {
+  final List<String> tabs;
+  final int activeTab;
+  final ValueChanged<int> onTap;
+  final Salon salon;
+  final bool showTitle;
+
+  _ChipBarDelegate({required this.tabs, required this.activeTab, required this.onTap, required this.salon, required this.showTitle});
+
+  @override
+  double get minExtent => 50;
+  @override
+  double get maxExtent => 50;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    final tt = Theme.of(context).textTheme;
+    return Container(
+      color: kScaffoldBg,
+      child: Column(
+        children: [
+          if (showTitle)
+            SizedBox(
+              height: 0,
+              child: OverflowBox(
+                maxHeight: 0,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _HeroBtn(icon: Icons.arrow_back_rounded, onTap: () => Navigator.pop(context)),
+                    const SizedBox(width: kSpaceSm),
+                    Text(salon.name, style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
+                    const Spacer(),
+                    _HeroBtn(icon: Icons.ios_share_rounded, onTap: () {}),
+                    const SizedBox(width: kSpaceSm),
+                    _HeroBtn(icon: Icons.favorite_border_rounded, onTap: () {}),
+                  ],
+                ),
+              ),
+            ),
+          Expanded(
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: kSpaceXl),
+              itemCount: tabs.length,
+              separatorBuilder: (_, __) => const SizedBox(width: kSpaceMd),
+              itemBuilder: (_, i) {
+                final sel = i == activeTab;
+                return GestureDetector(
+                  onTap: () { HapticFeedback.selectionClick(); onTap(i); },
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: Text(
+                          tabs[i],
+                          style: tt.titleSmall?.copyWith(
+                            fontWeight: sel ? FontWeight.w800 : FontWeight.w500,
+                            color: sel ? kTextPrimary : kTextSecondary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        height: 2.5,
+                        width: sel ? 40 : 0,
+                        decoration: BoxDecoration(color: kPrimary, borderRadius: BorderRadius.circular(2)),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+          Container(height: 1, color: kBorder),
+        ],
+      ),
+    );
+  }
+
+  @override
+  bool shouldRebuild(covariant _ChipBarDelegate old) =>
+      old.activeTab != activeTab || old.showTitle != showTitle;
+}
+
+// ═════════════════════════════════════════════
+// Services section
+// ═════════════════════════════════════════════
+class _ServicesSection extends StatelessWidget {
+  final Salon salon;
+  final ValueChanged<Service> onBook;
+  const _ServicesSection({required this.salon, required this.onBook});
+
+  @override
+  Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    final services = salon.services;
+
+    return Container(
+      padding: const EdgeInsets.all(kSpaceLg),
+      decoration: BoxDecoration(
+        color: kCardBg,
+        borderRadius: BorderRadius.circular(kRadiusLg),
+        border: Border.all(color: kBorder),
+        boxShadow: kShadowSm,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 36, height: 36,
+                decoration: BoxDecoration(color: kPrimary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(kRadiusSm)),
+                child: const Icon(Icons.content_cut_rounded, size: 18, color: kPrimary),
+              ),
+              const SizedBox(width: kSpaceMd),
+              Expanded(child: Text('Hyzmatlar', style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w800))),
+            ],
+          ),
+          const SizedBox(height: kSpaceSm),
+          Text('Isleýän hyzmatyňyzy saýlaň we bron ediň', style: tt.bodySmall?.copyWith(color: kTextSecondary)),
+          if (services.isNotEmpty) ...[
+            const SizedBox(height: kSpaceSm),
+            Text('Beýleki', style: tt.bodySmall?.copyWith(color: kPrimary, fontWeight: FontWeight.w600)),
+          ],
+          const SizedBox(height: kSpaceMd),
+          ...services.asMap().entries.map((e) {
+            final i = e.key;
+            final svc = e.value;
+            return Column(
+              children: [
+                if (i > 0) const Divider(height: 1),
+                _ServiceRow(service: svc, isPopular: i == 0, onBook: () => onBook(svc)),
+              ],
+            );
+          }),
+        ],
+      ),
+    );
+  }
+}
+
+class _ServiceRow extends StatelessWidget {
+  final Service service;
+  final bool isPopular;
+  final VoidCallback onBook;
+  const _ServiceRow({required this.service, this.isPopular = false, required this.onBook});
+
+  @override
+  Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    return InkWell(
+      onTap: onBook,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: kSpaceMd + 2),
+        child: Row(
+          children: [
+            Container(
+              width: 44, height: 44,
+              decoration: BoxDecoration(color: kPrimary.withValues(alpha: 0.10), shape: BoxShape.circle),
+              child: const Icon(Icons.content_cut_rounded, size: 20, color: kPrimary),
+            ),
+            const SizedBox(width: kSpaceMd),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(child: Text(service.name, style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w700))),
+                      if (isPopular) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(color: kSuccess.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(kRadiusPill)),
+                          child: Text('Meşhur', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: kSuccess.withValues(alpha: 0.9))),
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(Icons.access_time_rounded, size: 14, color: kTextTertiary),
+                      const SizedBox(width: 4),
+                      Text('${service.durationMinutes} min', style: tt.bodySmall?.copyWith(color: kTextSecondary)),
+                      const SizedBox(width: 8),
+                      const Text('•', style: TextStyle(color: kTextTertiary)),
+                      const SizedBox(width: 8),
+                      Text('${service.price?.toStringAsFixed(0) ?? '?'} TMT', style: tt.bodySmall?.copyWith(color: kPrimary, fontWeight: FontWeight.w700)),
+                    ],
+                  ),
                 ],
+              ),
+            ),
+            Container(
+              width: 38, height: 38,
+              decoration: BoxDecoration(color: kPrimary, shape: BoxShape.circle),
+              child: const Icon(Icons.arrow_forward_rounded, size: 18, color: Colors.white),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ═════════════════════════════════════════════
+// Team section
+// ═════════════════════════════════════════════
+class _TeamSection extends StatelessWidget {
+  final Salon salon;
+  final VoidCallback onBook;
+  const _TeamSection({required this.salon, required this.onBook});
+
+  @override
+  Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    return Container(
+      padding: const EdgeInsets.all(kSpaceLg),
+      decoration: BoxDecoration(
+        color: kCardBg,
+        borderRadius: BorderRadius.circular(kRadiusLg),
+        border: Border.all(color: kBorder),
+        boxShadow: kShadowSm,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text('Topar', style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+              const Spacer(),
+              Text('${_kMockStaff.length} ussa', style: tt.bodySmall?.copyWith(color: kTextTertiary)),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text('Islän ussaňyzy saýlaň we bron ediň', style: tt.bodySmall?.copyWith(color: kTextSecondary)),
+          const SizedBox(height: kSpaceLg),
+          SizedBox(
+            height: 200,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: _kMockStaff.length,
+              separatorBuilder: (_, __) => const SizedBox(width: kSpaceMd),
+              itemBuilder: (_, i) {
+                final s = _kMockStaff[i];
+                final initial = (s['name'] as String)[0];
+                final color = i == 0 ? kPrimary : const Color(0xFFE91E63);
+                return Container(
+                  width: 160,
+                  padding: const EdgeInsets.symmetric(vertical: kSpaceLg, horizontal: kSpaceMd),
+                  decoration: BoxDecoration(
+                    color: kCardBg,
+                    borderRadius: BorderRadius.circular(kRadiusLg),
+                    border: Border.all(color: kBorder),
+                    boxShadow: kShadowSm,
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 56, height: 56,
+                        decoration: BoxDecoration(color: color.withValues(alpha: 0.12), shape: BoxShape.circle),
+                        alignment: Alignment.center,
+                        child: Text(initial, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: color)),
+                      ),
+                      const SizedBox(height: kSpaceSm),
+                      Text(s['name'] as String, style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w700), textAlign: TextAlign.center),
+                      Text(s['role'] as String, style: tt.bodySmall?.copyWith(color: kTextSecondary, fontSize: 12)),
+                      const SizedBox(height: 4),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.star_rounded, size: 15, color: kStar),
+                          const SizedBox(width: 3),
+                          Text('${s['rating']}', style: tt.labelSmall?.copyWith(fontWeight: FontWeight.w700)),
+                          Text(' (${s['reviews']})', style: tt.bodySmall?.copyWith(color: kTextTertiary, fontSize: 11)),
+                        ],
+                      ),
+                      const Spacer(),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton(
+                          onPressed: onBook,
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: kPrimary),
+                            foregroundColor: kPrimary,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kRadiusMd)),
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                          ),
+                          child: Text('Bron et', style: tt.labelSmall?.copyWith(color: kPrimary, fontWeight: FontWeight.w700)),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ═════════════════════════════════════════════
+// Portfolio section
+// ═════════════════════════════════════════════
+class _PortfolioSection extends StatelessWidget {
+  final Salon salon;
+  final List<String> images;
+  const _PortfolioSection({required this.salon, required this.images});
+
+  @override
+  Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    return Container(
+      padding: const EdgeInsets.all(kSpaceLg),
+      decoration: BoxDecoration(
+        color: kCardBg,
+        borderRadius: BorderRadius.circular(kRadiusLg),
+        border: Border.all(color: kBorder),
+        boxShadow: kShadowSm,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 32, height: 32,
+                decoration: BoxDecoration(color: kPrimary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(kRadiusSm)),
+                child: const Icon(Icons.photo_library_rounded, size: 16, color: kPrimary),
+              ),
+              const SizedBox(width: kSpaceSm),
+              Text('Portefolio', style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+            ],
+          ),
+          const SizedBox(height: kSpaceMd),
+          SizedBox(
+            height: 110,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: images.length,
+              separatorBuilder: (_, __) => const SizedBox(width: kSpaceSm),
+              itemBuilder: (_, i) => ClipRRect(
+                borderRadius: BorderRadius.circular(kRadiusMd),
+                child: SizedBox(
+                  width: 140,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Image.asset(images[i], fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(color: kPrimary.withValues(alpha: 0.12), child: const Icon(Icons.image_not_supported_rounded)),
+                      ),
+                      Positioned(
+                        bottom: 8, left: 8,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(kRadiusSm)),
+                          child: Text('${i + 1}/${images.length}', style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700)),
+                        ),
+                      ),
+                      Positioned.fill(child: Material(color: Colors.transparent, child: InkWell(
+                        onTap: () => Navigator.push(context, fadeSlideRoute(SalonGalleryScreen(salon: salon, initialIndex: i))),
+                      ))),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
         ],
       ),
-    if (userLocation != null)
-      CircleLayer(
-        circles: [
-          CircleMarker(
-            point: userLocation,
-            radius: 24,
-            color: const Color(0xFF4285F4).withValues(alpha: 0.08),
-            borderColor: const Color(0xFF4285F4).withValues(alpha: 0.15),
-            borderStrokeWidth: 1,
+    );
+  }
+}
+
+// ═════════════════════════════════════════════
+// About section
+// ═════════════════════════════════════════════
+class _AboutSection extends StatefulWidget {
+  final Salon salon;
+  const _AboutSection({required this.salon});
+  @override
+  State<_AboutSection> createState() => _AboutSectionState();
+}
+
+class _AboutSectionState extends State<_AboutSection> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Description card
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(kSpaceLg),
+          decoration: BoxDecoration(
+            color: kCardBg,
+            borderRadius: BorderRadius.circular(kRadiusLg),
+            border: Border.all(color: kBorder),
+            boxShadow: kShadowSm,
           ),
-        ],
-      ),
-    MarkerLayer(
-      markers: [
-        Marker(
-          point: salonPoint,
-          width: 48,
-          height: 56,
-          alignment: Alignment.topCenter,
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 42, height: 42,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft, end: Alignment.bottomRight,
-                    colors: [Color(0xFF00BCD4), kPrimary],
-                  ),
-                  shape: BoxShape.circle,
-                  boxShadow: [BoxShadow(color: kPrimary.withValues(alpha: 0.4), blurRadius: 12, offset: const Offset(0, 4))],
-                  border: Border.all(color: Colors.white, width: 3),
-                ),
-                child: const Icon(Icons.content_cut_rounded, color: Colors.white, size: 18),
+              Text(
+                _kMockDescription,
+                style: tt.bodyMedium?.copyWith(height: 1.55),
+                maxLines: _expanded ? null : 3,
+                overflow: _expanded ? null : TextOverflow.ellipsis,
               ),
-              CustomPaint(size: const Size(14, 8), painter: _TrianglePainter(color: kPrimary)),
+              const SizedBox(height: kSpaceSm),
+              GestureDetector(
+                onTap: () => setState(() => _expanded = !_expanded),
+                child: Text(_expanded ? 'Az gör' : 'Doly oka', style: tt.bodySmall?.copyWith(color: kPrimary, fontWeight: FontWeight.w700)),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: kSpaceLg),
+
+        // Opening hours
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(kSpaceLg),
+          decoration: BoxDecoration(
+            color: kCardBg,
+            borderRadius: BorderRadius.circular(kRadiusLg),
+            border: Border.all(color: kBorder),
+            boxShadow: kShadowSm,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.access_time_rounded, size: 22, color: kPrimary),
+                  const SizedBox(width: kSpaceSm),
+                  Text('Iş wagty', style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+                ],
+              ),
+              const SizedBox(height: kSpaceMd),
+              ..._kOpeningHours.map((h) => Padding(
+                padding: const EdgeInsets.only(bottom: kSpaceSm),
+                child: Row(
+                  children: [
+                    Container(width: 8, height: 8, decoration: BoxDecoration(color: kSuccess, shape: BoxShape.circle)),
+                    const SizedBox(width: kSpaceSm),
+                    SizedBox(width: 100, child: Text(h['day'] as String, style: tt.bodyMedium?.copyWith(color: kTextPrimary))),
+                    Text(h['hours'] as String, style: tt.bodyMedium?.copyWith(color: kTextSecondary)),
+                  ],
+                ),
+              )),
+            ],
+          ),
+        ),
+        const SizedBox(height: kSpaceLg),
+
+        // Additional info
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(kSpaceLg),
+          decoration: BoxDecoration(
+            color: kCardBg,
+            borderRadius: BorderRadius.circular(kRadiusLg),
+            border: Border.all(color: kBorder),
+            boxShadow: kShadowSm,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.check_circle_rounded, size: 22, color: kSuccess),
+                  const SizedBox(width: kSpaceSm),
+                  Text('Goşmaça maglumat', style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+                ],
+              ),
+              const SizedBox(height: kSpaceMd),
+              ..._kAdditionalInfo.map((info) => Padding(
+                padding: const EdgeInsets.only(bottom: kSpaceSm),
+                child: Row(
+                  children: [
+                    Icon(info['icon'] as IconData, size: 20, color: kTextSecondary),
+                    const SizedBox(width: kSpaceMd),
+                    Expanded(child: Text(info['label'] as String, style: tt.bodyMedium?.copyWith(color: kTextPrimary))),
+                  ],
+                ),
+              )),
             ],
           ),
         ),
       ],
+    );
+  }
+}
+
+// ═════════════════════════════════════════════
+// Nearby salons
+// ═════════════════════════════════════════════
+class _NearbySalonsSection extends StatelessWidget {
+  final Salon currentSalon;
+  const _NearbySalonsSection({required this.currentSalon});
+
+  @override
+  Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.location_on_rounded, size: 22, color: kPrimary),
+            const SizedBox(width: kSpaceSm),
+            Text('Töwerekde salonlar', style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+          ],
+        ),
+        const SizedBox(height: kSpaceMd),
+        SizedBox(
+          height: 140,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: 2,
+            separatorBuilder: (_, __) => const SizedBox(width: kSpaceMd),
+            itemBuilder: (_, i) {
+              final images = _imageMap.values.toList();
+              final imgIdx = (currentSalon.id + i + 1) % images.length;
+              return Container(
+                width: 170,
+                decoration: BoxDecoration(
+                  color: kCardBg,
+                  borderRadius: BorderRadius.circular(kRadiusLg),
+                  border: Border.all(color: kBorder),
+                  boxShadow: kShadowSm,
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Image.asset(images[imgIdx], width: double.infinity, fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(color: kSurfaceBg, child: const Icon(Icons.storefront)),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(kSpaceSm),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Ýakyndaky salon ${i + 1}', style: tt.labelSmall?.copyWith(fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          Text('${(1.1 + i * 0.4).toStringAsFixed(1)} km · mock', style: tt.bodySmall?.copyWith(color: kTextTertiary, fontSize: 11)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ═════════════════════════════════════════════
+// Bottom book bar
+// ═════════════════════════════════════════════
+class _BottomBookBar extends StatelessWidget {
+  final double minPrice;
+  final String salonName;
+  final VoidCallback onBook;
+  const _BottomBookBar({required this.minPrice, required this.salonName, required this.onBook});
+
+  @override
+  Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    return Container(
+      decoration: BoxDecoration(
+        color: kCardBg,
+        boxShadow: kShadowUpMd,
+      ),
+      padding: EdgeInsets.fromLTRB(kSpaceXl, kSpaceMd, kSpaceXl, MediaQuery.of(context).padding.bottom + kSpaceMd),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('${minPrice.toStringAsFixed(0)} TMT-dan', style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w900)),
+                Text(salonName, style: tt.bodySmall?.copyWith(color: kTextSecondary)),
+              ],
+            ),
+          ),
+          FilledButton.icon(
+            onPressed: onBook,
+            icon: const Icon(Icons.calendar_today_rounded, size: 18),
+            label: const Text('Bron et'),
+            style: FilledButton.styleFrom(
+              backgroundColor: kPrimary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kRadiusMd)),
+              padding: const EdgeInsets.symmetric(horizontal: kSpaceXl, vertical: kSpaceMd),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ═════════════════════════════════════════════
+// Map section (kept from previous)
+// ═════════════════════════════════════════════
+List<Widget> _buildMapLayers(LatLng salonPoint, {LatLng? userLocation}) {
+  return [
+    TileLayer(
+      urlTemplate: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+      subdomains: const ['a', 'b', 'c', 'd'],
+      userAgentPackageName: 'com.parla.app', maxZoom: 19,
     ),
+    CircleLayer(circles: [
+      CircleMarker(point: salonPoint, radius: 48, color: kPrimary.withValues(alpha: 0.08), borderColor: kPrimary.withValues(alpha: 0.2), borderStrokeWidth: 1.5),
+    ]),
+    if (userLocation != null) ...[
+      MarkerLayer(markers: [
+        Marker(point: userLocation, width: 28, height: 28, child: Container(
+          decoration: BoxDecoration(color: const Color(0xFF4285F4), shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 3),
+            boxShadow: [BoxShadow(color: const Color(0xFF4285F4).withValues(alpha: 0.4), blurRadius: 8, offset: const Offset(0, 2))]),
+        )),
+      ]),
+      CircleLayer(circles: [
+        CircleMarker(point: userLocation, radius: 24, color: const Color(0xFF4285F4).withValues(alpha: 0.08), borderColor: const Color(0xFF4285F4).withValues(alpha: 0.15), borderStrokeWidth: 1),
+      ]),
+    ],
+    MarkerLayer(markers: [
+      Marker(point: salonPoint, width: 48, height: 56, alignment: Alignment.topCenter, child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(width: 42, height: 42, decoration: BoxDecoration(
+            gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF00BCD4), kPrimary]),
+            shape: BoxShape.circle,
+            boxShadow: [BoxShadow(color: kPrimary.withValues(alpha: 0.4), blurRadius: 12, offset: const Offset(0, 4))],
+            border: Border.all(color: Colors.white, width: 3),
+          ), child: const Icon(Icons.content_cut_rounded, color: Colors.white, size: 18)),
+          CustomPaint(size: const Size(14, 8), painter: _TrianglePainter(color: kPrimary)),
+        ],
+      )),
+    ]),
   ];
 }
 
-// ── Mini map in detail page ──
 class _SalonMapSection extends StatefulWidget {
   final Salon salon;
   const _SalonMapSection({required this.salon});
-
   @override
   State<_SalonMapSection> createState() => _SalonMapSectionState();
 }
@@ -316,382 +1109,70 @@ class _SalonMapSectionState extends State<_SalonMapSection> {
   LatLng? _userLoc;
 
   @override
-  void initState() {
-    super.initState();
-    _loadUserLoc();
-  }
+  void initState() { super.initState(); _loadUserLoc(); }
 
   Future<void> _loadUserLoc() async {
     final loc = await _getUserLocation();
     if (mounted && loc != null) setState(() => _userLoc = loc);
   }
 
-  void _openFullScreen() {
-    Navigator.push(context, fadeSlideRoute(
-      _FullScreenMapPage(salon: widget.salon, initialUserLocation: _userLoc),
-    ));
-  }
-
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
-    final cs = Theme.of(context).colorScheme;
     final salon = widget.salon;
     final point = LatLng(salon.latitude!, salon.longitude!);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Container(
-              width: 32, height: 32,
-              decoration: BoxDecoration(
-                color: kPrimary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(kRadiusSm),
-              ),
-              child: const Icon(Icons.map_rounded, size: 18, color: kPrimary),
-            ),
-            const SizedBox(width: kSpaceSm + 2),
-            Expanded(child: Text('Ýerleşýän ýeri', style: tt.titleMedium)),
-          ],
-        ),
+        Row(children: [
+          Container(width: 32, height: 32, decoration: BoxDecoration(color: kPrimary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(kRadiusSm)),
+            child: const Icon(Icons.map_rounded, size: 18, color: kPrimary)),
+          const SizedBox(width: kSpaceSm + 2),
+          Expanded(child: Text('Ýerleşýän ýeri', style: tt.titleMedium)),
+        ]),
         const SizedBox(height: kSpaceMd),
         Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(kRadiusLg),
-            boxShadow: kShadowLg,
-            border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.3)),
-          ),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(kRadiusLg), boxShadow: kShadowSm, border: Border.all(color: kBorder)),
           clipBehavior: Clip.antiAlias,
-          child: Column(
-            children: [
-              GestureDetector(
-                onTap: _openFullScreen,
-                child: SizedBox(
-                  height: 220,
-                  child: Stack(
-                    children: [
-                      AbsorbPointer(
-                        child: FlutterMap(
-                          options: MapOptions(initialCenter: point, initialZoom: 16),
-                          children: _buildMapLayers(point, userLocation: _userLoc),
-                        ),
-                      ),
-                      Positioned(
-                        top: kSpaceSm, left: kSpaceSm,
-                        child: _GlassChip(icon: Icons.fullscreen_rounded, label: 'Ulaltmak', onTap: _openFullScreen),
-                      ),
-                      Positioned(
-                        top: kSpaceSm, right: kSpaceSm,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: kSpaceSm, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.92),
-                            borderRadius: BorderRadius.circular(kRadiusSm), boxShadow: kShadowSm,
-                          ),
-                          child: Text('© OpenStreetMap © CARTO', style: tt.bodyMedium?.copyWith(fontSize: 9, color: kTextSecondary)),
-                        ),
-                      ),
-                      if (_userLoc != null)
-                        Positioned(
-                          bottom: kSpaceSm, left: kSpaceSm,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: kSpaceSm + 2, vertical: kSpaceXs),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.92),
-                              borderRadius: BorderRadius.circular(kRadiusSm), boxShadow: kShadowSm,
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(width: 8, height: 8, decoration: const BoxDecoration(color: Color(0xFF4285F4), shape: BoxShape.circle)),
-                                const SizedBox(width: kSpaceXs),
-                                Text(_distanceText(point, _userLoc!), style: tt.labelLarge?.copyWith(fontSize: 11, color: kTextSecondary)),
-                              ],
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
+          child: Column(children: [
+            SizedBox(height: 180, child: AbsorbPointer(child: FlutterMap(
+              options: MapOptions(initialCenter: point, initialZoom: 16),
+              children: _buildMapLayers(point, userLocation: _userLoc),
+            ))),
+            Container(
+              width: double.infinity, color: kCardBg,
+              padding: const EdgeInsets.symmetric(horizontal: kSpaceLg, vertical: kSpaceMd),
+              child: Row(children: [
+                Container(width: 36, height: 36, decoration: BoxDecoration(color: kPrimary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(kRadiusSm)),
+                  child: const Icon(Icons.location_on_rounded, size: 18, color: kPrimary)),
+                const SizedBox(width: kSpaceMd),
+                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(salon.name, style: tt.labelLarge),
+                  if (salon.address != null) Text(salon.address!, style: tt.bodyMedium?.copyWith(fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+                ])),
+                const SizedBox(width: kSpaceSm),
+                FilledButton.tonalIcon(
+                  onPressed: () => openMapsDirection(salon),
+                  icon: const Icon(Icons.directions_rounded, size: 18),
+                  label: const Text('Ugur'),
+                  style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: kSpaceMd, vertical: kSpaceSm), textStyle: tt.labelLarge?.copyWith(fontSize: 13)),
                 ),
-              ),
-              Container(
-                width: double.infinity, color: kCardBg,
-                padding: const EdgeInsets.symmetric(horizontal: kSpaceLg, vertical: kSpaceMd),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 36, height: 36,
-                      decoration: BoxDecoration(color: kPrimary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(kRadiusSm)),
-                      child: const Icon(Icons.location_on_rounded, size: 18, color: kPrimary),
-                    ),
-                    const SizedBox(width: kSpaceMd),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(salon.name, style: tt.labelLarge),
-                          if (salon.address != null)
-                            Text(salon.address!, style: tt.bodyMedium?.copyWith(fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: kSpaceSm),
-                    FilledButton.tonalIcon(
-                      onPressed: () => openMapsDirection(salon),
-                      icon: const Icon(Icons.directions_rounded, size: 18),
-                      label: const Text('Ugur'),
-                      style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: kSpaceMd, vertical: kSpaceSm),
-                        textStyle: tt.labelLarge?.copyWith(fontSize: 13),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+              ]),
+            ),
+          ]),
         ),
       ],
     );
   }
 }
 
+// ignore: unused_element
 String _distanceText(LatLng a, LatLng b) {
   const d = Distance();
   final meters = d.as(LengthUnit.Meter, a, b);
   if (meters < 1000) return '${meters.round()} m uzaklykda';
   return '${(meters / 1000).toStringAsFixed(1)} km uzaklykda';
-}
-
-// ── Full screen map ──
-class _FullScreenMapPage extends StatefulWidget {
-  final Salon salon;
-  final LatLng? initialUserLocation;
-  const _FullScreenMapPage({required this.salon, this.initialUserLocation});
-
-  @override
-  State<_FullScreenMapPage> createState() => _FullScreenMapPageState();
-}
-
-class _FullScreenMapPageState extends State<_FullScreenMapPage> {
-  final _mapCtrl = MapController();
-  LatLng? _userLoc;
-  bool _locatingUser = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _userLoc = widget.initialUserLocation;
-    if (_userLoc == null) _fetchUserLoc();
-  }
-
-  Future<void> _fetchUserLoc() async {
-    setState(() => _locatingUser = true);
-    final loc = await _getUserLocation();
-    if (mounted) setState(() { _userLoc = loc; _locatingUser = false; });
-  }
-
-  void _zoomIn() {
-    final z = _mapCtrl.camera.zoom;
-    _mapCtrl.move(_mapCtrl.camera.center, (z + 1).clamp(2, 19));
-  }
-
-  void _zoomOut() {
-    final z = _mapCtrl.camera.zoom;
-    _mapCtrl.move(_mapCtrl.camera.center, (z - 1).clamp(2, 19));
-  }
-
-  void _goToSalon() {
-    _mapCtrl.move(LatLng(widget.salon.latitude!, widget.salon.longitude!), 16);
-  }
-
-  void _goToUser() {
-    if (_userLoc != null) {
-      _mapCtrl.move(_userLoc!, 16);
-    } else {
-      _fetchUserLoc();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final tt = Theme.of(context).textTheme;
-    final salon = widget.salon;
-    final salonPoint = LatLng(salon.latitude!, salon.longitude!);
-
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent, elevation: 0, automaticallyImplyLeading: false,
-        leading: Padding(
-          padding: const EdgeInsets.all(kSpaceSm),
-          child: Material(
-            color: Colors.white.withValues(alpha: 0.92),
-            borderRadius: BorderRadius.circular(kRadiusMd), elevation: 2,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(kRadiusMd),
-              onTap: () => Navigator.pop(context),
-              child: const Icon(Icons.close_rounded, color: kTextPrimary),
-            ),
-          ),
-        ),
-        actions: [
-          if (_userLoc != null)
-            Padding(
-              padding: const EdgeInsets.only(right: kSpaceSm),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: kSpaceMd, vertical: kSpaceSm),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.92),
-                  borderRadius: BorderRadius.circular(kRadiusMd), boxShadow: kShadowSm,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(width: 8, height: 8, decoration: const BoxDecoration(color: Color(0xFF4285F4), shape: BoxShape.circle)),
-                    const SizedBox(width: kSpaceSm),
-                    Text(_distanceText(salonPoint, _userLoc!), style: tt.labelLarge?.copyWith(fontSize: 12, color: kTextSecondary)),
-                  ],
-                ),
-              ),
-            ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: FlutterMap(
-              mapController: _mapCtrl,
-              options: MapOptions(initialCenter: salonPoint, initialZoom: 16, interactionOptions: const InteractionOptions(flags: InteractiveFlag.all)),
-              children: _buildMapLayers(salonPoint, userLocation: _userLoc),
-            ),
-          ),
-
-          Positioned(
-            right: kSpaceLg,
-            bottom: MediaQuery.of(context).padding.bottom + kSpaceLg + 96 + kSpaceMd,
-            child: Column(
-              children: [
-                _MapControlButton(
-                  icon: _locatingUser ? Icons.hourglass_top_rounded : Icons.my_location_rounded,
-                  accent: true,
-                  onTap: _goToUser,
-                ),
-                const SizedBox(height: kSpaceSm),
-                _MapControlButton(icon: Icons.storefront_rounded, onTap: _goToSalon),
-                const SizedBox(height: kSpaceMd),
-                _MapControlButton(icon: Icons.add, onTap: _zoomIn),
-                const SizedBox(height: kSpaceSm),
-                _MapControlButton(icon: Icons.remove, onTap: _zoomOut),
-              ],
-            ),
-          ),
-
-          Positioned(
-            left: kSpaceLg, right: kSpaceLg,
-            bottom: MediaQuery.of(context).padding.bottom + kSpaceLg,
-            child: Container(
-              padding: const EdgeInsets.all(kSpaceLg),
-              decoration: BoxDecoration(color: kCardBg, borderRadius: BorderRadius.circular(kRadiusLg), boxShadow: kShadowLg),
-              child: Row(
-                children: [
-                  Container(
-                    width: 48, height: 48,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft, end: Alignment.bottomRight,
-                        colors: [kPrimary.withValues(alpha: 0.2), kPrimary.withValues(alpha: 0.08)],
-                      ),
-                      borderRadius: BorderRadius.circular(kRadiusMd),
-                    ),
-                    child: const Icon(Icons.storefront_rounded, size: 24, color: kPrimary),
-                  ),
-                  const SizedBox(width: kSpaceMd),
-                  Expanded(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(salon.name, style: tt.titleMedium),
-                        if (salon.address != null) ...[
-                          const SizedBox(height: kSpaceXs),
-                          Text(salon.address!, style: tt.bodyMedium?.copyWith(fontSize: 13), maxLines: 2, overflow: TextOverflow.ellipsis),
-                        ],
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: kSpaceSm),
-                  FloatingActionButton.small(
-                    heroTag: 'directions', backgroundColor: kPrimary,
-                    onPressed: () => openMapsDirection(salon),
-                    child: const Icon(Icons.directions_rounded, color: Colors.white, size: 20),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Reusable widgets ──
-class _GlassChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  const _GlassChip({required this.icon, required this.label, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap, borderRadius: BorderRadius.circular(kRadiusSm),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: kSpaceSm + 2, vertical: kSpaceXs + 1),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.92),
-            borderRadius: BorderRadius.circular(kRadiusSm), boxShadow: kShadowSm,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 16, color: kPrimary),
-              const SizedBox(width: kSpaceXs),
-              Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: kPrimary)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _MapControlButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-  final bool accent;
-  const _MapControlButton({required this.icon, required this.onTap, this.accent = false});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: accent ? const Color(0xFF4285F4) : kCardBg,
-      borderRadius: BorderRadius.circular(kRadiusMd),
-      elevation: 4, shadowColor: Colors.black26,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(kRadiusMd), onTap: onTap,
-        child: SizedBox(
-          width: 44, height: 44,
-          child: Icon(icon, color: accent ? Colors.white : kTextPrimary, size: 22),
-        ),
-      ),
-    );
-  }
 }
 
 class _TrianglePainter extends CustomPainter {
@@ -700,157 +1181,9 @@ class _TrianglePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = color..style = PaintingStyle.fill;
-    canvas.drawPath(_trianglePath(size), paint);
-  }
-
-  static ui.Path _trianglePath(Size size) {
-    final p = ui.Path();
-    p.moveTo(0, 0);
-    p.lineTo(size.width, 0);
-    p.lineTo(size.width / 2, size.height);
-    p.close();
-    return p;
+    canvas.drawPath(ui.Path()..moveTo(0, 0)..lineTo(size.width, 0)..lineTo(size.width / 2, size.height)..close(), Paint()..color = color..style = PaintingStyle.fill);
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _OpeningHoursTile extends StatelessWidget {
-  final String salonName;
-  const _OpeningHoursTile({required this.salonName});
-
-  static const _mockHours = [
-    'Duşenbe – Şenbe: 09:00 – 20:00',
-    'Ýekşenbe: 10:00 – 18:00',
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    final tt = Theme.of(context).textTheme;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => showModalBottomSheet(
-          context: context,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-          ),
-          builder: (_) => Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Iş wagty', style: tt.titleLarge),
-                const SizedBox(height: 16),
-                ..._mockHours.map((h) => Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Text(h, style: tt.bodyLarge),
-                    )),
-                SizedBox(height: MediaQuery.of(context).padding.bottom),
-              ],
-            ),
-          ),
-        ),
-        borderRadius: BorderRadius.circular(kRadiusMd),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: kSpaceSm),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: kPrimary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(kRadiusSm),
-                ),
-                child: const Icon(Icons.schedule_rounded, size: 22, color: kPrimary),
-              ),
-              const SizedBox(width: kSpaceMd),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Iş wagty', style: tt.titleMedium),
-                    Text('Duş–Şen: 09:00–20:00', style: tt.bodySmall?.copyWith(color: kTextSecondary)),
-                  ],
-                ),
-              ),
-              const Icon(Icons.chevron_right_rounded, color: kTextTertiary),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DetailNavTile extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  const _DetailNavTile({required this.icon, required this.label, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final tt = Theme.of(context).textTheme;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(kRadiusMd),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-          decoration: BoxDecoration(
-            color: kSurfaceBg,
-            borderRadius: BorderRadius.circular(kRadiusMd),
-            border: Border.all(color: kBorder),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 20, color: kPrimary),
-              const SizedBox(width: 8),
-              Text(label, style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ServiceTile extends StatelessWidget {
-  final Service service;
-  final VoidCallback onBook;
-  const _ServiceTile({required this.service, required this.onBook});
-
-  @override
-  Widget build(BuildContext context) {
-    final tt = Theme.of(context).textTheme;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: kSpaceMd),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(service.name, style: tt.titleMedium),
-                const SizedBox(height: kSpaceXs),
-                Text(
-                  '${service.durationMinutes} min'
-                  '${service.price != null ? '  •  ${service.price!.toStringAsFixed(0)} TMT' : ''}',
-                  style: tt.bodyMedium,
-                ),
-              ],
-            ),
-          ),
-          FilledButton.tonal(onPressed: onBook, child: const Text('Bron et')),
-        ],
-      ),
-    );
-  }
 }

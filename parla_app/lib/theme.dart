@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 // ── Colors (Fresha style, cyan variant) ──
 const Color kPrimary = Color(0xFF00ACC1);       // Fresha #7C40F6 → cyan
+const Color kPrimarySoft = Color(0xFFE8F8FA); // saýlanan kartlar üçin ýeňil cyan fon
 const Color kSecondary = Color(0xFF0097A7);      // goýuraq cyan
 const Color kAccentLight = Color(0xFF26C6DA);    // açyk cyan
 const Color kScaffoldBg = Color(0xFFFFFFFF);     // Fresha: ak fon
@@ -39,6 +39,23 @@ List<BoxShadow> kShadowSm = [
     color: Colors.black.withValues(alpha: 0.04),
     blurRadius: 6,
     offset: const Offset(0, 1),
+  ),
+];
+
+// Fresha stili: aşak panel / ýokarky panel köleleri.
+List<BoxShadow> kShadowUpMd = [
+  BoxShadow(
+    color: Colors.black.withValues(alpha: 0.06),
+    blurRadius: 12,
+    offset: const Offset(0, -4),
+  ),
+];
+
+List<BoxShadow> kShadowDownSm = [
+  BoxShadow(
+    color: Colors.black.withValues(alpha: 0.05),
+    blurRadius: 10,
+    offset: const Offset(0, 4),
   ),
 ];
 
@@ -89,48 +106,54 @@ ThemeData buildParlaTheme() {
     onSurfaceVariant: kTextSecondary,
   );
 
-  final baseTextStyle = TextStyle(
-    fontFamilyFallback: const ['Roboto', 'sans-serif'],
-  );
+  const fallback = ['Roboto', 'sans-serif'];
 
-  // Fresha: aýdyň ierarhiýa, 20–24px sözbaşy, 15–16px atlar, 13px çal tekst
-  final textTheme = GoogleFonts.interTextTheme().copyWith(
-    headlineLarge: GoogleFonts.inter(
+  final textTheme = const TextTheme(
+    headlineLarge: TextStyle(
       fontSize: 26, fontWeight: FontWeight.w700,
       color: kTextPrimary, letterSpacing: -0.6, height: 1.22,
-    ).merge(baseTextStyle),
-    headlineMedium: GoogleFonts.inter(
+      fontFamilyFallback: fallback,
+    ),
+    headlineMedium: TextStyle(
       fontSize: 22, fontWeight: FontWeight.w700,
       color: kTextPrimary, height: 1.25,
-    ).merge(baseTextStyle),
-    titleLarge: GoogleFonts.inter(
+      fontFamilyFallback: fallback,
+    ),
+    titleLarge: TextStyle(
       fontSize: 20, fontWeight: FontWeight.w700,
       color: kTextPrimary, height: 1.28,
-    ).merge(baseTextStyle),
-    titleMedium: GoogleFonts.inter(
+      fontFamilyFallback: fallback,
+    ),
+    titleMedium: TextStyle(
       fontSize: 16, fontWeight: FontWeight.w600,
       color: kTextPrimary, height: 1.3,
-    ).merge(baseTextStyle),
-    titleSmall: GoogleFonts.inter(
+      fontFamilyFallback: fallback,
+    ),
+    titleSmall: TextStyle(
       fontSize: 15, fontWeight: FontWeight.w600,
       color: kTextPrimary, height: 1.3,
-    ).merge(baseTextStyle),
-    bodyLarge: GoogleFonts.inter(
+      fontFamilyFallback: fallback,
+    ),
+    bodyLarge: TextStyle(
       fontSize: 15, fontWeight: FontWeight.w400,
       color: kTextPrimary, height: 1.45,
-    ).merge(baseTextStyle),
-    bodyMedium: GoogleFonts.inter(
+      fontFamilyFallback: fallback,
+    ),
+    bodyMedium: TextStyle(
       fontSize: 14, fontWeight: FontWeight.w400,
       color: kTextSecondary, height: 1.45,
-    ).merge(baseTextStyle),
-    bodySmall: GoogleFonts.inter(
+      fontFamilyFallback: fallback,
+    ),
+    bodySmall: TextStyle(
       fontSize: 13, fontWeight: FontWeight.w400,
       color: kTextSecondary, height: 1.4,
-    ).merge(baseTextStyle),
-    labelLarge: GoogleFonts.inter(
+      fontFamilyFallback: fallback,
+    ),
+    labelLarge: TextStyle(
       fontSize: 14, fontWeight: FontWeight.w600,
       color: kTextPrimary,
-    ).merge(baseTextStyle),
+      fontFamilyFallback: fallback,
+    ),
   );
 
   return ThemeData(
@@ -179,7 +202,7 @@ ThemeData buildParlaTheme() {
         elevation: 0,
         minimumSize: const Size(double.infinity, 52),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kRadiusMd)),
-        textStyle: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
+        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
       ),
     ),
     cardTheme: CardThemeData(

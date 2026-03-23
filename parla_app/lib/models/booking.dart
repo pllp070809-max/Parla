@@ -32,4 +32,16 @@ class Booking {
         salonName: json['salon_name'] as String?,
         serviceName: json['service_name'] as String?,
       );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'salon_id': salonId,
+        'service_id': serviceId,
+        'guest_name': guestName,
+        'guest_phone': guestPhone,
+        'slot_at': slotAt.toIso8601String(),
+        'status': status,
+        'salon_name': salonName,
+        'service_name': serviceName,
+      };
 }
