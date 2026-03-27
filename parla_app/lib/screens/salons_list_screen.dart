@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/providers.dart';
 import '../models/salon.dart';
 import '../theme.dart';
+import '../utils/salon_images.dart';
 import '../widgets/shared_widgets.dart';
 import 'salon_detail_screen.dart';
 
@@ -129,12 +130,6 @@ class _SalonTile extends StatelessWidget {
     required this.onTap,
   });
 
-  static const _imageMap = {
-    'salon1': 'images/salon1.png',
-    'salon2': 'images/salon2.png',
-    'salon3': 'images/salon3.png',
-  };
-
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
@@ -153,10 +148,8 @@ class _SalonTile extends StatelessWidget {
                   borderRadius: BorderRadius.circular(kRadiusMd),
                 ),
                 clipBehavior: Clip.antiAlias,
-                child: _imageMap.containsKey(salon.imageKey)
-                  ? Image.asset(_imageMap[salon.imageKey]!, fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const Icon(Icons.storefront, color: kPrimary, size: 32))
-                  : const Icon(Icons.storefront, color: kPrimary, size: 32),
+                child: Image.asset(salonMainImage(salon), fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const Icon(Icons.storefront, color: kPrimary, size: 32)),
               ),
               const SizedBox(width: 14),
               Expanded(

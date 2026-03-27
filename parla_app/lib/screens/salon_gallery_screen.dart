@@ -1,27 +1,15 @@
 import 'package:flutter/material.dart';
 import '../models/salon.dart';
+import '../utils/salon_images.dart';
 
 class SalonGalleryScreen extends StatelessWidget {
   final Salon salon;
   final int initialIndex;
   const SalonGalleryScreen({super.key, required this.salon, this.initialIndex = 0});
 
-  static const _imageMap = {
-    'salon1': 'images/salon1.png',
-    'salon2': 'images/salon2.png',
-    'salon3': 'images/salon3.png',
-  };
-
   @override
   Widget build(BuildContext context) {
-    final images = <String>[];
-    if (salon.imageKey != null && _imageMap.containsKey(salon.imageKey)) {
-      images.add(_imageMap[salon.imageKey]!);
-    }
-    images.addAll(_imageMap.values.where((v) => !images.contains(v)));
-    if (images.isEmpty) {
-      images.add('images/salon1.png');
-    }
+    final images = portfolioImages(salon);
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -56,7 +44,7 @@ class SalonGalleryScreen extends StatelessWidget {
           child: Image.asset(
             images[i],
             fit: BoxFit.contain,
-            errorBuilder: (_, __, ___) => Center(
+            errorBuilder: (_, __, ___) => const Center(
               child: Icon(Icons.broken_image_rounded, size: 72, color: Colors.white54),
             ),
           ),

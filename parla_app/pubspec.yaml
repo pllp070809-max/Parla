@@ -57,9 +57,7 @@ flutter:
   uses-material-design: true
 
   assets:
-    - images/salon1.png
-    - images/salon2.png
-    - images/salon3.png
+    - images/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

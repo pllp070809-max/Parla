@@ -7,6 +7,7 @@ import '../providers/providers.dart';
 import '../models/salon.dart';
 import '../services/api_service.dart';
 import '../theme.dart';
+import '../utils/salon_images.dart';
 import 'confirmation_screen.dart';
 
 class _Staff {
@@ -423,7 +424,7 @@ class _StaffStep extends StatelessWidget {
                   else
                     ClipOval(
                       child: Image.asset(
-                        'images/salon${(s.id % 3) + 1}.png',
+                        imageForKey(null, fallbackId: s.id),
                         width: 52, height: 52, fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => Container(width: 52, height: 52, color: kSurfaceBg, child: const Icon(Icons.person)),
                       ),

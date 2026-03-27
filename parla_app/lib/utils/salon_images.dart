@@ -1,73 +1,65 @@
 import 'package:flutter/material.dart';
 
-import '../config.dart';
 import '../models/salon.dart';
 import '../theme.dart';
 
-/// Serwersiz / APK / offline web üçin assets.
-const salonImageAssetsOffline = <String>[
-  'images/salon1.png',
-  'images/salon2.png',
-  'images/salon3.png',
+const _allImages = <String>[
+  'images/1.webp',
+  'images/2.jpg',
+  'images/3.jpg',
+  'images/4.jpg',
+  'images/5.png',
+  'images/6.webp',
+  'images/7.webp',
+  'images/8.jpg',
+  'images/9.jpg',
 ];
 
-/// Online bolanda ulanmak üçin (internet bar bolsa).
-/// (Internet ýok bolsa ulanma, sebäbi `kUseMockApi == true` bolanda offline ulanylýar.)
-const salonImageUrlsOnline = <String>[
-  'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&q=80',
-  'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?w=800&q=80',
-  'https://images.unsplash.com/photo-1600948836101-f9ffda59d250?w=800&q=80',
-  'https://images.unsplash.com/photo-1633681926022-84c23e8cb2d6?w=800&q=80',
-  'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&q=80',
-  'https://images.unsplash.com/photo-1559599101-f09722fb4948?w=800&q=80',
-  'https://images.unsplash.com/photo-1605497788044-5a32c7078486?w=800&q=80',
-];
+const _keyToImage = <String, String>{
+  'img1': 'images/1.webp',
+  'img2': 'images/2.jpg',
+  'img3': 'images/3.jpg',
+  'img4': 'images/4.jpg',
+  'img5': 'images/5.png',
+  'img6': 'images/6.webp',
+  'img7': 'images/7.webp',
+  'img8': 'images/8.jpg',
+  'img9': 'images/9.jpg',
+};
 
-String salonImageUrl(Salon salon) {
-  if (kUseMockApi) {
-    return salonImageAssetsOffline[salon.id % salonImageAssetsOffline.length];
+/// imageKey-den asset path almak. Tapylmasa salon.id boýunça fallback.
+String imageForKey(String? key, {int fallbackId = 0}) {
+  if (key != null && _keyToImage.containsKey(key)) {
+    return _keyToImage[key]!;
   }
-  return salonImageUrlsOnline[salon.id % salonImageUrlsOnline.length];
+  return _allImages[fallbackId % _allImages.length];
 }
 
-List<String> salonImageUrlsList(Salon salon) {
-  final base = salon.id % salonImageAssetsOffline.length;
-  if (kUseMockApi) {
-    return [
-      salonImageAssetsOffline[base],
-      salonImageAssetsOffline[(base + 1) % salonImageAssetsOffline.length],
-      salonImageAssetsOffline[(base + 2) % salonImageAssetsOffline.length],
-    ];
-  }
-
-  final onlineBase = salon.id % salonImageUrlsOnline.length;
-  return [
-    salonImageUrlsOnline[onlineBase],
-    salonImageUrlsOnline[(onlineBase + 1) % salonImageUrlsOnline.length],
-    salonImageUrlsOnline[(onlineBase + 2) % salonImageUrlsOnline.length],
-  ];
+/// Salon üçin esasy (baş) surat.
+String salonMainImage(Salon salon) {
+  return imageForKey(salon.imageKey, fallbackId: salon.id);
 }
 
-/// URL ýa-da asset path-dan surat çykarmak üçin universal widget.
+/// Salon üçin portfolio / galereýa suratlary (esasysy birinji, soň rotation).
+List<String> portfolioImages(Salon salon) {
+  final main = salonMainImage(salon);
+  final base = salon.id % _allImages.length;
+  final result = <String>[main];
+  for (int i = 1; i < _allImages.length; i++) {
+    final img = _allImages[(base + i) % _allImages.length];
+    if (img != main) result.add(img);
+  }
+  return result;
+}
+
 Widget salonImage(
-  String urlOrAsset, {
+  String assetPath, {
   BoxFit fit = BoxFit.cover,
   double? width,
   double? height,
 }) {
-  final isNetwork = urlOrAsset.startsWith('http');
-  if (isNetwork) {
-    return Image.network(
-      urlOrAsset,
-      fit: fit,
-      width: width,
-      height: height,
-      errorBuilder: (_, __, ___) => _placeholder(width: width, height: height),
-    );
-  }
-
   return Image.asset(
-    urlOrAsset,
+    assetPath,
     fit: fit,
     width: width,
     height: height,
@@ -88,4 +80,3 @@ Widget _placeholder({double? width, double? height}) {
     child: const Icon(Icons.image_not_supported_rounded, size: 44, color: kTextTertiary),
   );
 }
-

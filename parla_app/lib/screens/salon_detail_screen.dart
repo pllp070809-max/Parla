@@ -10,6 +10,8 @@ import '../models/salon.dart';
 import '../theme.dart';
 import '../widgets/shared_widgets.dart';
 import '../utils/launch_utils.dart';
+import '../utils/service_categories.dart';
+import '../utils/salon_images.dart';
 import 'booking_screen.dart';
 import 'salon_gallery_screen.dart';
 
@@ -60,18 +62,6 @@ Future<LatLng?> _getUserLocation() async {
   }
 }
 
-const _imageMap = <String, String>{
-  'salon1': 'images/salon1.png',
-  'salon2': 'images/salon2.png',
-  'salon3': 'images/salon3.png',
-};
-
-List<String> _portfolioImages(Salon salon) {
-  final all = _imageMap.values.toList(growable: false);
-  if (all.isEmpty) return ['images/salon1.png'];
-  final base = salon.id % all.length;
-  return [all[base], all[(base + 1) % all.length], all[(base + 2) % all.length]];
-}
 
 // ═════════════════════════════════════════════
 // Main screen
@@ -192,7 +182,7 @@ class _SalonDetailBodyState extends State<_SalonDetailBody> {
   @override
   Widget build(BuildContext context) {
     final salon = widget.salon;
-    final images = _portfolioImages(salon);
+    final images = portfolioImages(salon);
     final minPrice = salon.services.isNotEmpty
         ? salon.services.map((s) => s.price ?? 0).reduce((a, b) => a < b ? a : b)
         : 0;
@@ -528,56 +518,129 @@ class _ChipBarDelegate extends SliverPersistentHeaderDelegate {
 // ═════════════════════════════════════════════
 // Services section
 // ═════════════════════════════════════════════
-class _ServicesSection extends StatelessWidget {
+class _ServicesSection extends StatefulWidget {
   final Salon salon;
   final ValueChanged<Service> onBook;
   const _ServicesSection({required this.salon, required this.onBook});
 
   @override
+  State<_ServicesSection> createState() => _ServicesSectionState();
+}
+
+class _ServicesSectionState extends State<_ServicesSection> {
+  int _activeTab = 0;
+  static const int _initialVisibleCount = 4;
+
+  List<Service> get _visibleServices {
+    final all = widget.salon.services;
+    if (_activeTab == 0) return all;
+    final key = kServiceCategories[_activeTab - 1]['key'];
+    return all.where((s) => s.categoryKey == key).toList();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
-    final services = salon.services;
+    final visible = _visibleServices;
+    final display = visible.take(_initialVisibleCount).toList();
+    final showViewAll = visible.length > _initialVisibleCount;
 
-    return Container(
-      padding: const EdgeInsets.all(kSpaceLg),
-      decoration: BoxDecoration(
-        color: kCardBg,
-        borderRadius: BorderRadius.circular(kRadiusLg),
-        border: Border.all(color: kBorder),
-        boxShadow: kShadowSm,
-      ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 36, height: 36,
-                decoration: BoxDecoration(color: kPrimary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(kRadiusSm)),
-                child: const Icon(Icons.content_cut_rounded, size: 18, color: kPrimary),
-              ),
-              const SizedBox(width: kSpaceMd),
-              Expanded(child: Text('Hyzmatlar', style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w800))),
-            ],
-          ),
-          const SizedBox(height: kSpaceSm),
-          Text('Isleýän hyzmatyňyzy saýlaň we bron ediň', style: tt.bodySmall?.copyWith(color: kTextSecondary)),
-          if (services.isNotEmpty) ...[
-            const SizedBox(height: kSpaceSm),
-            Text('Beýleki', style: tt.bodySmall?.copyWith(color: kPrimary, fontWeight: FontWeight.w600)),
-          ],
-          const SizedBox(height: kSpaceMd),
-          ...services.asMap().entries.map((e) {
-            final i = e.key;
-            final svc = e.value;
-            return Column(
+          Text('Hyzmatlar', style: tt.titleLarge?.copyWith(fontWeight: FontWeight.w800, color: Colors.black)),
+          const SizedBox(height: 24),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
               children: [
-                if (i > 0) const Divider(height: 1),
-                _ServiceRow(service: svc, isPopular: i == 0, onBook: () => onBook(svc)),
+                _ServiceTab(label: 'Hemmesi', isActive: _activeTab == 0, onTap: () => setState(() => _activeTab = 0)),
+                ...kServiceCategories.asMap().entries.map((e) {
+                  final tabIndex = e.key + 1;
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 16),
+                    child: _ServiceTab(
+                      label: e.value['label']!,
+                      isActive: _activeTab == tabIndex,
+                      onTap: () => setState(() => _activeTab = tabIndex),
+                    ),
+                  );
+                }),
               ],
-            );
-          }),
+            ),
+          ),
+          const SizedBox(height: 24),
+          if (visible.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Text('Bu bölümde hyzmat ýok', style: tt.bodyMedium?.copyWith(color: const Color(0xFF757575))),
+            )
+          else ...[
+            ...display.asMap().entries.map((e) {
+              final i = e.key;
+              final svc = e.value;
+              return Column(
+                children: [
+                  if (i > 0) const Divider(height: 1, color: Color(0xFFEEEEEE)),
+                  _ServiceRow(service: svc, onBook: () => widget.onBook(svc)),
+                ],
+              );
+            }),
+            if (showViewAll) ...[
+              const SizedBox(height: 16),
+              Center(
+                child: OutlinedButton(
+                  onPressed: () {},
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Color(0xFFCCCCCC), width: 1),
+                    foregroundColor: Colors.black,
+                    backgroundColor: Colors.white,
+                    shape: const StadiumBorder(),
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                    textStyle: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                    ),
+                  ),
+                  child: const Text('Hemmesini görmek'),
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ],
         ],
+      ),
+    );
+  }
+}
+
+class _ServiceTab extends StatelessWidget {
+  final String label;
+  final bool isActive;
+  final VoidCallback onTap;
+  const _ServiceTab({required this.label, required this.isActive, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isActive ? Colors.black : Colors.transparent,
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: isActive ? Colors.white : Colors.black,
+          ),
+        ),
       ),
     );
   }
@@ -585,64 +648,41 @@ class _ServicesSection extends StatelessWidget {
 
 class _ServiceRow extends StatelessWidget {
   final Service service;
-  final bool isPopular;
   final VoidCallback onBook;
-  const _ServiceRow({required this.service, this.isPopular = false, required this.onBook});
+  const _ServiceRow({required this.service, required this.onBook});
 
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
-    return InkWell(
-      onTap: onBook,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: kSpaceMd + 2),
-        child: Row(
-          children: [
-            Container(
-              width: 44, height: 44,
-              decoration: BoxDecoration(color: kPrimary.withValues(alpha: 0.10), shape: BoxShape.circle),
-              child: const Icon(Icons.content_cut_rounded, size: 20, color: kPrimary),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(service.name, style: tt.bodyLarge?.copyWith(fontWeight: FontWeight.w600, color: Colors.black)),
+                const SizedBox(height: 4),
+                Text('${service.durationMinutes} min', style: tt.bodySmall?.copyWith(color: const Color(0xFF757575))),
+                const SizedBox(height: 4),
+                Text('${service.price?.toStringAsFixed(0) ?? '?'} TMT', style: tt.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: Colors.black)),
+              ],
             ),
-            const SizedBox(width: kSpaceMd),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Flexible(child: Text(service.name, style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w700))),
-                      if (isPopular) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(color: kSuccess.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(kRadiusPill)),
-                          child: Text('Meşhur', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: kSuccess.withValues(alpha: 0.9))),
-                        ),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Icon(Icons.access_time_rounded, size: 14, color: kTextTertiary),
-                      const SizedBox(width: 4),
-                      Text('${service.durationMinutes} min', style: tt.bodySmall?.copyWith(color: kTextSecondary)),
-                      const SizedBox(width: 8),
-                      const Text('•', style: TextStyle(color: kTextTertiary)),
-                      const SizedBox(width: 8),
-                      Text('${service.price?.toStringAsFixed(0) ?? '?'} TMT', style: tt.bodySmall?.copyWith(color: kPrimary, fontWeight: FontWeight.w700)),
-                    ],
-                  ),
-                ],
-              ),
+          ),
+          OutlinedButton(
+            onPressed: onBook,
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: Color(0xFFE0E0E0)),
+              foregroundColor: Colors.black,
+              backgroundColor: Colors.white,
+              shape: const StadiumBorder(),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             ),
-            Container(
-              width: 38, height: 38,
-              decoration: BoxDecoration(color: kPrimary, shape: BoxShape.circle),
-              child: const Icon(Icons.arrow_forward_rounded, size: 18, color: Colors.white),
-            ),
-          ],
-        ),
+            child: const Text('Bron et'),
+          ),
+        ],
       ),
     );
   }
@@ -971,8 +1011,8 @@ class _NearbySalonsSection extends StatelessWidget {
             itemCount: 2,
             separatorBuilder: (_, __) => const SizedBox(width: kSpaceMd),
             itemBuilder: (_, i) {
-              final images = _imageMap.values.toList();
-              final imgIdx = (currentSalon.id + i + 1) % images.length;
+              final images = portfolioImages(currentSalon);
+              final imgIdx = (i + 1) % images.length;
               return Container(
                 width: 170,
                 decoration: BoxDecoration(

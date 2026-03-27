@@ -41,12 +41,14 @@ class Service {
   final String name;
   final int durationMinutes;
   final double? price;
+  final String? categoryKey;
 
   const Service({
     required this.id,
     required this.name,
     required this.durationMinutes,
     this.price,
+    this.categoryKey,
   });
 
   factory Service.fromJson(Map<String, dynamic> json) => Service(
@@ -54,5 +56,6 @@ class Service {
         name: json['name'] as String,
         durationMinutes: json['duration_minutes'] as int,
         price: (json['price'] as num?)?.toDouble(),
+        categoryKey: json['category_key'] as String?,
       );
 }

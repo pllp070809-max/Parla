@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../providers/providers.dart';
 import '../models/salon.dart';
 import '../theme.dart';
+import '../utils/salon_images.dart';
 import '../widgets/shared_widgets.dart';
 import 'salons_list_screen.dart';
 import 'salon_detail_screen.dart';
@@ -114,73 +115,24 @@ class HomeScreen extends ConsumerWidget {
                         ],
                       ),
                       GestureDetector(
-                        onTap: () => ref.read(selectedTabIndexProvider.notifier).state = 2,
-                        child: Consumer(
-                          builder: (_, ref2, __) {
-                            final name = ref2.watch(profileNameProvider).valueOrNull?.trim();
-                            final initial = (name != null && name.isNotEmpty)
-                                ? name[0].toUpperCase()
-                                : 'P';
-                            return Container(
-                              width: 36,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                color: kPrimary.withValues(alpha: 0.15),
-                                shape: BoxShape.circle,
-                                border: Border.all(color: kBorder),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  initial,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w700,
-                                    color: kPrimary,
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              // ── Search bar (pill + semantics) ──
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-                  child: Semantics(
-                    label: 'Salonlary we hyzmatlary gözle',
-                    button: true,
-                    child: Material(
-                      color: const Color(0xFFF2F2F2),
-                      borderRadius: BorderRadius.circular(22),
-                      child: InkWell(
                         onTap: () {
                           HapticFeedback.lightImpact();
                           Navigator.push(context, fadeSlideRoute(const SearchScreen()));
                         },
-                        borderRadius: BorderRadius.circular(22),
                         child: Container(
-                          height: 44,
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          alignment: Alignment.centerLeft,
-                          child: Row(
-                            children: [
-                              Icon(Icons.search_rounded, color: kTextTertiary, size: 22),
-                              const SizedBox(width: 10),
-                              Text(
-                                'Salonlary we hyzmatlary gözle',
-                                style: tt.bodyMedium?.copyWith(color: kTextTertiary, fontSize: 15),
-                              ),
-                            ],
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: kPrimary.withValues(alpha: 0.15),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: kBorder),
+                          ),
+                          child: const Center(
+                            child: Icon(Icons.search_rounded, size: 20, color: kPrimary),
                           ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
               ),
@@ -707,12 +659,6 @@ class _VenueCard extends StatelessWidget {
     required this.isFavourite,
   });
 
-  static const _images = {
-    'salon1': 'images/salon1.png',
-    'salon2': 'images/salon2.png',
-    'salon3': 'images/salon3.png',
-  };
-
   double get _rating {
     const r = [5.0, 4.9, 4.8, 4.7, 4.6];
     return r[salon.id % r.length];
@@ -747,13 +693,11 @@ class _VenueCard extends StatelessWidget {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      _images.containsKey(salon.imageKey)
-                          ? Image.asset(
-                              _images[salon.imageKey]!,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => _placeholder(),
-                            )
-                          : _placeholder(),
+                      Image.asset(
+                        salonMainImage(salon),
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => _placeholder(),
+                      ),
                       Positioned(
                         top: 10,
                         right: 10,
