@@ -11,7 +11,6 @@ import 'salons_list_screen.dart';
 import 'salon_detail_screen.dart';
 import 'search_screen.dart';
 import 'all_categories_screen.dart';
-import 'location_picker_screen.dart';
 import 'notifications_screen.dart';
 import 'deals_screen.dart';
 
@@ -55,36 +54,9 @@ class HomeScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('Gözle', style: tt.headlineLarge),
-                            const SizedBox(height: 2),
-                            GestureDetector(
-                              onTap: () => Navigator.push(context, fadeSlideRoute(const LocationPickerScreen())),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: kSurfaceBg,
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(color: kBorder),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(Icons.location_on_rounded, size: 14, color: kTextSecondary),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      ref.watch(selectedLocationProvider),
-                                      style: tt.bodySmall?.copyWith(color: kTextSecondary, fontSize: 13),
-                                    ),
-                                    Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: kTextSecondary),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
+                        child: Text(
+                          'Siz üçin',
+                          style: tt.headlineLarge?.copyWith(fontSize: 26, letterSpacing: -0.6),
                         ),
                       ),
                       Stack(
@@ -139,79 +111,6 @@ class HomeScreen extends ConsumerWidget {
 
               // ── Soňky görülen salonlar ──
               _recentlyViewedRow(salons, ref, context, cardW),
-
-              // ── Top categories ──
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpace3xl, kSpaceXl, kSpaceMd),
-                  child: _sectionHeader(context, tt, 'Esasy kategoriýalar', toAllCategories: true),
-                ),
-              ),
-
-              // ── Category circles + sag tarap fade (scroll görkezijisi) ──
-              SliverToBoxAdapter(
-                child: SizedBox(
-                  height: 92,
-                  child: Stack(
-                    children: [
-                      ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        itemCount: _categories.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 20),
-                        itemBuilder: (_, i) {
-                          final cat = _categories[i];
-                          return _CategoryCircle(
-                            label: cat.label,
-                            icon: cat.icon,
-                            onTap: () {
-                              HapticFeedback.lightImpact();
-                              Navigator.push(
-                                context,
-                                fadeSlideRoute(SalonsListScreen(category: cat.key)),
-                              );
-                            },
-                          );
-                        },
-                      ),
-                      Positioned(
-                        top: 0,
-                        right: 0,
-                        bottom: 0,
-                        width: 24,
-                        child: IgnorePointer(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.centerLeft,
-                                end: Alignment.centerRight,
-                                colors: [kScaffoldBg.withValues(alpha: 0), kScaffoldBg],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        top: 0,
-                        left: 0,
-                        bottom: 0,
-                        width: 24,
-                        child: IgnorePointer(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.centerRight,
-                                end: Alignment.centerLeft,
-                                colors: [kScaffoldBg.withValues(alpha: 0), kScaffoldBg],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
 
               // ── Arzanladyşlar ──
               SliverToBoxAdapter(
@@ -332,6 +231,79 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ),
               _salonRow(salons, ref, context, cardW, false),
+
+              // ── Top categories ──
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 32, 20, 12),
+                  child: _sectionHeader(context, tt, 'Esasy kategoriýalar', toAllCategories: true),
+                ),
+              ),
+
+              // ── Category circles + sag tarap fade (scroll görkezijisi) ──
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 92,
+                  child: Stack(
+                    children: [
+                      ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        itemCount: _categories.length,
+                        separatorBuilder: (_, __) => const SizedBox(width: 20),
+                        itemBuilder: (_, i) {
+                          final cat = _categories[i];
+                          return _CategoryCircle(
+                            label: cat.label,
+                            icon: cat.icon,
+                            onTap: () {
+                              HapticFeedback.lightImpact();
+                              Navigator.push(
+                                context,
+                                fadeSlideRoute(SalonsListScreen(category: cat.key)),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        bottom: 0,
+                        width: 24,
+                        child: IgnorePointer(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight,
+                                colors: [Colors.white.withValues(alpha: 0), Colors.white],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        bottom: 0,
+                        width: 24,
+                        child: IgnorePointer(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.centerRight,
+                                end: Alignment.centerLeft,
+                                colors: [Colors.white.withValues(alpha: 0), Colors.white],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
 
               const SliverToBoxAdapter(child: SizedBox(height: 32)),
             ],

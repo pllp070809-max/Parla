@@ -8,6 +8,9 @@ final apiServiceProvider = Provider<ApiService>((ref) => ApiService());
 /// Bottom bar saýlanan tab (0 = Sahypa, 1 = Bronlarym, 2 = Profil).
 final selectedTabIndexProvider = StateProvider<int>((ref) => 0);
 
+/// Saýlanan ýerleşýän ýer (salon filtri üçin ulanylýar).
+final selectedLocationProvider = StateProvider<String>((ref) => 'Asgabat');
+
 /// Ulanyjynyň saklanan telefon nomeri.
 final userPhoneProvider = StateNotifierProvider<UserPhoneNotifier, String?>((ref) {
   return UserPhoneNotifier();
