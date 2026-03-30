@@ -197,7 +197,7 @@ class _BookingTile extends StatelessWidget {
       child: Card(
         margin: const EdgeInsets.only(bottom: kSpaceSm + 2),
         child: Padding(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.all(kSpaceLg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -206,12 +206,12 @@ class _BookingTile extends StatelessWidget {
                   Container(
                     width: 48, height: 48,
                     decoration: BoxDecoration(
-                      color: (isPast ? Colors.grey : kPrimary).withValues(alpha: 0.1),
+                      color: (isPast ? kTextTertiary : kPrimary).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(kRadiusMd),
                     ),
                     child: Icon(
                       isPast ? Icons.check_circle_outline : Icons.calendar_today,
-                      color: isPast ? Colors.grey : kPrimary,
+                      color: isPast ? kTextTertiary : kPrimary,
                     ),
                   ),
                   const SizedBox(width: 14),
@@ -232,12 +232,12 @@ class _BookingTile extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: kSpaceXs),
                     decoration: BoxDecoration(
-                      color: isPast ? Colors.grey.withValues(alpha: 0.15) : kPrimary.withValues(alpha: 0.1),
+                      color: isPast ? kTextTertiary.withValues(alpha: 0.15) : kPrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(kRadiusSm),
                     ),
                     child: Text(
                       isPast ? 'Tamamlandy' : (booking.status == 'cancelled' ? 'Ýatyryldy' : booking.status),
-                      style: tt.labelLarge?.copyWith(color: isPast ? Colors.grey : kPrimary, fontSize: 12),
+                      style: tt.labelLarge?.copyWith(color: isPast ? kTextTertiary : kPrimary, fontSize: 12),
                     ),
                   ),
                 ],
@@ -270,7 +270,7 @@ class _BookingTileSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(kSpaceLg),
         child: Row(
           children: const [
             SkeletonBox(width: 48, height: 48, radius: kRadiusMd),

@@ -48,7 +48,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+              padding: const EdgeInsets.fromLTRB(kSpaceLg, kSpaceMd, kSpaceLg, kSpaceMd),
               child: Row(
                 children: [
                   IconButton(
@@ -76,12 +76,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                               )
                             : null,
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(kRadiusMd),
                           borderSide: BorderSide.none,
                         ),
                         filled: true,
-                        fillColor: const Color(0xFFF5F5F5),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        fillColor: kSurfaceBg,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: kSpaceLg, vertical: kSpaceMd),
                       ),
                     ),
                   ),
@@ -100,7 +100,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   Widget _buildSuggestions(TextTheme tt) {
     final recent = ref.watch(recentSearchQueriesProvider);
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: kSpaceXl),
       children: [
         const SizedBox(height: 8),
         if (recent.isNotEmpty) ...[
@@ -138,7 +138,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           );
         }
         return ListView.separated(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: kSpaceXl, vertical: kSpaceSm),
           itemCount: salons.length,
           separatorBuilder: (_, __) => const Divider(height: 1),
           itemBuilder: (_, i) {
@@ -189,12 +189,12 @@ class _SuggestionChip extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(kRadiusMd),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: kSpaceLg, vertical: kSpaceMd),
           decoration: BoxDecoration(
-            color: const Color(0xFFF5F5F5),
-            borderRadius: BorderRadius.circular(12),
+            color: kSurfaceBg,
+            borderRadius: BorderRadius.circular(kRadiusMd),
           ),
           child: Row(
             children: [

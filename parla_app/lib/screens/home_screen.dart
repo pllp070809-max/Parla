@@ -50,7 +50,7 @@ class HomeScreen extends ConsumerWidget {
               // ── Fresha header: Gözle (uly) + location chip + bell + avatar ──
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 16, 0),
+                  padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpaceXl, kSpaceLg, 0),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -59,10 +59,7 @@ class HomeScreen extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(
-                              'Gözle',
-                              style: tt.headlineLarge?.copyWith(fontSize: 26, letterSpacing: -0.6),
-                            ),
+                            Text('Gözle', style: tt.headlineLarge),
                             const SizedBox(height: 2),
                             GestureDetector(
                               onTap: () => Navigator.push(context, fadeSlideRoute(const LocationPickerScreen())),
@@ -108,7 +105,7 @@ class HomeScreen extends ConsumerWidget {
                                 decoration: const BoxDecoration(
                                   color: kError,
                                   shape: BoxShape.circle,
-                                  border: Border.fromBorderSide(BorderSide(color: Colors.white, width: 1)),
+                                  border: Border.fromBorderSide(BorderSide(color: kCardBg, width: 1)),
                                 ),
                               ),
                             ),
@@ -123,7 +120,7 @@ class HomeScreen extends ConsumerWidget {
                           width: 36,
                           height: 36,
                           decoration: BoxDecoration(
-                            color: kPrimary.withValues(alpha: 0.15),
+                            color: kSurfaceBg,
                             shape: BoxShape.circle,
                             border: Border.all(color: kBorder),
                           ),
@@ -146,7 +143,7 @@ class HomeScreen extends ConsumerWidget {
               // ── Top categories ──
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 32, 20, 12),
+                  padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpace3xl, kSpaceXl, kSpaceMd),
                   child: _sectionHeader(context, tt, 'Esasy kategoriýalar', toAllCategories: true),
                 ),
               ),
@@ -188,7 +185,7 @@ class HomeScreen extends ConsumerWidget {
                               gradient: LinearGradient(
                                 begin: Alignment.centerLeft,
                                 end: Alignment.centerRight,
-                                colors: [Colors.white.withValues(alpha: 0), Colors.white],
+                                colors: [kScaffoldBg.withValues(alpha: 0), kScaffoldBg],
                               ),
                             ),
                           ),
@@ -205,7 +202,7 @@ class HomeScreen extends ConsumerWidget {
                               gradient: LinearGradient(
                                 begin: Alignment.centerRight,
                                 end: Alignment.centerLeft,
-                                colors: [Colors.white.withValues(alpha: 0), Colors.white],
+                                colors: [kScaffoldBg.withValues(alpha: 0), kScaffoldBg],
                               ),
                             ),
                           ),
@@ -219,7 +216,7 @@ class HomeScreen extends ConsumerWidget {
               // ── Arzanladyşlar ──
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 32, 20, 12),
+                  padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpace3xl, kSpaceXl, kSpaceMd),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -273,7 +270,7 @@ class HomeScreen extends ConsumerWidget {
               // ── Maslahat berilýän ──
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 32, 20, 12),
+                  padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpace3xl, kSpaceXl, kSpaceMd),
                   child: Semantics(
                     label: 'Maslahat berilýän salonlar',
                     child: Column(
@@ -295,7 +292,7 @@ class HomeScreen extends ConsumerWidget {
               // ── Meşhur ──
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 32, 20, 12),
+                  padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpace3xl, kSpaceXl, kSpaceMd),
                   child: Semantics(
                     label: 'Meşhur salonlar',
                     child: Column(
@@ -317,7 +314,7 @@ class HomeScreen extends ConsumerWidget {
               // ── Täze Parla-da ──
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 32, 20, 12),
+                  padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpace3xl, kSpaceXl, kSpaceMd),
                   child: Semantics(
                     label: 'Täze Parla-da goşulan salonlar',
                     child: Column(
@@ -362,7 +359,7 @@ class HomeScreen extends ConsumerWidget {
         final dateStr = DateFormat('dd MMM, HH:mm').format(b.slotAt);
         return SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+            padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpace2xl, kSpaceXl, 0),
             child: Material(
               color: kPrimary.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(kRadiusLg),
@@ -423,10 +420,10 @@ class HomeScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 28, 20, 12),
+                padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpace2xl + 4, kSpaceXl, kSpaceMd),
                 child: Text(
                   'Soňky görülen salonlar',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 20, fontWeight: FontWeight.w700, color: kTextPrimary),
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700, color: kTextPrimary),
                 ),
               ),
               SizedBox(
@@ -463,7 +460,7 @@ class HomeScreen extends ConsumerWidget {
       children: [
         Text(
           title,
-          style: tt.titleLarge?.copyWith(fontSize: 20, fontWeight: FontWeight.w700, color: kTextPrimary),
+          style: tt.titleLarge?.copyWith(fontWeight: FontWeight.w700, color: kTextPrimary),
         ),
         GestureDetector(
           onTap: () {
@@ -477,11 +474,7 @@ class HomeScreen extends ConsumerWidget {
           },
           child: Text(
             'Hemmesini gör',
-            style: tt.bodyMedium?.copyWith(
-              color: kPrimary,
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
-            ),
+            style: tt.labelMedium?.copyWith(color: kPrimary, fontWeight: FontWeight.w600),
           ),
         ),
       ],
@@ -607,7 +600,7 @@ class _CategoryCircle extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Material(
-              color: Colors.white,
+              color: kCardBg,
               shape: const CircleBorder(),
               clipBehavior: Clip.antiAlias,
               child: InkWell(
@@ -618,7 +611,7 @@ class _CategoryCircle extends StatelessWidget {
                   height: 60,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: const Color(0xFFEEEEEE), width: 1),
+                    border: Border.all(color: kBorder, width: 1),
                     boxShadow: kShadowSm,
                   ),
                   child: Icon(icon, color: kPrimary, size: 26),
@@ -628,12 +621,10 @@ class _CategoryCircle extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               label,
-              style: const TextStyle(
-                color: kTextPrimary,
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-                height: 1.2,
-              ),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: kTextPrimary,
+                    fontWeight: FontWeight.w500,
+                  ),
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -681,12 +672,12 @@ class _VenueCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(kRadiusLg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(kRadiusLg),
                 child: SizedBox(
                   width: double.infinity,
                   height: 160,
@@ -711,7 +702,7 @@ class _VenueCard extends StatelessWidget {
                               width: 32,
                               height: 32,
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: kCardBg,
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
@@ -724,7 +715,7 @@ class _VenueCard extends StatelessWidget {
                               child: Icon(
                                 isFavourite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
                                 size: 18,
-                                color: isFavourite ? Colors.red : kTextPrimary,
+                                color: isFavourite ? kError : kTextPrimary,
                               ),
                             ),
                           ),
@@ -789,12 +780,12 @@ class _VenueCard extends StatelessWidget {
                     HapticFeedback.lightImpact();
                     onTap();
                   },
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(kRadiusSm),
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
                       color: kPrimary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(kRadiusSm),
                       border: Border.all(color: kPrimary.withValues(alpha: 0.3)),
                     ),
                     child: Text(
@@ -883,7 +874,7 @@ class _DealPreviewCard extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(kRadiusLg),
         child: Stack(
           clipBehavior: Clip.none,
           children: [
@@ -896,7 +887,7 @@ class _DealPreviewCard extends StatelessWidget {
                   end: Alignment.centerRight,
                   colors: _gradientColors(),
                 ),
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(kRadiusLg),
                 boxShadow: kShadowSm,
               ),
               child: Row(

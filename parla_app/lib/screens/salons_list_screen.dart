@@ -138,7 +138,7 @@ class _SalonTile extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.all(kSpaceLg),
           child: Row(
             children: [
               Container(
@@ -149,7 +149,7 @@ class _SalonTile extends StatelessWidget {
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: Image.asset(salonMainImage(salon), fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const Icon(Icons.storefront, color: kPrimary, size: 32)),
+                    errorBuilder: (_, __, ___) => const Icon(Icons.storefront_rounded, color: kPrimary, size: 32)),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -165,11 +165,11 @@ class _SalonTile extends StatelessWidget {
                 ),
               ),
               IconButton(
-                icon: Icon(isFavourite ? Icons.favorite : Icons.favorite_border, color: isFavourite ? Colors.red : kTextSecondary),
+                icon: Icon(isFavourite ? Icons.favorite_rounded : Icons.favorite_border_rounded, color: isFavourite ? kError : kTextSecondary),
                 onPressed: onFavouriteToggle,
                 tooltip: isFavourite ? 'Saýlananlardan aýyr' : 'Saýlananlara goş',
               ),
-              const Icon(Icons.chevron_right, color: kTextSecondary),
+              const Icon(Icons.chevron_right_rounded, color: kTextTertiary),
             ],
           ),
         ),

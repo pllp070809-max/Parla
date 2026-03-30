@@ -23,16 +23,10 @@ class BottomNavShell extends ConsumerWidget {
     return Scaffold(
       body: IndexedStack(index: index, children: _screens),
       bottomNavigationBar: Container(
-        height: 56,
+        height: 60,
         decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
-            ),
-          ],
+          color: kCardBg,
+          border: const Border(top: BorderSide(color: kBorder, width: 1)),
         ),
         child: SafeArea(
           top: false,
@@ -85,6 +79,7 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
     final color = isSelected ? kPrimary : kTextTertiary;
     return InkWell(
       onTap: onTap,
@@ -99,8 +94,7 @@ class _NavItem extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               label,
-              style: TextStyle(
-                fontSize: 11,
+              style: tt.labelSmall?.copyWith(
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                 color: color,
               ),

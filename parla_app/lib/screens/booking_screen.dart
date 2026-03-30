@@ -224,7 +224,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
             DecoratedBox(
               decoration: BoxDecoration(color: kCardBg, boxShadow: kShadowDownSm),
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(4, 6, 4, 10),
+                padding: const EdgeInsets.fromLTRB(kSpaceXs, kSpaceSm - 2, kSpaceXs, kSpaceMd - 2),
                 child: Column(
                   children: [
                     Row(
@@ -237,7 +237,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(widget.salonName, style: tt.bodySmall?.copyWith(color: kTextSecondary, fontSize: 12)),
+                              Text(widget.salonName, style: tt.bodySmall?.copyWith(color: kTextSecondary)),
                               Text(_stepTitles[_step], style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
                             ],
                           ),
@@ -245,7 +245,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(color: kPrimary, borderRadius: BorderRadius.circular(kRadiusPill)),
-                          child: Text('Ädim ${_step + 1} / $_kTotalSteps', style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700)),
+                          child: Text('Ädim ${_step + 1} / $_kTotalSteps', style: tt.labelSmall?.copyWith(color: kCardBg, fontWeight: FontWeight.w700)),
                         ),
                         const SizedBox(width: 6),
                         _BookingIconBtn(icon: Icons.close_rounded, onTap: () => Navigator.pop(context)),

@@ -220,7 +220,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           const SizedBox(height: kSpaceXs),
           Text(
             _fullPhone().isNotEmpty ? _formatPhone(_phoneCtrl.text) : 'Telefon goşulmadyk',
-            style: tt.bodyMedium?.copyWith(fontSize: 15),
+            style: tt.bodyMedium,
             textAlign: TextAlign.center,
           ),
           if (_gender != null) ...[
@@ -347,7 +347,7 @@ class _ProfileInfoCard extends StatelessWidget {
         color: kCardBg,
         borderRadius: BorderRadius.circular(kRadiusLg),
         boxShadow: kShadowSm,
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3)),
+        border: Border.all(color: kBorder),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(mainAxisSize: MainAxisSize.min, children: children),

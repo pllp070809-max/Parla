@@ -48,7 +48,7 @@ class SalonCardSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(color: kCardBg, borderRadius: BorderRadius.circular(kRadiusLg), boxShadow: kShadowMd),
+      decoration: BoxDecoration(color: kCardBg, borderRadius: BorderRadius.circular(kRadiusLg), boxShadow: kShadowSm, border: Border.all(color: kBorder)),
       clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,7 +80,7 @@ class SalonTileSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(kSpaceLg),
         child: Row(
           children: const [
             SkeletonBox(width: 64, height: 64, radius: kRadiusMd),
