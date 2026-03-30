@@ -46,7 +46,7 @@ class HomeScreen extends ConsumerWidget {
           onRefresh: () async => ref.invalidate(_featuredProvider),
           child: CustomScrollView(
             slivers: [
-              // ── Fresha header: Gözle (uly) + location chip + bell + avatar ──
+              // ── Baş sahypa header: Siz üçin + bildirişler + avatar ──
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpaceXl, kSpaceLg, 0),
@@ -131,35 +131,44 @@ class HomeScreen extends ConsumerWidget {
               ),
               SliverToBoxAdapter(
                 child: SizedBox(
-                  height: 104,
+                  height: 92,
                   child: ListView(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.only(left: 20, right: 20),
                     children: [
                       Padding(
                         padding: const EdgeInsets.only(right: 12),
-                        child: _DealPreviewCard(
-                          title: 'Ilkinji zyýaretde 20%',
-                          onTap: () => Navigator.push(context, fadeSlideRoute(const DealsScreen())),
-                          showBadge: true,
-                          badgeText: '2 gün',
-                          gradientIndex: 0,
+                        child: Align(
+                          alignment: Alignment.topCenter,
+                          child: _DealPreviewCard(
+                            title: 'Ilkinji zyýaretde 20%',
+                            onTap: () => Navigator.push(context, fadeSlideRoute(const DealsScreen())),
+                            showBadge: true,
+                            badgeText: '2 gün',
+                            gradientIndex: 0,
+                          ),
                         ),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(right: 12),
-                        child: _DealPreviewCard(
-                          title: 'Massage paketi 15%',
-                          onTap: () => Navigator.push(context, fadeSlideRoute(const DealsScreen())),
-                          showBadge: false,
-                          gradientIndex: 1,
+                        child: Align(
+                          alignment: Alignment.topCenter,
+                          child: _DealPreviewCard(
+                            title: 'Massage paketi 15%',
+                            onTap: () => Navigator.push(context, fadeSlideRoute(const DealsScreen())),
+                            showBadge: false,
+                            gradientIndex: 1,
+                          ),
                         ),
                       ),
-                      _DealPreviewCard(
-                        title: 'Dyrnak + kirpik 10%',
-                        onTap: () => Navigator.push(context, fadeSlideRoute(const DealsScreen())),
-                        showBadge: false,
-                        gradientIndex: 2,
+                      Align(
+                        alignment: Alignment.topCenter,
+                        child: _DealPreviewCard(
+                          title: 'Dyrnak + kirpik 10%',
+                          onTap: () => Navigator.push(context, fadeSlideRoute(const DealsScreen())),
+                          showBadge: false,
+                          gradientIndex: 2,
+                        ),
                       ),
                     ],
                   ),
@@ -243,7 +252,7 @@ class HomeScreen extends ConsumerWidget {
               // ── Category circles + sag tarap fade (scroll görkezijisi) ──
               SliverToBoxAdapter(
                 child: SizedBox(
-                  height: 92,
+                  height: 104,
                   child: Stack(
                     children: [
                       ListView.separated(
@@ -407,14 +416,17 @@ class HomeScreen extends ConsumerWidget {
                   separatorBuilder: (_, __) => const SizedBox(width: 12),
                   itemBuilder: (_, i) => SizedBox(
                     width: cardW,
-                    child: _VenueCard(
-                      salon: list[i],
-                      onTap: () => Navigator.push(context, fadeSlideRoute(SalonDetailScreen(salonId: list[i].id))),
-                      onFavouriteTap: () {
-                        HapticFeedback.lightImpact();
-                        ref.read(favouriteSalonsProvider.notifier).toggle(list[i].id);
-                      },
-                      isFavourite: ref.watch(favouriteSalonsProvider).contains(list[i].id),
+                    child: Align(
+                      alignment: Alignment.topLeft,
+                      child: _VenueCard(
+                        salon: list[i],
+                        onTap: () => Navigator.push(context, fadeSlideRoute(SalonDetailScreen(salonId: list[i].id))),
+                        onFavouriteTap: () {
+                          HapticFeedback.lightImpact();
+                          ref.read(favouriteSalonsProvider.notifier).toggle(list[i].id);
+                        },
+                        isFavourite: ref.watch(favouriteSalonsProvider).contains(list[i].id),
+                      ),
                     ),
                   ),
                 ),
@@ -445,7 +457,7 @@ class HomeScreen extends ConsumerWidget {
             }
           },
           child: Text(
-            'Hemmesini gör',
+            'Ählisi',
             style: tt.labelMedium?.copyWith(color: kPrimary, fontWeight: FontWeight.w600),
           ),
         ),
@@ -523,17 +535,20 @@ class HomeScreen extends ConsumerWidget {
               separatorBuilder: (_, __) => const SizedBox(width: 12),
               itemBuilder: (_, i) => SizedBox(
                 width: cardW,
-                child: _VenueCard(
-                  salon: list[i],
-                  onTap: () => Navigator.push(
-                    context,
-                    fadeSlideRoute(SalonDetailScreen(salonId: list[i].id)),
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: _VenueCard(
+                    salon: list[i],
+                    onTap: () => Navigator.push(
+                      context,
+                      fadeSlideRoute(SalonDetailScreen(salonId: list[i].id)),
+                    ),
+                    onFavouriteTap: () {
+                      HapticFeedback.lightImpact();
+                      ref.read(favouriteSalonsProvider.notifier).toggle(list[i].id);
+                    },
+                    isFavourite: ref.watch(favouriteSalonsProvider).contains(list[i].id),
                   ),
-                  onFavouriteTap: () {
-                    HapticFeedback.lightImpact();
-                    ref.read(favouriteSalonsProvider.notifier).toggle(list[i].id);
-                  },
-                  isFavourite: ref.watch(favouriteSalonsProvider).contains(list[i].id),
                 ),
               ),
             ),
@@ -567,7 +582,7 @@ class _CategoryCircle extends StatelessWidget {
       label: label,
       button: true,
       child: SizedBox(
-        width: 64,
+        width: 78,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -582,9 +597,10 @@ class _CategoryCircle extends StatelessWidget {
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
+                    color: kPrimarySoft,
                     shape: BoxShape.circle,
-                    border: Border.all(color: kBorder, width: 1),
-                    boxShadow: kShadowSm,
+                    border: Border.all(color: kStickerOutline, width: 1.5),
+                    boxShadow: kStickerShadow,
                   ),
                   child: Icon(icon, color: kPrimary, size: 26),
                 ),
@@ -598,7 +614,8 @@ class _CategoryCircle extends StatelessWidget {
                     fontWeight: FontWeight.w500,
                   ),
               textAlign: TextAlign.center,
-              maxLines: 2,
+              maxLines: 1,
+              softWrap: false,
               overflow: TextOverflow.ellipsis,
             ),
           ],
@@ -637,20 +654,24 @@ class _VenueCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
-    return Semantics(
-      label: '${salon.name}, reýting $_rating, $_reviews syn, takmynan $_distanceKm. Bron etmek üçin basyň.',
-      button: true,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(kRadiusLg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(kRadiusLg),
-                child: SizedBox(
+    return Container(
+      decoration: kStickerCardDecoration(),
+      clipBehavior: Clip.antiAlias,
+      child: Semantics(
+        label: '${salon.name}, reýting $_rating, $_reviews syn, takmynan $_distanceKm. Bron etmek üçin basyň.',
+        button: true,
+        child: Material(
+          color: Colors.transparent,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kRadiusLg)),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(kRadiusLg),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
                   width: double.infinity,
                   height: 160,
                   child: Stack(
@@ -696,82 +717,60 @@ class _VenueCard extends StatelessWidget {
                     ],
                   ),
                 ),
-              ),
-              const SizedBox(height: 10),
-
-              Text(
-                salon.name,
-                style: tt.titleSmall?.copyWith(fontSize: 15, fontWeight: FontWeight.w600, color: kTextPrimary),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 4),
-
-              Tooltip(
-                message: 'Reýting we uzaklyk nümunä maglumat',
-                child: Row(
-                  children: [
-                    const Icon(Icons.star_rounded, size: 15, color: kStar),
-                    const SizedBox(width: 4),
-                    Text(
-                      _rating.toStringAsFixed(1),
-                      style: tt.bodySmall?.copyWith(color: kTextPrimary, fontWeight: FontWeight.w600, fontSize: 13),
-                    ),
-                    Text(
-                      ' ($_reviews)',
-                      style: tt.bodySmall?.copyWith(fontSize: 13, color: kTextSecondary),
-                    ),
-                    Text(
-                      ' • ~$_distanceKm',
-                      style: tt.bodySmall?.copyWith(fontSize: 13, color: kTextSecondary),
-                    ),
-                  ],
-                ),
-              ),
-              if (salon.address != null) ...[
-                const SizedBox(height: 2),
-                Text(
-                  salon.address!,
-                  style: tt.bodySmall?.copyWith(fontSize: 13, color: kTextSecondary),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-              if (salon.category != null) ...[
-                const SizedBox(height: 1),
-                Text(
-                  _catLabel(salon.category!),
-                  style: tt.bodySmall?.copyWith(fontSize: 12, color: kTextTertiary),
-                ),
-              ],
-              const SizedBox(height: 8),
-              Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    onTap();
-                  },
-                  borderRadius: BorderRadius.circular(kRadiusSm),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: kPrimary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(kRadiusSm),
-                      border: Border.all(color: kPrimary.withValues(alpha: 0.3)),
-                    ),
-                    child: Text(
-                      'Bron et',
-                      style: tt.labelMedium?.copyWith(
-                        color: kPrimary,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 12,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(kSpaceLg, 10, kSpaceLg, kSpaceMd),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        salon.name,
+                        style: tt.titleSmall?.copyWith(fontSize: 15, fontWeight: FontWeight.w600, color: kTextPrimary),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
+                      const SizedBox(height: 4),
+                      Tooltip(
+                        message: 'Reýting we uzaklyk nümunä maglumat',
+                        child: Row(
+                          children: [
+                            const Icon(Icons.star_rounded, size: 15, color: kStar),
+                            const SizedBox(width: 4),
+                            Text(
+                              _rating.toStringAsFixed(1),
+                              style: tt.bodySmall?.copyWith(color: kTextPrimary, fontWeight: FontWeight.w600, fontSize: 13),
+                            ),
+                            Text(
+                              ' ($_reviews)',
+                              style: tt.bodySmall?.copyWith(fontSize: 13, color: kTextSecondary),
+                            ),
+                            Text(
+                              ' • ~$_distanceKm',
+                              style: tt.bodySmall?.copyWith(fontSize: 13, color: kTextSecondary),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (salon.address != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          salon.address!,
+                          style: tt.bodySmall?.copyWith(fontSize: 13, color: kTextSecondary),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                      if (salon.category != null) ...[
+                        const SizedBox(height: 1),
+                        Text(
+                          _catLabel(salon.category!),
+                          style: tt.bodySmall?.copyWith(fontSize: 12, color: kTextTertiary),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -860,7 +859,8 @@ class _DealPreviewCard extends StatelessWidget {
                   colors: _gradientColors(),
                 ),
                 borderRadius: BorderRadius.circular(kRadiusLg),
-                boxShadow: kShadowSm,
+                border: Border.all(color: kStickerOutline),
+                boxShadow: kStickerShadow,
               ),
               child: Row(
                 children: [

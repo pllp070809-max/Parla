@@ -48,7 +48,7 @@ class SalonCardSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(color: kCardBg, borderRadius: BorderRadius.circular(kRadiusLg), boxShadow: kShadowSm, border: Border.all(color: kBorder)),
+      decoration: kStickerCardDecoration(),
       clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

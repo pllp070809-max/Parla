@@ -89,6 +89,31 @@ List<BoxShadow> kShadowLg = [
   ),
 ];
 
+// ── Stiker-stil tokens ──
+// Subtle cyan-tinted border for sticker cards (matches kPrimary family)
+const Color kStickerOutline = Color(0xFFD9F2F5);
+
+// Two-layer shadow: faint cyan tint + soft black — gives depth without heaviness
+List<BoxShadow> kStickerShadow = [
+  BoxShadow(
+    color: Color(0x1000ACC1), // kPrimary ~6%
+    blurRadius: 16,
+    offset: Offset(0, 5),
+  ),
+  BoxShadow(
+    color: Color(0x08000000), // black ~3%
+    blurRadius: 6,
+    offset: Offset(0, 1),
+  ),
+];
+
+BoxDecoration kStickerCardDecoration({double radius = kRadiusLg}) => BoxDecoration(
+      color: kCardBg,
+      borderRadius: BorderRadius.circular(radius),
+      border: Border.all(color: kStickerOutline),
+      boxShadow: kStickerShadow,
+    );
+
 // ── Page transition ──
 Route<T> fadeSlideRoute<T>(Widget page) {
   return PageRouteBuilder<T>(

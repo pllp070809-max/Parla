@@ -707,7 +707,7 @@ class _ServicesSectionState extends State<_ServicesSection> {
               child: OutlinedButton(
                 onPressed: () {},
                 style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: kBorder, width: 1),
+                  side: const BorderSide(color: kStickerOutline, width: 1.5),
                   foregroundColor: kTextPrimary,
                   backgroundColor: kCardBg,
                   shape: const StadiumBorder(),
@@ -794,7 +794,7 @@ class _ServiceRow extends StatelessWidget {
           OutlinedButton(
             onPressed: onBook,
             style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: kBorder),
+              side: const BorderSide(color: kStickerOutline, width: 1.5),
               foregroundColor: kTextPrimary,
               backgroundColor: kCardBg,
               shape: const StadiumBorder(),
@@ -845,7 +845,7 @@ class _TeamSection extends StatelessWidget {
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
               child: Text(
-                'Ählisini gör',
+                'Ählisi',
                 style: tt.labelMedium
                     ?.copyWith(color: kPrimary, fontWeight: FontWeight.w600),
               ),
@@ -873,7 +873,7 @@ class _TeamSection extends StatelessWidget {
                       height: 96,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(color: kBorder, width: 1),
+                        border: Border.all(color: kStickerOutline, width: 1.5),
                       ),
                       clipBehavior: Clip.antiAlias,
                       child: Image.asset(
@@ -955,9 +955,9 @@ class _PortfolioSection extends StatelessWidget {
               padding:
                   const EdgeInsets.symmetric(horizontal: kSpaceSm + 2, vertical: 6),
               decoration: BoxDecoration(
-                color: const Color(0xFFF2F2F5),
+                color: kPrimarySoft,
                 borderRadius: BorderRadius.circular(kRadiusPill),
-                border: Border.all(color: kBorder),
+                border: Border.all(color: kStickerOutline),
               ),
               alignment: Alignment.center,
               child: Text(
@@ -1057,8 +1057,8 @@ class _AboutSectionState extends State<_AboutSection> {
           decoration: BoxDecoration(
             color: kCardBg,
             borderRadius: BorderRadius.circular(kRadiusLg),
-            border: Border.all(color: kBorder),
-            boxShadow: kShadowSm,
+            border: Border.all(color: kStickerOutline),
+            boxShadow: kStickerShadow,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1088,8 +1088,8 @@ class _AboutSectionState extends State<_AboutSection> {
           decoration: BoxDecoration(
             color: kCardBg,
             borderRadius: BorderRadius.circular(kRadiusLg),
-            border: Border.all(color: kBorder),
-            boxShadow: kShadowSm,
+            border: Border.all(color: kStickerOutline),
+            boxShadow: kStickerShadow,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1138,8 +1138,8 @@ class _AboutSectionState extends State<_AboutSection> {
           decoration: BoxDecoration(
             color: kCardBg,
             borderRadius: BorderRadius.circular(kRadiusLg),
-            border: Border.all(color: kBorder),
-            boxShadow: kShadowSm,
+            border: Border.all(color: kStickerOutline),
+            boxShadow: kStickerShadow,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1213,8 +1213,8 @@ class _NearbySalonsSection extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: kCardBg,
                   borderRadius: BorderRadius.circular(kRadiusLg),
-                  border: Border.all(color: kBorder),
-                  boxShadow: kShadowSm,
+                  border: Border.all(color: kStickerOutline),
+                  boxShadow: kStickerShadow,
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: Column(
@@ -1441,8 +1441,8 @@ class _SalonMapSectionState extends State<_SalonMapSection> {
         Container(
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(kRadiusLg),
-              boxShadow: kShadowSm,
-              border: Border.all(color: kBorder)),
+              boxShadow: kStickerShadow,
+              border: Border.all(color: kStickerOutline)),
           clipBehavior: Clip.antiAlias,
           child: Column(children: [
             SizedBox(
