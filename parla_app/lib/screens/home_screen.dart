@@ -4,6 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../providers/providers.dart';
 import '../models/salon.dart';
+import '../app_radius.dart';
+import '../app_sizes.dart';
+import '../app_spacing.dart';
+import '../app_text_styles.dart';
 import '../theme.dart';
 import '../utils/salon_images.dart';
 import '../widgets/shared_widgets.dart';
@@ -34,7 +38,6 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final salons = ref.watch(_featuredProvider);
-    final tt = Theme.of(context).textTheme;
     final screenW = MediaQuery.of(context).size.width;
     final cardW = (screenW * 0.72).clamp(240.0, 320.0);
 
@@ -46,68 +49,76 @@ class HomeScreen extends ConsumerWidget {
           onRefresh: () async => ref.invalidate(_featuredProvider),
           child: CustomScrollView(
             slivers: [
-              // ── Baş sahypa header: Siz üçin + bildirişler + avatar ──
+              // ── Baş sahypa header: Siz üçin + bildirişler + gözleg ──
               SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpaceXl, kSpaceLg, 0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Siz üçin',
-                          style: tt.headlineLarge?.copyWith(fontSize: 26, letterSpacing: -0.6),
-                        ),
-                      ),
-                      Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.notifications_outlined, size: 24),
-                            onPressed: () => Navigator.push(context, fadeSlideRoute(const NotificationsScreen())),
-                            style: IconButton.styleFrom(foregroundColor: kTextPrimary),
-                          ),
-                          if (ref.watch(hasUnreadNotificationsProvider))
-                            Positioned(
-                              top: 8,
-                              right: 8,
+                child: SizedBox(
+                  height: AppSizes.headerHeight,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingHorizontal),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Siz üçin',
+                                style: AppTextStyles.headerTitle,
+                              ),
+                            ),
+                            Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.notifications_outlined, size: 24),
+                                  onPressed: () => Navigator.push(context, fadeSlideRoute(const NotificationsScreen())),
+                                  style: IconButton.styleFrom(foregroundColor: kTextPrimary),
+                                ),
+                                if (ref.watch(hasUnreadNotificationsProvider))
+                                  Positioned(
+                                    top: 8,
+                                    right: 8,
+                                    child: Container(
+                                      width: 8,
+                                      height: 8,
+                                      decoration: const BoxDecoration(
+                                        color: kError,
+                                        shape: BoxShape.circle,
+                                        border: Border.fromBorderSide(BorderSide(color: kCardBg, width: 1)),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                HapticFeedback.lightImpact();
+                                Navigator.push(context, fadeSlideRoute(const SearchScreen()));
+                              },
                               child: Container(
-                                width: 8,
-                                height: 8,
-                                decoration: const BoxDecoration(
-                                  color: kError,
+                                width: 36,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  color: kSurfaceBg,
                                   shape: BoxShape.circle,
-                                  border: Border.fromBorderSide(BorderSide(color: kCardBg, width: 1)),
+                                  border: Border.all(color: kBorder),
+                                ),
+                                child: const Center(
+                                  child: Icon(Icons.search_rounded, size: 20, color: kPrimary),
                                 ),
                               ),
                             ),
-                        ],
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          HapticFeedback.lightImpact();
-                          Navigator.push(context, fadeSlideRoute(const SearchScreen()));
-                        },
-                        child: Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            color: kSurfaceBg,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: kBorder),
-                          ),
-                          child: const Center(
-                            child: Icon(Icons.search_rounded, size: 20, color: kPrimary),
-                          ),
+                          ],
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
 
               // ── Siziň geljekki bronyňyz ──
-              _upcomingBookingStrip(ref, context, tt),
+              _upcomingBookingStrip(ref, context),
 
               // ── Soňky görülen salonlar ──
               _recentlyViewedRow(salons, ref, context, cardW),
@@ -115,24 +126,29 @@ class HomeScreen extends ConsumerWidget {
               // ── Arzanladyşlar ──
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpace3xl, kSpaceXl, kSpaceMd),
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSizes.paddingHorizontal,
+                    AppSizes.sectionSpacing,
+                    AppSizes.paddingHorizontal,
+                    AppSizes.elementSpacing,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _sectionHeader(context, tt, 'Arzanladyşlar', toDeals: true),
+                      _sectionHeader(context, 'Arzanladyşlar', toDeals: true),
                     ],
                   ),
                 ),
               ),
               SliverToBoxAdapter(
                 child: SizedBox(
-                  height: 92,
+                  height: AppSizes.exploreCardHeight,
                   child: ListView(
                     scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.only(left: 20, right: 20),
+                    padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingHorizontal),
                     children: [
                       Padding(
-                        padding: const EdgeInsets.only(right: 12),
+                        padding: const EdgeInsets.only(right: AppSizes.elementSpacing),
                         child: Align(
                           alignment: Alignment.topCenter,
                           child: _DealPreviewCard(
@@ -145,7 +161,7 @@ class HomeScreen extends ConsumerWidget {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(right: 12),
+                        padding: const EdgeInsets.only(right: AppSizes.elementSpacing),
                         child: Align(
                           alignment: Alignment.topCenter,
                           child: _DealPreviewCard(
@@ -173,13 +189,18 @@ class HomeScreen extends ConsumerWidget {
               // ── Maslahat berilýän ──
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpace3xl, kSpaceXl, kSpaceMd),
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSizes.paddingHorizontal,
+                    AppSizes.sectionSpacing,
+                    AppSizes.paddingHorizontal,
+                    AppSizes.elementSpacing,
+                  ),
                   child: Semantics(
                     label: 'Maslahat berilýän salonlar',
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _sectionHeader(context, tt, 'Maslahat berilýän'),
+                        _sectionHeader(context, 'Maslahat berilýän'),
                       ],
                     ),
                   ),
@@ -190,13 +211,18 @@ class HomeScreen extends ConsumerWidget {
               // ── Meşhur ──
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpace3xl, kSpaceXl, kSpaceMd),
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSizes.paddingHorizontal,
+                    AppSizes.sectionSpacing,
+                    AppSizes.paddingHorizontal,
+                    AppSizes.elementSpacing,
+                  ),
                   child: Semantics(
                     label: 'Meşhur salonlar',
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _sectionHeader(context, tt, 'Meşhur'),
+                        _sectionHeader(context, 'Meşhur'),
                       ],
                     ),
                   ),
@@ -207,13 +233,18 @@ class HomeScreen extends ConsumerWidget {
               // ── Täze Parla-da ──
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpace3xl, kSpaceXl, kSpaceMd),
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSizes.paddingHorizontal,
+                    AppSizes.sectionSpacing,
+                    AppSizes.paddingHorizontal,
+                    AppSizes.elementSpacing,
+                  ),
                   child: Semantics(
                     label: 'Täze Parla-da goşulan salonlar',
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _sectionHeader(context, tt, 'Täze Parla-da'),
+                        _sectionHeader(context, 'Täze Parla-da'),
                       ],
                     ),
                   ),
@@ -224,22 +255,27 @@ class HomeScreen extends ConsumerWidget {
               // ── Top categories ──
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 32, 20, 12),
-                  child: _sectionHeader(context, tt, 'Esasy kategoriýalar', toAllCategories: true),
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSizes.paddingHorizontal,
+                    AppSizes.sectionSpacing,
+                    AppSizes.paddingHorizontal,
+                    AppSizes.elementSpacing,
+                  ),
+                  child: _sectionHeader(context, 'Esasy kategoriýalar', toAllCategories: true),
                 ),
               ),
 
               // ── Category circles + sag tarap fade (scroll görkezijisi) ──
               SliverToBoxAdapter(
                 child: SizedBox(
-                  height: 104,
+                  height: AppSizes.categorySize + AppSizes.smallSpacing + 36,
                   child: Stack(
                     children: [
                       ListView.separated(
                         scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingHorizontal),
                         itemCount: _categories.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 20),
+                        separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.xl),
                         itemBuilder: (_, i) {
                           final cat = _categories[i];
                           return _CategoryCircle(
@@ -294,7 +330,7 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ),
 
-              const SliverToBoxAdapter(child: SizedBox(height: 32)),
+              const SliverToBoxAdapter(child: SizedBox(height: AppSizes.sectionSpacing)),
             ],
           ),
         ),
@@ -302,7 +338,7 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _upcomingBookingStrip(WidgetRef ref, BuildContext context, TextTheme tt) {
+  Widget _upcomingBookingStrip(WidgetRef ref, BuildContext context) {
     final phone = ref.watch(userPhoneProvider);
     if (phone == null || phone.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
     final bookingsAsync = ref.watch(myBookingsProvider);
@@ -320,15 +356,20 @@ class HomeScreen extends ConsumerWidget {
         final dateStr = DateFormat('dd MMM, HH:mm').format(b.slotAt);
         return SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpace2xl, kSpaceXl, 0),
+            padding: const EdgeInsets.fromLTRB(
+              AppSizes.paddingHorizontal,
+              AppSizes.sectionSpacing,
+              AppSizes.paddingHorizontal,
+              0,
+            ),
             child: Material(
               color: kPrimary.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(kRadiusLg),
+              borderRadius: BorderRadius.circular(AppRadius.m),
               child: InkWell(
                 onTap: () => ref.read(selectedTabIndexProvider.notifier).state = 1,
-                borderRadius: BorderRadius.circular(kRadiusLg),
+                borderRadius: BorderRadius.circular(AppRadius.m),
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(AppSizes.paddingHorizontal),
                   child: Row(
                     children: [
                       Container(
@@ -336,7 +377,7 @@ class HomeScreen extends ConsumerWidget {
                         height: 48,
                         decoration: BoxDecoration(
                           color: kPrimary.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(kRadiusMd),
+                          borderRadius: BorderRadius.circular(AppRadius.m),
                         ),
                         child: const Icon(Icons.calendar_today_rounded, color: kPrimary, size: 24),
                       ),
@@ -345,12 +386,19 @@ class HomeScreen extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Siziň geljekki bronyňyz', style: tt.labelMedium?.copyWith(color: kTextSecondary)),
+                            Text(
+                              'Siziň geljekki bronyňyz',
+                              style: AppTextStyles.cardMeta.copyWith(color: kTextSecondary),
+                            ),
                             const SizedBox(height: 2),
-                            Text(b.salonName ?? 'Salon #${b.salonId}', style: tt.titleSmall),
-                            if (b.serviceName != null) Text(b.serviceName!, style: tt.bodySmall?.copyWith(color: kTextSecondary)),
+                            Text(b.salonName ?? 'Salon #${b.salonId}', style: AppTextStyles.cardTitle),
+                            if (b.serviceName != null)
+                              Text(b.serviceName!, style: AppTextStyles.cardMeta.copyWith(color: kTextSecondary)),
                             const SizedBox(height: 2),
-                            Text(dateStr, style: tt.bodySmall?.copyWith(color: kPrimary, fontWeight: FontWeight.w600)),
+                            Text(
+                              dateStr,
+                              style: AppTextStyles.cardMeta.copyWith(color: kPrimary, fontWeight: FontWeight.w600),
+                            ),
                           ],
                         ),
                       ),
@@ -381,19 +429,24 @@ class HomeScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpace2xl + 4, kSpaceXl, kSpaceMd),
+                padding: const EdgeInsets.fromLTRB(
+                  AppSizes.paddingHorizontal,
+                  AppSizes.sectionSpacing + 4,
+                  AppSizes.paddingHorizontal,
+                  AppSizes.elementSpacing,
+                ),
                 child: Text(
                   'Soňky görülen salonlar',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700, color: kTextPrimary),
+                  style: AppTextStyles.sectionTitle,
                 ),
               ),
               SizedBox(
                 height: 300,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingHorizontal),
                   itemCount: list.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 12),
+                  separatorBuilder: (_, __) => const SizedBox(width: AppSizes.elementSpacing),
                   itemBuilder: (_, i) => SizedBox(
                     width: cardW,
                     child: Align(
@@ -418,13 +471,13 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _sectionHeader(BuildContext context, TextTheme tt, String title, {bool toAllCategories = false, bool toDeals = false}) {
+  Widget _sectionHeader(BuildContext context, String title, {bool toAllCategories = false, bool toDeals = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           title,
-          style: tt.titleLarge?.copyWith(fontWeight: FontWeight.w700, color: kTextPrimary),
+          style: AppTextStyles.sectionTitle,
         ),
         GestureDetector(
           onTap: () {
@@ -438,7 +491,7 @@ class HomeScreen extends ConsumerWidget {
           },
           child: Text(
             'Ählisi',
-            style: tt.labelMedium?.copyWith(color: kPrimary, fontWeight: FontWeight.w600),
+            style: AppTextStyles.sectionLink,
           ),
         ),
       ],
@@ -458,9 +511,9 @@ class HomeScreen extends ConsumerWidget {
           height: 300,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingHorizontal),
             itemCount: 3,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            separatorBuilder: (_, __) => const SizedBox(width: AppSizes.elementSpacing),
             itemBuilder: (_, __) => SizedBox(
               width: cardW,
               child: const _VenueCardSkeleton(),
@@ -487,13 +540,16 @@ class HomeScreen extends ConsumerWidget {
         if (list.isEmpty) {
           return SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSizes.paddingHorizontal,
+                vertical: AppSizes.sectionSpacing,
+              ),
               child: Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.storefront_outlined, size: 48, color: kTextTertiary),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSizes.elementSpacing),
                     Text(
                       'Bu bölümde häzir salon ýok',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: kTextSecondary),
@@ -510,9 +566,9 @@ class HomeScreen extends ConsumerWidget {
             height: 300,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingHorizontal),
               itemCount: list.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              separatorBuilder: (_, __) => const SizedBox(width: AppSizes.elementSpacing),
               itemBuilder: (_, i) => SizedBox(
                 width: cardW,
                 child: Align(
@@ -562,7 +618,7 @@ class _CategoryCircle extends StatelessWidget {
       label: label,
       button: true,
       child: SizedBox(
-        width: 78,
+        width: AppSizes.categoryColumnWidth,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -574,25 +630,22 @@ class _CategoryCircle extends StatelessWidget {
                 onTap: onTap,
                 customBorder: const CircleBorder(),
                 child: Container(
-                  width: 60,
-                  height: 60,
+                  width: AppSizes.categorySize,
+                  height: AppSizes.categorySize,
                   decoration: BoxDecoration(
                     color: kPrimarySoft,
                     shape: BoxShape.circle,
                     border: Border.all(color: kStickerOutline, width: 1.5),
                     boxShadow: kStickerShadow,
                   ),
-                  child: Icon(icon, color: kPrimary, size: 26),
+                  child: Icon(icon, color: kPrimary, size: 31),
                 ),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSizes.smallSpacing),
             Text(
               label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: kTextPrimary,
-                    fontWeight: FontWeight.w500,
-                  ),
+              style: AppTextStyles.categoryLabel,
               textAlign: TextAlign.center,
               maxLines: 1,
               softWrap: false,
@@ -633,7 +686,6 @@ class _VenueCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tt = Theme.of(context).textTheme;
     return Container(
       decoration: kStickerCardDecoration(),
       clipBehavior: Clip.antiAlias,
@@ -642,18 +694,18 @@ class _VenueCard extends StatelessWidget {
         button: true,
         child: Material(
           color: Colors.transparent,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kRadiusLg)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.m)),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             onTap: onTap,
-            borderRadius: BorderRadius.circular(kRadiusLg),
+            borderRadius: BorderRadius.circular(AppRadius.m),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(
                   width: double.infinity,
-                  height: 160,
+                  height: AppSizes.cardImageHeight,
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
@@ -698,13 +750,13 @@ class _VenueCard extends StatelessWidget {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(kSpaceLg, 10, kSpaceLg, kSpaceMd),
+                  padding: const EdgeInsets.fromLTRB(AppSpacing.l, 10, AppSpacing.l, AppSpacing.m),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         salon.name,
-                        style: tt.titleSmall?.copyWith(fontSize: 15, fontWeight: FontWeight.w600, color: kTextPrimary),
+                        style: AppTextStyles.cardTitle,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -717,15 +769,15 @@ class _VenueCard extends StatelessWidget {
                             const SizedBox(width: 4),
                             Text(
                               _rating.toStringAsFixed(1),
-                              style: tt.bodySmall?.copyWith(color: kTextPrimary, fontWeight: FontWeight.w600, fontSize: 13),
+                              style: AppTextStyles.cardMeta.copyWith(color: kTextPrimary, fontWeight: FontWeight.w600),
                             ),
                             Text(
                               ' ($_reviews)',
-                              style: tt.bodySmall?.copyWith(fontSize: 13, color: kTextSecondary),
+                              style: AppTextStyles.cardMeta.copyWith(color: kTextSecondary),
                             ),
                             Text(
                               ' • ~$_distanceKm',
-                              style: tt.bodySmall?.copyWith(fontSize: 13, color: kTextSecondary),
+                              style: AppTextStyles.cardMeta.copyWith(color: kTextSecondary),
                             ),
                           ],
                         ),
@@ -734,7 +786,7 @@ class _VenueCard extends StatelessWidget {
                         const SizedBox(height: 2),
                         Text(
                           salon.address!,
-                          style: tt.bodySmall?.copyWith(fontSize: 13, color: kTextSecondary),
+                          style: AppTextStyles.cardMeta.copyWith(color: kTextSecondary),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -743,7 +795,7 @@ class _VenueCard extends StatelessWidget {
                         const SizedBox(height: 1),
                         Text(
                           _catLabel(salon.category!),
-                          style: tt.bodySmall?.copyWith(fontSize: 12, color: kTextTertiary),
+                          style: AppTextStyles.cardMeta.copyWith(color: kTextTertiary),
                         ),
                       ],
                     ],
@@ -820,25 +872,29 @@ class _DealPreviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tt = Theme.of(context).textTheme;
+    final badgeStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: Colors.white,
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+        );
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(kRadiusLg),
+        borderRadius: BorderRadius.circular(AppRadius.m),
         child: Stack(
           clipBehavior: Clip.none,
           children: [
             Container(
-              width: 260,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              width: AppSizes.cardWidth,
+              padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingHorizontal, vertical: 14),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                   colors: _gradientColors(),
                 ),
-                borderRadius: BorderRadius.circular(kRadiusLg),
+                borderRadius: BorderRadius.circular(AppRadius.m),
                 border: Border.all(color: kStickerOutline),
                 boxShadow: kStickerShadow,
               ),
@@ -857,7 +913,7 @@ class _DealPreviewCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       title,
-                      style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w600, color: kTextPrimary),
+                      style: AppTextStyles.cardTitle,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -877,11 +933,7 @@ class _DealPreviewCard extends StatelessWidget {
                   ),
                   child: Text(
                     badgeText!,
-                    style: tt.bodySmall?.copyWith(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: badgeStyle,
                   ),
                 ),
               ),
@@ -902,7 +954,7 @@ class _VenueCardSkeleton extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SkeletonBox(width: double.infinity, height: 160, radius: 14),
+        SkeletonBox(width: double.infinity, height: AppSizes.cardImageHeight, radius: AppRadius.m),
         const SizedBox(height: 10),
         const SkeletonBox(width: 140, height: 16),
         const SizedBox(height: 6),

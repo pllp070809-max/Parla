@@ -7,6 +7,8 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import '../providers/providers.dart';
+import '../app_radius.dart';
+import '../app_spacing.dart';
 import '../models/salon.dart';
 import '../theme.dart';
 import '../widgets/shared_widgets.dart';
@@ -260,7 +262,7 @@ class _SalonDetailBodyState extends State<_SalonDetailBody> {
               child: Padding(
                 key: _sectionKeys[0],
                 padding:
-                    const EdgeInsets.fromLTRB(kSpaceXl, kSpaceLg, kSpaceXl, 0),
+                    const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.l, AppSpacing.xl, 0),
                 child: _ServicesSection(
                     salon: salon,
                     onBook: (svc) =>
@@ -273,7 +275,7 @@ class _SalonDetailBodyState extends State<_SalonDetailBody> {
               child: Padding(
                 key: _sectionKeys[1],
                 padding:
-                    const EdgeInsets.fromLTRB(kSpaceXl, kSpace2xl, kSpaceXl, 0),
+                    const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, 0),
                 child: _TeamSection(salon: salon),
               ),
             ),
@@ -283,7 +285,7 @@ class _SalonDetailBodyState extends State<_SalonDetailBody> {
               child: Padding(
                 key: _sectionKeys[2],
                 padding:
-                    const EdgeInsets.fromLTRB(kSpaceXl, kSpace2xl, kSpaceXl, 0),
+                    const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, 0),
                 child: _PortfolioSection(salon: salon, images: images),
               ),
             ),
@@ -293,7 +295,7 @@ class _SalonDetailBodyState extends State<_SalonDetailBody> {
               child: Padding(
                 key: _sectionKeys[3],
                 padding:
-                    const EdgeInsets.fromLTRB(kSpaceXl, kSpace2xl, kSpaceXl, 0),
+                    const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, 0),
                 child: _AboutSection(salon: salon),
               ),
             ),
@@ -303,7 +305,7 @@ class _SalonDetailBodyState extends State<_SalonDetailBody> {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(
-                      kSpaceXl, kSpace2xl, kSpaceXl, 0),
+                      AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, 0),
                   child: _SalonMapSection(salon: salon),
                 ),
               ),
@@ -312,7 +314,7 @@ class _SalonDetailBodyState extends State<_SalonDetailBody> {
             SliverToBoxAdapter(
               child: Padding(
                 padding:
-                    const EdgeInsets.fromLTRB(kSpaceXl, kSpace2xl, kSpaceXl, 0),
+                    const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, 0),
                 child: _NearbySalonsSection(currentSalon: salon),
               ),
             ),
@@ -390,8 +392,8 @@ class _HeroSection extends StatelessWidget {
           // Top buttons
           Positioned(
             top: MediaQuery.of(context).padding.top + 8,
-            left: kSpaceMd,
-            right: kSpaceMd,
+            left: AppSpacing.m,
+            right: AppSpacing.m,
             child: Row(
               children: [
                 _HeroBtn(
@@ -399,7 +401,7 @@ class _HeroSection extends StatelessWidget {
                     onTap: () => Navigator.pop(context)),
                 const Spacer(),
                 _HeroBtn(icon: Icons.ios_share_rounded, onTap: () {}),
-                const SizedBox(width: kSpaceSm),
+                const SizedBox(width: AppSpacing.s),
                 _HeroBtn(icon: Icons.favorite_border_rounded, onTap: () {}),
               ],
             ),
@@ -413,7 +415,7 @@ class _HeroSection extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
                   color: Colors.black54,
-                  borderRadius: BorderRadius.circular(kRadiusSm)),
+                  borderRadius: BorderRadius.circular(AppRadius.s)),
               child: Text('${currentPage + 1}/${images.length}',
                   style: const TextStyle(
                       color: Colors.white,
@@ -461,13 +463,13 @@ class _InfoBlock extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
     return Padding(
       padding:
-          const EdgeInsets.fromLTRB(kSpaceXl, kSpaceLg, kSpaceXl, kSpaceSm),
+          const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.l, AppSpacing.xl, AppSpacing.s),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(salon.name,
               style: tt.headlineMedium?.copyWith(fontWeight: FontWeight.w800)),
-          const SizedBox(height: kSpaceSm),
+          const SizedBox(height: AppSpacing.s),
           Row(
             children: [
               Text('$_kMockRating',
@@ -489,14 +491,14 @@ class _InfoBlock extends StatelessWidget {
                   style: tt.bodySmall?.copyWith(color: kTextTertiary)),
             ],
           ),
-          const SizedBox(height: kSpaceSm),
+          const SizedBox(height: AppSpacing.s),
           if (salon.address != null) Text(salon.address!, style: tt.bodyMedium),
-          const SizedBox(height: kSpaceSm),
+          const SizedBox(height: AppSpacing.s),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
               color: kError.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(kRadiusPill),
+              borderRadius: BorderRadius.circular(AppRadius.pill),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -560,13 +562,13 @@ class _ChipBarDelegate extends SliverPersistentHeaderDelegate {
                     _HeroBtn(
                         icon: Icons.arrow_back_rounded,
                         onTap: () => Navigator.pop(context)),
-                    const SizedBox(width: kSpaceSm),
+                    const SizedBox(width: AppSpacing.s),
                     Text(salon.name,
                         style: tt.titleSmall
                             ?.copyWith(fontWeight: FontWeight.w800)),
                     const Spacer(),
                     _HeroBtn(icon: Icons.ios_share_rounded, onTap: () {}),
-                    const SizedBox(width: kSpaceSm),
+                    const SizedBox(width: AppSpacing.s),
                     _HeroBtn(icon: Icons.favorite_border_rounded, onTap: () {}),
                   ],
                 ),
@@ -575,9 +577,9 @@ class _ChipBarDelegate extends SliverPersistentHeaderDelegate {
           Expanded(
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: kSpaceXl),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
               itemCount: tabs.length,
-              separatorBuilder: (_, __) => const SizedBox(width: kSpaceMd),
+              separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.m),
               itemBuilder: (_, i) {
                 final sel = i == activeTab;
                 return GestureDetector(
@@ -714,7 +716,7 @@ class _ServicesSectionState extends State<_ServicesSection> {
                   elevation: 0,
                   minimumSize: const Size(500, 45),
                   padding: const EdgeInsets.symmetric(
-                      horizontal: kSpace3xl, vertical: 14),
+                      horizontal: AppSpacing.xxl, vertical: 14),
                   textStyle: const TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 16,
@@ -852,7 +854,7 @@ class _TeamSection extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: kSpace2xl),
+        const SizedBox(height: AppSpacing.xl),
         SizedBox(
           height: 216,
           child: ListView.separated(
@@ -950,13 +952,13 @@ class _PortfolioSection extends StatelessWidget {
               style: tt.titleLarge
                   ?.copyWith(fontWeight: FontWeight.w800, color: kTextPrimary),
             ),
-            const SizedBox(width: kSpaceSm + 2),
+            const SizedBox(width: AppSpacing.s + 2),
             Container(
               padding:
-                  const EdgeInsets.symmetric(horizontal: kSpaceSm + 2, vertical: 6),
+                  const EdgeInsets.symmetric(horizontal: AppSpacing.s + 2, vertical: 6),
               decoration: BoxDecoration(
                 color: kPrimarySoft,
-                borderRadius: BorderRadius.circular(kRadiusPill),
+                borderRadius: BorderRadius.circular(AppRadius.pill),
                 border: Border.all(color: kStickerOutline),
               ),
               alignment: Alignment.center,
@@ -970,19 +972,19 @@ class _PortfolioSection extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: kSpace2xl),
+        const SizedBox(height: AppSpacing.xl),
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: visibleCount,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 3,
-            crossAxisSpacing: kSpaceMd,
-            mainAxisSpacing: kSpaceMd,
+            crossAxisSpacing: AppSpacing.m,
+            mainAxisSpacing: AppSpacing.m,
             childAspectRatio: 1,
           ),
           itemBuilder: (_, i) => ClipRRect(
-            borderRadius: BorderRadius.circular(kRadiusLg),
+            borderRadius: BorderRadius.circular(AppRadius.m),
             child: Stack(
               fit: StackFit.expand,
               children: [
@@ -1053,10 +1055,10 @@ class _AboutSectionState extends State<_AboutSection> {
         // Description card
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(kSpaceLg),
+          padding: const EdgeInsets.all(AppSpacing.l),
           decoration: BoxDecoration(
             color: kCardBg,
-            borderRadius: BorderRadius.circular(kRadiusLg),
+            borderRadius: BorderRadius.circular(AppRadius.m),
             border: Border.all(color: kStickerOutline),
             boxShadow: kStickerShadow,
           ),
@@ -1069,7 +1071,7 @@ class _AboutSectionState extends State<_AboutSection> {
                 maxLines: _expanded ? null : 3,
                 overflow: _expanded ? null : TextOverflow.ellipsis,
               ),
-              const SizedBox(height: kSpaceSm),
+              const SizedBox(height: AppSpacing.s),
               GestureDetector(
                 onTap: () => setState(() => _expanded = !_expanded),
                 child: Text(_expanded ? 'Az gör' : 'Doly oka',
@@ -1079,15 +1081,15 @@ class _AboutSectionState extends State<_AboutSection> {
             ],
           ),
         ),
-        const SizedBox(height: kSpaceLg),
+        const SizedBox(height: AppSpacing.l),
 
         // Opening hours
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(kSpaceLg),
+          padding: const EdgeInsets.all(AppSpacing.l),
           decoration: BoxDecoration(
             color: kCardBg,
-            borderRadius: BorderRadius.circular(kRadiusLg),
+            borderRadius: BorderRadius.circular(AppRadius.m),
             border: Border.all(color: kStickerOutline),
             boxShadow: kStickerShadow,
           ),
@@ -1098,15 +1100,15 @@ class _AboutSectionState extends State<_AboutSection> {
                 children: [
                   const Icon(Icons.access_time_rounded,
                       size: 22, color: kPrimary),
-                  const SizedBox(width: kSpaceSm),
+                  const SizedBox(width: AppSpacing.s),
                   Text('Iş wagty',
                       style: tt.titleMedium
                           ?.copyWith(fontWeight: FontWeight.w800)),
                 ],
               ),
-              const SizedBox(height: kSpaceMd),
+              const SizedBox(height: AppSpacing.m),
               ..._kOpeningHours.map((h) => Padding(
-                    padding: const EdgeInsets.only(bottom: kSpaceSm),
+                    padding: const EdgeInsets.only(bottom: AppSpacing.s),
                     child: Row(
                       children: [
                         Container(
@@ -1114,7 +1116,7 @@ class _AboutSectionState extends State<_AboutSection> {
                             height: 8,
                             decoration: BoxDecoration(
                                 color: kSuccess, shape: BoxShape.circle)),
-                        const SizedBox(width: kSpaceSm),
+                        const SizedBox(width: AppSpacing.s),
                         SizedBox(
                             width: 100,
                             child: Text(h['day'] as String,
@@ -1129,15 +1131,15 @@ class _AboutSectionState extends State<_AboutSection> {
             ],
           ),
         ),
-        const SizedBox(height: kSpaceLg),
+        const SizedBox(height: AppSpacing.l),
 
         // Additional info
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(kSpaceLg),
+          padding: const EdgeInsets.all(AppSpacing.l),
           decoration: BoxDecoration(
             color: kCardBg,
-            borderRadius: BorderRadius.circular(kRadiusLg),
+            borderRadius: BorderRadius.circular(AppRadius.m),
             border: Border.all(color: kStickerOutline),
             boxShadow: kStickerShadow,
           ),
@@ -1148,20 +1150,20 @@ class _AboutSectionState extends State<_AboutSection> {
                 children: [
                   const Icon(Icons.check_circle_rounded,
                       size: 22, color: kSuccess),
-                  const SizedBox(width: kSpaceSm),
+                  const SizedBox(width: AppSpacing.s),
                   Text('Goşmaça maglumat',
                       style: tt.titleMedium
                           ?.copyWith(fontWeight: FontWeight.w800)),
                 ],
               ),
-              const SizedBox(height: kSpaceMd),
+              const SizedBox(height: AppSpacing.m),
               ..._kAdditionalInfo.map((info) => Padding(
-                    padding: const EdgeInsets.only(bottom: kSpaceSm),
+                    padding: const EdgeInsets.only(bottom: AppSpacing.s),
                     child: Row(
                       children: [
                         Icon(info['icon'] as IconData,
                             size: 20, color: kTextSecondary),
-                        const SizedBox(width: kSpaceMd),
+                        const SizedBox(width: AppSpacing.m),
                         Expanded(
                             child: Text(info['label'] as String,
                                 style: tt.bodyMedium
@@ -1193,18 +1195,18 @@ class _NearbySalonsSection extends StatelessWidget {
         Row(
           children: [
             const Icon(Icons.location_on_rounded, size: 22, color: kPrimary),
-            const SizedBox(width: kSpaceSm),
+            const SizedBox(width: AppSpacing.s),
             Text('Töwerekde salonlar',
                 style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
           ],
         ),
-        const SizedBox(height: kSpaceMd),
+        const SizedBox(height: AppSpacing.m),
         SizedBox(
           height: 140,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: 2,
-            separatorBuilder: (_, __) => const SizedBox(width: kSpaceMd),
+            separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.m),
             itemBuilder: (_, i) {
               final images = portfolioImages(currentSalon);
               final imgIdx = (i + 1) % images.length;
@@ -1212,7 +1214,7 @@ class _NearbySalonsSection extends StatelessWidget {
                 width: 170,
                 decoration: BoxDecoration(
                   color: kCardBg,
-                  borderRadius: BorderRadius.circular(kRadiusLg),
+                  borderRadius: BorderRadius.circular(AppRadius.m),
                   border: Border.all(color: kStickerOutline),
                   boxShadow: kStickerShadow,
                 ),
@@ -1231,7 +1233,7 @@ class _NearbySalonsSection extends StatelessWidget {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.all(kSpaceSm),
+                      padding: const EdgeInsets.all(AppSpacing.s),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -1276,8 +1278,8 @@ class _BottomBookBar extends StatelessWidget {
         color: kCardBg,
         boxShadow: kShadowUpMd,
       ),
-      padding: EdgeInsets.fromLTRB(kSpaceXl, kSpaceMd, kSpaceXl,
-          MediaQuery.of(context).padding.bottom + kSpaceMd),
+      padding: EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.m, AppSpacing.xl,
+          MediaQuery.of(context).padding.bottom + AppSpacing.m),
       child: Row(
         children: [
           Expanded(
@@ -1300,9 +1302,9 @@ class _BottomBookBar extends StatelessWidget {
             style: FilledButton.styleFrom(
               backgroundColor: kPrimary,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(kRadiusMd)),
+                  borderRadius: BorderRadius.circular(AppRadius.m)),
               padding: const EdgeInsets.symmetric(
-                  horizontal: kSpaceXl, vertical: kSpaceMd),
+                  horizontal: AppSpacing.xl, vertical: AppSpacing.m),
             ),
           ),
         ],
@@ -1432,15 +1434,15 @@ class _SalonMapSectionState extends State<_SalonMapSection> {
               height: 32,
               decoration: BoxDecoration(
                   color: kPrimary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(kRadiusSm)),
+                  borderRadius: BorderRadius.circular(AppRadius.s)),
               child: const Icon(Icons.map_rounded, size: 18, color: kPrimary)),
-          const SizedBox(width: kSpaceSm + 2),
+          const SizedBox(width: AppSpacing.s + 2),
           Expanded(child: Text('Ýerleşýän ýeri', style: tt.titleMedium)),
         ]),
-        const SizedBox(height: kSpaceMd),
+        const SizedBox(height: AppSpacing.m),
         Container(
           decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(kRadiusLg),
+              borderRadius: BorderRadius.circular(AppRadius.m),
               boxShadow: kStickerShadow,
               border: Border.all(color: kStickerOutline)),
           clipBehavior: Clip.antiAlias,
@@ -1456,17 +1458,17 @@ class _SalonMapSectionState extends State<_SalonMapSection> {
               width: double.infinity,
               color: kCardBg,
               padding: const EdgeInsets.symmetric(
-                  horizontal: kSpaceLg, vertical: kSpaceMd),
+                  horizontal: AppSpacing.l, vertical: AppSpacing.m),
               child: Row(children: [
                 Container(
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
                         color: kPrimary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(kRadiusSm)),
+                        borderRadius: BorderRadius.circular(AppRadius.s)),
                     child: const Icon(Icons.location_on_rounded,
                         size: 18, color: kPrimary)),
-                const SizedBox(width: kSpaceMd),
+                const SizedBox(width: AppSpacing.m),
                 Expanded(
                     child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1478,14 +1480,14 @@ class _SalonMapSectionState extends State<_SalonMapSection> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis),
                     ])),
-                const SizedBox(width: kSpaceSm),
+                const SizedBox(width: AppSpacing.s),
                 FilledButton.tonalIcon(
                   onPressed: () => openMapsDirection(salon),
                   icon: const Icon(Icons.directions_rounded, size: 18),
                   label: const Text('Ugur'),
                   style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: kSpaceMd, vertical: kSpaceSm),
+                          horizontal: AppSpacing.m, vertical: AppSpacing.s),
                       textStyle: tt.labelLarge?.copyWith(fontSize: 13)),
                 ),
               ]),

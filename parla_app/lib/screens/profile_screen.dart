@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/providers.dart';
+import '../app_radius.dart';
+import '../app_spacing.dart';
 import '../theme.dart';
 import 'settings_screen.dart';
 
@@ -84,12 +86,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       SnackBar(
         content: const Row(children: [
           Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
-          SizedBox(width: kSpaceSm),
+          SizedBox(width: AppSpacing.s),
           Text('Üstünlikli saklandy!'),
         ]),
         backgroundColor: kSuccess,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kRadiusMd)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.m)),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -173,10 +175,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           : Form(
               key: _formKey,
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpaceSm, kSpaceXl, kSpace3xl),
+                padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.s, AppSpacing.xl, AppSpacing.xxl),
                 children: [
                   _buildHeader(tt),
-                  const SizedBox(height: kSpace2xl),
+                  const SizedBox(height: AppSpacing.xl),
 
                   if (_editing) ..._buildEditMode(tt)
                   else ..._buildViewMode(tt),
@@ -210,26 +212,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 : const Icon(Icons.person_rounded, size: 48, color: kPrimary),
           ),
         ),
-        const SizedBox(height: kSpaceLg),
+        const SizedBox(height: AppSpacing.l),
         if (hasName && !_editing) ...[
           Text(
             _nameCtrl.text.trim(),
             style: tt.headlineMedium,
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: kSpaceXs),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             _fullPhone().isNotEmpty ? _formatPhone(_phoneCtrl.text) : 'Telefon goşulmadyk',
             style: tt.bodyMedium,
             textAlign: TextAlign.center,
           ),
           if (_gender != null) ...[
-            const SizedBox(height: kSpaceXs),
+            const SizedBox(height: AppSpacing.xs),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: kSpaceMd, vertical: kSpaceXs),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m, vertical: AppSpacing.xs),
               decoration: BoxDecoration(
                 color: kPrimary.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(kRadiusXl),
+                borderRadius: BorderRadius.circular(AppRadius.m),
               ),
               child: Text(
                 _gender == 'male' ? 'Erkek' : 'Zenan',
@@ -239,7 +241,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ],
         ] else ...[
           Text('Maglumatyňyz', style: tt.headlineMedium, textAlign: TextAlign.center),
-          const SizedBox(height: kSpaceXs),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             'Lokal saklanýar, bron wagtynda awtomatik doldurylýar.',
             style: tt.bodyMedium, textAlign: TextAlign.center,
@@ -270,14 +272,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ],
         ],
       ),
-      const SizedBox(height: kSpaceLg),
+      const SizedBox(height: AppSpacing.l),
       OutlinedButton.icon(
         onPressed: _startEdit,
         icon: const Icon(Icons.edit_rounded, size: 18),
         label: const Text('Üýtgetmek'),
         style: OutlinedButton.styleFrom(
           minimumSize: const Size(double.infinity, 48),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kRadiusMd)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.m)),
         ),
       ),
     ];
@@ -288,7 +290,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       _ProfileInfoCard(
         children: [
           Padding(
-            padding: const EdgeInsets.all(kSpaceLg),
+            padding: const EdgeInsets.all(AppSpacing.l),
             child: Column(
               children: [
                 TextFormField(
@@ -299,7 +301,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   validator: _validateName,
                   onFieldSubmitted: (_) => _phoneFocus.requestFocus(),
                 ),
-                const SizedBox(height: kSpaceLg),
+                const SizedBox(height: AppSpacing.l),
                 TextFormField(
                   controller: _phoneCtrl,
                   focusNode: _phoneFocus,
@@ -315,7 +317,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   validator: _validatePhone,
                   onFieldSubmitted: (_) => _save(),
                 ),
-                const SizedBox(height: kSpaceLg),
+                const SizedBox(height: AppSpacing.l),
                 _GenderSelector(
                   value: _gender,
                   onChanged: (v) => setState(() => _gender = v),
@@ -325,7 +327,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
         ],
       ),
-      const SizedBox(height: kSpaceLg),
+      const SizedBox(height: AppSpacing.l),
       ElevatedButton(
         onPressed: _saving ? null : _save,
         child: _saving
@@ -345,7 +347,7 @@ class _ProfileInfoCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: kCardBg,
-        borderRadius: BorderRadius.circular(kRadiusLg),
+        borderRadius: BorderRadius.circular(AppRadius.m),
         boxShadow: kShadowSm,
         border: Border.all(color: kBorder),
       ),
@@ -365,18 +367,18 @@ class _InfoRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: kSpaceLg, vertical: kSpaceMd + 4),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.l, vertical: AppSpacing.m + 4),
       child: Row(
         children: [
           Container(
             width: 36, height: 36,
             decoration: BoxDecoration(
               color: kPrimary.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(kRadiusSm),
+              borderRadius: BorderRadius.circular(AppRadius.s),
             ),
             child: Icon(icon, size: 20, color: kPrimary),
           ),
-          const SizedBox(width: kSpaceMd),
+          const SizedBox(width: AppSpacing.m),
           SizedBox(width: 72, child: Text(label, style: tt.bodyMedium?.copyWith(color: kTextSecondary))),
           Expanded(child: Text(value, style: tt.bodyLarge?.copyWith(fontWeight: FontWeight.w500), textAlign: TextAlign.end)),
         ],
@@ -397,7 +399,7 @@ class _GenderSelector extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Jyns (hökmany däl)', style: tt.bodyMedium),
-        const SizedBox(height: kSpaceSm),
+        const SizedBox(height: AppSpacing.s),
         Row(
           children: [
             Expanded(child: _GenderChip(
@@ -406,7 +408,7 @@ class _GenderSelector extends StatelessWidget {
               selected: value == 'male',
               onTap: () => onChanged(value == 'male' ? null : 'male'),
             )),
-            const SizedBox(width: kSpaceMd),
+            const SizedBox(width: AppSpacing.m),
             Expanded(child: _GenderChip(
               icon: Icons.female_rounded,
               label: 'Zenan',
@@ -434,13 +436,13 @@ class _GenderChip extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(kRadiusMd),
+        borderRadius: BorderRadius.circular(AppRadius.m),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: kSpaceMd),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.m),
           decoration: BoxDecoration(
             color: selected ? kPrimary.withValues(alpha: 0.1) : Colors.transparent,
-            borderRadius: BorderRadius.circular(kRadiusMd),
+            borderRadius: BorderRadius.circular(AppRadius.m),
             border: Border.all(
               color: selected ? kPrimary : kTextSecondary.withValues(alpha: 0.3),
               width: selected ? 2 : 1,
@@ -450,7 +452,7 @@ class _GenderChip extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(icon, size: 20, color: selected ? kPrimary : kTextSecondary),
-              const SizedBox(width: kSpaceSm),
+              const SizedBox(width: AppSpacing.s),
               Text(label, style: tt.labelLarge?.copyWith(color: selected ? kPrimary : kTextSecondary)),
             ],
           ),

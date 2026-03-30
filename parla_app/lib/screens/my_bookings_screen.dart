@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../providers/providers.dart';
 import '../models/booking.dart';
+import '../app_radius.dart';
+import '../app_spacing.dart';
 import '../theme.dart';
 import '../widgets/shared_widgets.dart';
 
@@ -42,7 +44,7 @@ class _NoPhoneView extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: kSpace3xl),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -54,14 +56,14 @@ class _NoPhoneView extends StatelessWidget {
               ),
               child: Icon(Icons.person_outline_rounded, size: 48, color: kPrimary.withValues(alpha: 0.5)),
             ),
-            const SizedBox(height: kSpace2xl),
+            const SizedBox(height: AppSpacing.xl),
             Text('Profiliňizi dolduryň', style: tt.titleLarge, textAlign: TextAlign.center),
-            const SizedBox(height: kSpaceSm),
+            const SizedBox(height: AppSpacing.s),
             Text(
               'Bronlaryňyzy görmek üçin ilki Profil sahypasynda telefon nomeriňizi ýazyň.',
               style: tt.bodyMedium, textAlign: TextAlign.center,
             ),
-            const SizedBox(height: kSpace2xl),
+            const SizedBox(height: AppSpacing.xl),
             FilledButton.icon(
               onPressed: () => ref.read(selectedTabIndexProvider.notifier).state = 2,
               icon: const Icon(Icons.person_rounded, size: 20),
@@ -85,9 +87,9 @@ class _BookingsBody extends StatelessWidget {
 
     return bookingsAsync.when(
       loading: () => ListView.separated(
-        padding: const EdgeInsets.all(kSpaceXl),
+        padding: const EdgeInsets.all(AppSpacing.xl),
         itemCount: 4,
-        separatorBuilder: (_, __) => const SizedBox(height: kSpaceSm + 2),
+        separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.s + 2),
         itemBuilder: (_, __) => const _BookingTileSkeleton(),
       ),
       error: (e, _) => ErrorRetryWidget(
@@ -115,12 +117,12 @@ class _BookingsBody extends StatelessWidget {
           color: kPrimary,
           onRefresh: () async => ref.invalidate(myBookingsProvider),
           child: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: kSpaceXl, vertical: kSpaceSm),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.s),
             physics: const AlwaysScrollableScrollPhysics(),
             children: [
               if (upcoming.isNotEmpty) ...[
                 _SectionHeader(title: 'Geljekki', count: upcoming.length),
-                const SizedBox(height: kSpaceSm),
+                const SizedBox(height: AppSpacing.s),
                 ...upcoming.map((b) => _BookingTile(
                       booking: b,
                       isPast: false,
@@ -135,12 +137,12 @@ class _BookingsBody extends StatelessWidget {
                     )),
               ],
               if (past.isNotEmpty) ...[
-                SizedBox(height: upcoming.isNotEmpty ? kSpaceXl : 0),
+                SizedBox(height: upcoming.isNotEmpty ? AppSpacing.xl : 0),
                 _SectionHeader(title: 'Tamamlandy', count: past.length, muted: true),
-                const SizedBox(height: kSpaceSm),
+                const SizedBox(height: AppSpacing.s),
                 ...past.map((b) => _BookingTile(booking: b, isPast: true, onCancel: null)),
               ],
-              const SizedBox(height: kSpaceXl),
+              const SizedBox(height: AppSpacing.xl),
             ],
           ),
         );
@@ -161,12 +163,12 @@ class _SectionHeader extends StatelessWidget {
     return Row(
       children: [
         Text(title, style: tt.titleMedium?.copyWith(color: muted ? kTextSecondary : null)),
-        const SizedBox(width: kSpaceSm),
+        const SizedBox(width: AppSpacing.s),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: kSpaceSm, vertical: 2),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s, vertical: 2),
           decoration: BoxDecoration(
             color: (muted ? kTextSecondary : kPrimary).withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(kRadiusSm),
+            borderRadius: BorderRadius.circular(AppRadius.s),
           ),
           child: Text(
             '$count',
@@ -195,9 +197,9 @@ class _BookingTile extends StatelessWidget {
     return Opacity(
       opacity: isPast ? 0.55 : 1.0,
       child: Card(
-        margin: const EdgeInsets.only(bottom: kSpaceSm + 2),
+        margin: const EdgeInsets.only(bottom: AppSpacing.s + 2),
         child: Padding(
-          padding: const EdgeInsets.all(kSpaceLg),
+          padding: const EdgeInsets.all(AppSpacing.l),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -207,7 +209,7 @@ class _BookingTile extends StatelessWidget {
                     width: 48, height: 48,
                     decoration: BoxDecoration(
                       color: (isPast ? kTextTertiary : kPrimary).withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(kRadiusMd),
+                      borderRadius: BorderRadius.circular(AppRadius.m),
                     ),
                     child: Icon(
                       isPast ? Icons.check_circle_outline : Icons.calendar_today,
@@ -220,20 +222,20 @@ class _BookingTile extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('Bron #${booking.id}', style: tt.titleMedium),
-                        const SizedBox(height: kSpaceXs),
+                        const SizedBox(height: AppSpacing.xs),
                         Text(salonLabel, style: tt.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
                         if (serviceLabel.isNotEmpty)
                           Text(serviceLabel, style: tt.bodySmall?.copyWith(color: kTextSecondary)),
-                        const SizedBox(height: kSpaceXs),
+                        const SizedBox(height: AppSpacing.xs),
                         Text(dateStr, style: tt.bodyMedium),
                       ],
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: kSpaceXs),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: AppSpacing.xs),
                     decoration: BoxDecoration(
                       color: isPast ? kTextTertiary.withValues(alpha: 0.15) : kPrimary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(kRadiusSm),
+                      borderRadius: BorderRadius.circular(AppRadius.s),
                     ),
                     child: Text(
                       isPast ? 'Tamamlandy' : (booking.status == 'cancelled' ? 'Ýatyryldy' : booking.status),
@@ -270,22 +272,22 @@ class _BookingTileSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(kSpaceLg),
+        padding: const EdgeInsets.all(AppSpacing.l),
         child: Row(
           children: const [
-            SkeletonBox(width: 48, height: 48, radius: kRadiusMd),
+            SkeletonBox(width: 48, height: 48, radius: AppRadius.m),
             SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SkeletonBox(width: 100, height: 16),
-                  SizedBox(height: kSpaceSm),
+                  SizedBox(height: AppSpacing.s),
                   SkeletonBox(width: 160, height: 14),
                 ],
               ),
             ),
-            SkeletonBox(width: 72, height: 24, radius: kRadiusSm),
+            SkeletonBox(width: 72, height: 24, radius: AppRadius.s),
           ],
         ),
       ),

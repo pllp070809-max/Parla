@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/providers.dart';
 import '../models/salon.dart';
+import '../app_radius.dart';
+import '../app_spacing.dart';
 import '../theme.dart';
 import '../utils/salon_images.dart';
 import '../widgets/shared_widgets.dart';
@@ -73,9 +75,9 @@ class _SalonsListScreenState extends ConsumerState<SalonsListScreen> {
         builder: (context, snap) {
           if (snap.connectionState == ConnectionState.waiting) {
             return ListView.separated(
-              padding: const EdgeInsets.all(kSpaceXl),
+              padding: const EdgeInsets.all(AppSpacing.xl),
               itemCount: 4,
-              separatorBuilder: (_, __) => const SizedBox(height: kSpaceMd),
+              separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.m),
               itemBuilder: (_, __) => const SalonTileSkeleton(),
             );
           }
@@ -99,9 +101,9 @@ class _SalonsListScreenState extends ConsumerState<SalonsListScreen> {
             );
           }
           return ListView.separated(
-            padding: const EdgeInsets.all(kSpaceXl),
+            padding: const EdgeInsets.all(AppSpacing.xl),
             itemCount: salons.length,
-            separatorBuilder: (_, __) => const SizedBox(height: kSpaceMd),
+            separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.m),
             itemBuilder: (_, i) {
               final s = salons[i];
               return _SalonTile(
@@ -138,14 +140,14 @@ class _SalonTile extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(kSpaceLg),
+          padding: const EdgeInsets.all(AppSpacing.l),
           child: Row(
             children: [
               Container(
                 width: 64, height: 64,
                 decoration: BoxDecoration(
                   color: kPrimary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(kRadiusMd),
+                  borderRadius: BorderRadius.circular(AppRadius.m),
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: Image.asset(salonMainImage(salon), fit: BoxFit.cover,
@@ -158,7 +160,7 @@ class _SalonTile extends StatelessWidget {
                   children: [
                     Text(salon.name, style: tt.titleMedium),
                     if (salon.address != null) ...[
-                      const SizedBox(height: kSpaceXs),
+                      const SizedBox(height: AppSpacing.xs),
                       Text(salon.address!, style: tt.bodyMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
                     ],
                   ],

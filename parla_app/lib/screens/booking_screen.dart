@@ -6,6 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/providers.dart';
 import '../models/salon.dart';
 import '../services/api_service.dart';
+import '../app_radius.dart';
+import '../app_spacing.dart';
 import '../theme.dart';
 import '../utils/salon_images.dart';
 import 'confirmation_screen.dart';
@@ -186,7 +188,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kRadiusLg)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.m)),
         title: const Text('Wagt eýýäm bronlandy'),
         content: const Text('Başga wagt synap görüň.'),
         actions: [FilledButton(onPressed: () { Navigator.pop(ctx); _loadSlots(); }, child: const Text('Wagtlary täzelemek'))],
@@ -224,7 +226,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
             DecoratedBox(
               decoration: BoxDecoration(color: kCardBg, boxShadow: kShadowDownSm),
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(kSpaceXs, kSpaceSm - 2, kSpaceXs, kSpaceMd - 2),
+                padding: const EdgeInsets.fromLTRB(AppSpacing.xs, AppSpacing.s - 2, AppSpacing.xs, AppSpacing.m - 2),
                 child: Column(
                   children: [
                     Row(
@@ -244,7 +246,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(color: kPrimary, borderRadius: BorderRadius.circular(kRadiusPill)),
+                          decoration: BoxDecoration(color: kPrimary, borderRadius: BorderRadius.circular(AppRadius.pill)),
                           child: Text('Ädim ${_step + 1} / $_kTotalSteps', style: tt.labelSmall?.copyWith(color: kCardBg, fontWeight: FontWeight.w700)),
                         ),
                         const SizedBox(width: 6),
@@ -296,7 +298,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
               child: DecoratedBox(
                 decoration: BoxDecoration(color: kCardBg, boxShadow: kShadowUpMd),
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpaceMd, kSpaceXl, kSpaceLg),
+                  padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.m, AppSpacing.xl, AppSpacing.l),
                   child: SizedBox(
                     width: double.infinity,
                     height: 54,
@@ -304,7 +306,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                       onPressed: (_canProceed && !_submitting) ? _onPrimaryAction : null,
                       style: FilledButton.styleFrom(
                         backgroundColor: kTextPrimary,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kRadiusMd)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.m)),
                       ),
                       child: _submitting
                           ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
@@ -334,9 +336,9 @@ class _ServiceStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
     return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpaceLg, kSpaceXl, kSpace2xl),
+      padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.l, AppSpacing.xl, AppSpacing.xl),
       itemCount: services.length,
-      separatorBuilder: (_, __) => const SizedBox(height: kSpaceMd),
+      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.m),
       itemBuilder: (_, i) {
         final s = services[i];
         final sel = selectedIds.contains(s.id);
@@ -344,13 +346,13 @@ class _ServiceStep extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: () { HapticFeedback.selectionClick(); onSelect(s.id); },
-            borderRadius: BorderRadius.circular(kRadiusLg),
+            borderRadius: BorderRadius.circular(AppRadius.m),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 220),
-              padding: const EdgeInsets.all(kSpaceLg),
+              padding: const EdgeInsets.all(AppSpacing.l),
               decoration: BoxDecoration(
                 color: sel ? kPrimarySoft : kCardBg,
-                borderRadius: BorderRadius.circular(kRadiusLg),
+                borderRadius: BorderRadius.circular(AppRadius.m),
                 border: Border.all(color: sel ? kPrimary.withValues(alpha: 0.45) : kBorder, width: sel ? 1.5 : 1),
                 boxShadow: sel ? kShadowMd : kShadowSm,
               ),
@@ -392,9 +394,9 @@ class _StaffStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
     return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpaceLg, kSpaceXl, kSpace2xl),
+      padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.l, AppSpacing.xl, AppSpacing.xl),
       itemCount: _mockStaffList.length,
-      separatorBuilder: (_, __) => const SizedBox(height: kSpaceMd),
+      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.m),
       itemBuilder: (_, i) {
         final s = _mockStaffList[i];
         final sel = s.id == selectedId;
@@ -403,13 +405,13 @@ class _StaffStep extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: () { HapticFeedback.selectionClick(); onSelect(s.id); },
-            borderRadius: BorderRadius.circular(kRadiusLg),
+            borderRadius: BorderRadius.circular(AppRadius.m),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 220),
-              padding: const EdgeInsets.symmetric(horizontal: kSpaceLg, vertical: kSpaceMd + 2),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.l, vertical: AppSpacing.m + 2),
               decoration: BoxDecoration(
                 color: sel ? kPrimarySoft : kCardBg,
-                borderRadius: BorderRadius.circular(kRadiusLg),
+                borderRadius: BorderRadius.circular(AppRadius.m),
                 border: Border.all(color: sel ? kPrimary.withValues(alpha: 0.45) : kBorder, width: sel ? 1.5 : 1),
                 boxShadow: sel ? kShadowMd : kShadowSm,
               ),
@@ -429,7 +431,7 @@ class _StaffStep extends StatelessWidget {
                         errorBuilder: (_, __, ___) => Container(width: 52, height: 52, color: kSurfaceBg, child: const Icon(Icons.person)),
                       ),
                     ),
-                  const SizedBox(width: kSpaceMd),
+                  const SizedBox(width: AppSpacing.m),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -483,16 +485,16 @@ class _DateTimeStep extends StatelessWidget {
     final monthLabel = DateFormat('MMMM yyyy').format(selectedDate);
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpaceLg, kSpaceXl, kSpace2xl),
+      padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.l, AppSpacing.xl, AppSpacing.xl),
       children: [
         Text(monthLabel, style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
-        const SizedBox(height: kSpaceMd),
+        const SizedBox(height: AppSpacing.m),
         SizedBox(
           height: 72,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: days.length,
-            separatorBuilder: (_, __) => const SizedBox(width: kSpaceSm),
+            separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.s),
             itemBuilder: (_, i) {
               final d = days[i];
               final sel = DateFormat('yyyy-MM-dd').format(d) == DateFormat('yyyy-MM-dd').format(selectedDate);
@@ -503,7 +505,7 @@ class _DateTimeStep extends StatelessWidget {
                   width: 52,
                   decoration: BoxDecoration(
                     color: sel ? kTextPrimary : kSurfaceBg,
-                    borderRadius: BorderRadius.circular(kRadiusMd),
+                    borderRadius: BorderRadius.circular(AppRadius.m),
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -519,11 +521,11 @@ class _DateTimeStep extends StatelessWidget {
             },
           ),
         ),
-        const SizedBox(height: kSpace2xl),
+        const SizedBox(height: AppSpacing.xl),
         Text('Elýeterli wagtlar', style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
-        const SizedBox(height: kSpaceMd),
+        const SizedBox(height: AppSpacing.m),
         if (loadingSlots)
-          const Padding(padding: EdgeInsets.all(kSpaceXl), child: Center(child: CircularProgressIndicator(color: kPrimary)))
+          const Padding(padding: EdgeInsets.all(AppSpacing.xl), child: Center(child: CircularProgressIndicator(color: kPrimary)))
         else if (slots != null && slots!.isEmpty)
           Text('Bu gün üçin boş wagt ýok', style: tt.bodyMedium, textAlign: TextAlign.center)
         else if (slots != null)
@@ -542,11 +544,11 @@ class _DateTimeStep extends StatelessWidget {
     final widgets = <Widget>[];
     for (final h in hours) {
       widgets.add(Padding(
-        padding: const EdgeInsets.only(top: kSpaceMd, bottom: kSpaceXs),
+        padding: const EdgeInsets.only(top: AppSpacing.m, bottom: AppSpacing.xs),
         child: Text('${h.toString().padLeft(2, '0')}:00', style: tt.bodySmall?.copyWith(color: kTextTertiary)),
       ));
       widgets.add(Wrap(
-        spacing: kSpaceSm, runSpacing: kSpaceSm,
+        spacing: AppSpacing.s, runSpacing: AppSpacing.s,
         children: grouped[h]!.map((slot) {
           final t = DateTime.parse(slot);
           final label = DateFormat('HH:mm').format(t);
@@ -558,7 +560,7 @@ class _DateTimeStep extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
               decoration: BoxDecoration(
                 color: sel ? kTextPrimary : kSurfaceBg,
-                borderRadius: BorderRadius.circular(kRadiusMd),
+                borderRadius: BorderRadius.circular(AppRadius.m),
               ),
               child: Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: sel ? Colors.white : kTextPrimary)),
             ),
@@ -582,24 +584,24 @@ class _GuestCountStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: kSpaceXl),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
       child: Column(
         children: [
-          const SizedBox(height: kSpace3xl),
+          const SizedBox(height: AppSpacing.xxl),
           Container(
             width: 80, height: 80,
             decoration: BoxDecoration(color: kSurfaceBg, shape: BoxShape.circle),
             child: const Icon(Icons.groups_rounded, size: 40, color: kPrimary),
           ),
-          const SizedBox(height: kSpaceXl),
+          const SizedBox(height: AppSpacing.xl),
           Text('Myhmanlaryň sany', style: tt.headlineMedium?.copyWith(fontWeight: FontWeight.w800)),
-          const SizedBox(height: kSpaceMd),
+          const SizedBox(height: AppSpacing.m),
           Text(
             'Bir wagtda birnäçe adam üçin bron edip bilersiňiz.\nHer myhman üçin soňraky ädimde ady görkezip bilersiňiz.',
             textAlign: TextAlign.center,
             style: tt.bodyMedium?.copyWith(color: kTextSecondary, height: 1.5),
           ),
-          const SizedBox(height: kSpace3xl),
+          const SizedBox(height: AppSpacing.xxl),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -616,7 +618,7 @@ class _GuestCountStep extends StatelessWidget {
               _CounterBtn(icon: Icons.add, onTap: count < 10 ? () => onChanged(count + 1) : null, filled: true),
             ],
           ),
-          const SizedBox(height: kSpaceLg),
+          const SizedBox(height: AppSpacing.l),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -668,45 +670,45 @@ class _GuestNamesStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
     return ListView(
-      padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpaceLg, kSpaceXl, kSpace2xl),
+      padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.l, AppSpacing.xl, AppSpacing.xl),
       children: [
         Text('Myhmanlaryň maglumaty', style: tt.headlineMedium?.copyWith(fontWeight: FontWeight.w800)),
-        const SizedBox(height: kSpaceSm),
+        const SizedBox(height: AppSpacing.s),
         Text('Islege görä dolduryň — salon myhmanlaryň sanawyny görüp bilýär.', style: tt.bodyMedium?.copyWith(color: kTextSecondary)),
-        const SizedBox(height: kSpaceMd),
+        const SizedBox(height: AppSpacing.m),
         Container(
-          padding: const EdgeInsets.all(kSpaceMd),
-          decoration: BoxDecoration(color: kSurfaceBg, borderRadius: BorderRadius.circular(kRadiusMd)),
+          padding: const EdgeInsets.all(AppSpacing.m),
+          decoration: BoxDecoration(color: kSurfaceBg, borderRadius: BorderRadius.circular(AppRadius.m)),
           child: Row(
             children: [
               const Icon(Icons.verified_rounded, color: kPrimary, size: 22),
-              const SizedBox(width: kSpaceSm),
+              const SizedBox(width: AppSpacing.s),
               Expanded(child: Text('Maglumatlar diňe brony tassyklamak we habarlaşmak üçin ulanylýar.', style: tt.bodySmall?.copyWith(color: kTextSecondary))),
             ],
           ),
         ),
-        const SizedBox(height: kSpaceXl),
+        const SizedBox(height: AppSpacing.xl),
         for (int i = 0; i < count && i < controllers.length; i++) ...[
           Container(
-            padding: const EdgeInsets.all(kSpaceLg),
-            decoration: BoxDecoration(color: kCardBg, borderRadius: BorderRadius.circular(kRadiusLg), border: Border.all(color: kBorder), boxShadow: kShadowSm),
+            padding: const EdgeInsets.all(AppSpacing.l),
+            decoration: BoxDecoration(color: kCardBg, borderRadius: BorderRadius.circular(AppRadius.m), border: Border.all(color: kBorder), boxShadow: kShadowSm),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
                   width: 36, height: 36,
-                  decoration: BoxDecoration(color: kSurfaceBg, borderRadius: BorderRadius.circular(kRadiusSm), border: Border.all(color: kBorder)),
+                  decoration: BoxDecoration(color: kSurfaceBg, borderRadius: BorderRadius.circular(AppRadius.s), border: Border.all(color: kBorder)),
                   alignment: Alignment.center,
                   child: Text('${i + 1}', style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
                 ),
-                const SizedBox(width: kSpaceMd),
+                const SizedBox(width: AppSpacing.m),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Adyňyz', style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
                       Text('Islege görä', style: tt.bodySmall?.copyWith(color: kTextTertiary)),
-                      const SizedBox(height: kSpaceSm),
+                      const SizedBox(height: AppSpacing.s),
                       TextField(
                         controller: controllers[i],
                         decoration: InputDecoration(hintText: 'Meselem: Aýgül Amanowa', hintStyle: tt.bodyMedium?.copyWith(color: kTextTertiary)),
@@ -718,7 +720,7 @@ class _GuestNamesStep extends StatelessWidget {
               ],
             ),
           ),
-          if (i < count - 1) const SizedBox(height: kSpaceMd),
+          if (i < count - 1) const SizedBox(height: AppSpacing.m),
         ],
       ],
     );
@@ -737,18 +739,18 @@ class _ContactStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
     return ListView(
-      padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpaceLg, kSpaceXl, kSpace2xl),
+      padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.l, AppSpacing.xl, AppSpacing.xl),
       children: [
         Text('Habarlaşmak üçin maglumat', style: tt.headlineMedium?.copyWith(fontWeight: FontWeight.w800)),
-        const SizedBox(height: kSpaceSm),
+        const SizedBox(height: AppSpacing.s),
         Text('Salon sizi tassyklamak üçin habarlaşar.', style: tt.bodyMedium?.copyWith(color: kTextSecondary)),
-        const SizedBox(height: kSpace2xl),
+        const SizedBox(height: AppSpacing.xl),
         TextField(
           controller: nameCtrl,
           decoration: InputDecoration(labelText: 'Adyňyz', prefixIcon: const Icon(Icons.person_outline_rounded)),
           textCapitalization: TextCapitalization.words,
         ),
-        const SizedBox(height: kSpaceLg),
+        const SizedBox(height: AppSpacing.l),
         TextField(
           controller: phoneCtrl,
           decoration: InputDecoration(labelText: 'Telefon', prefixIcon: const Icon(Icons.phone_outlined), hintText: '+993...'),
@@ -782,12 +784,12 @@ class _ReviewStep extends StatelessWidget {
     final timeLabel = slotDt != null ? DateFormat('HH:mm').format(slotDt) : '—';
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpaceLg, kSpaceXl, kSpace2xl),
+      padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.l, AppSpacing.xl, AppSpacing.xl),
       children: [
         Text('Bronyňyzy tassyklaň', style: tt.headlineMedium?.copyWith(fontWeight: FontWeight.w800)),
-        const SizedBox(height: kSpaceSm),
+        const SizedBox(height: AppSpacing.s),
         Text('Maglumatlaryňyzy barlaň we bron etmek basyň.', style: tt.bodyMedium?.copyWith(color: kTextSecondary)),
-        const SizedBox(height: kSpaceXl),
+        const SizedBox(height: AppSpacing.xl),
         _RevCard(children: [
           _RevRow(icon: Icons.storefront_rounded, label: 'Salon', value: salonName),
           const Divider(height: 1),
@@ -795,13 +797,13 @@ class _ReviewStep extends StatelessWidget {
           const Divider(height: 1),
           _RevRow(icon: Icons.badge_rounded, label: 'Usta', value: staffName),
         ]),
-        const SizedBox(height: kSpaceMd),
+        const SizedBox(height: AppSpacing.m),
         _RevCard(children: [
           _RevRow(icon: Icons.calendar_today_rounded, label: 'Senä', value: dateLabel),
           const Divider(height: 1),
           _RevRow(icon: Icons.access_time_rounded, label: 'Wagt', value: timeLabel),
         ]),
-        const SizedBox(height: kSpaceMd),
+        const SizedBox(height: AppSpacing.m),
         _RevCard(children: [
           _RevRow(icon: Icons.groups_rounded, label: 'Adam sany', value: '$guestCount'),
         ]),
@@ -818,7 +820,7 @@ class _RevCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: kCardBg, borderRadius: BorderRadius.circular(kRadiusLg),
+        color: kCardBg, borderRadius: BorderRadius.circular(AppRadius.m),
         border: Border.all(color: kBorder), boxShadow: kShadowSm,
       ),
       clipBehavior: Clip.antiAlias,
@@ -838,15 +840,15 @@ class _RevRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: kSpaceLg, vertical: kSpaceMd + 2),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.l, vertical: AppSpacing.m + 2),
       child: Row(
         children: [
           Container(
             width: 40, height: 40,
-            decoration: BoxDecoration(color: kSurfaceBg, borderRadius: BorderRadius.circular(kRadiusSm), border: Border.all(color: kBorder)),
+            decoration: BoxDecoration(color: kSurfaceBg, borderRadius: BorderRadius.circular(AppRadius.s), border: Border.all(color: kBorder)),
             child: Icon(icon, size: 20, color: kTextSecondary),
           ),
-          const SizedBox(width: kSpaceMd),
+          const SizedBox(width: AppSpacing.m),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -891,7 +893,7 @@ class _BookingSegmentProgress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: kSpaceMd),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m),
       child: Row(
         children: List.generate(total, (i) {
           final done = i < current;

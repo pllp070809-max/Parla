@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/booking.dart';
+import '../app_spacing.dart';
 import '../theme.dart';
 
 class ConfirmationScreen extends StatefulWidget {
@@ -44,7 +45,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> with SingleTick
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: kSpace3xl - 4),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl - 4),
           child: Column(
             children: [
               const Spacer(flex: 2),
@@ -69,9 +70,9 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> with SingleTick
                   ),
                 ),
               ),
-              const SizedBox(height: kSpace2xl),
+              const SizedBox(height: AppSpacing.xl),
               Text('Bron edildi!', style: tt.headlineMedium?.copyWith(color: kSuccess)),
-              const SizedBox(height: kSpace3xl),
+              const SizedBox(height: AppSpacing.xxl),
 
               _InfoRow(label: 'Salon', value: widget.salonName),
               _InfoRow(label: 'Hyzmat', value: widget.serviceName),
@@ -86,12 +87,12 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> with SingleTick
                 onPressed: () => Navigator.of(context).popUntil((r) => r.isFirst),
                 child: const Text('Sahypa'),
               ),
-              const SizedBox(height: kSpaceMd),
+              const SizedBox(height: AppSpacing.m),
               TextButton(
                 onPressed: () => Navigator.of(context).popUntil((r) => r.isFirst),
                 child: const Text('Meniň bronlarym'),
               ),
-              const SizedBox(height: kSpace3xl),
+              const SizedBox(height: AppSpacing.xxl),
             ],
           ),
         ),
@@ -109,7 +110,7 @@ class _InfoRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: kSpaceSm - 2),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.s - 2),
       child: Row(
         children: [
           SizedBox(width: 90, child: Text(label, style: tt.bodyMedium)),

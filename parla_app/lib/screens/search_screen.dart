@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/providers.dart';
 import '../models/salon.dart';
+import '../app_radius.dart';
+import '../app_spacing.dart';
 import '../theme.dart';
 import '../widgets/shared_widgets.dart';
 import 'salons_list_screen.dart';
@@ -48,7 +50,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(kSpaceLg, kSpaceMd, kSpaceLg, kSpaceMd),
+              padding: const EdgeInsets.fromLTRB(AppSpacing.l, AppSpacing.m, AppSpacing.l, AppSpacing.m),
               child: Row(
                 children: [
                   IconButton(
@@ -76,12 +78,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                               )
                             : null,
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(kRadiusMd),
+                          borderRadius: BorderRadius.circular(AppRadius.m),
                           borderSide: BorderSide.none,
                         ),
                         filled: true,
                         fillColor: kSurfaceBg,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: kSpaceLg, vertical: kSpaceMd),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.l, vertical: AppSpacing.m),
                       ),
                     ),
                   ),
@@ -100,7 +102,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   Widget _buildSuggestions(TextTheme tt) {
     final recent = ref.watch(recentSearchQueriesProvider);
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: kSpaceXl),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
       children: [
         const SizedBox(height: 8),
         if (recent.isNotEmpty) ...[
@@ -138,7 +140,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           );
         }
         return ListView.separated(
-          padding: const EdgeInsets.symmetric(horizontal: kSpaceXl, vertical: kSpaceSm),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.s),
           itemCount: salons.length,
           separatorBuilder: (_, __) => const Divider(height: 1),
           itemBuilder: (_, i) {
@@ -150,7 +152,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 height: 48,
                 decoration: BoxDecoration(
                   color: kPrimary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(kRadiusMd),
+                  borderRadius: BorderRadius.circular(AppRadius.m),
                 ),
                 child: const Icon(Icons.storefront_rounded, color: kPrimary),
               ),
@@ -189,12 +191,12 @@ class _SuggestionChip extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(kRadiusMd),
+        borderRadius: BorderRadius.circular(AppRadius.m),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: kSpaceLg, vertical: kSpaceMd),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.l, vertical: AppSpacing.m),
           decoration: BoxDecoration(
             color: kSurfaceBg,
-            borderRadius: BorderRadius.circular(kRadiusMd),
+            borderRadius: BorderRadius.circular(AppRadius.m),
           ),
           child: Row(
             children: [

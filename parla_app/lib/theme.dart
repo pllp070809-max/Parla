@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'app_radius.dart';
+import 'app_spacing.dart';
+
 const String kFontDisplay = 'Tartuffo';
 const String kFontBody = 'Roobert';
 
@@ -22,22 +25,6 @@ const Color kTextSecondary = Color(0xFF71717A);   // Fresha: ikinji tekst
 const Color kTextTertiary = Color(0xFFA1A1AA);    // Fresha: üçünji tekst
 const Color kBorder = Color(0xFFE5E7EB);          // Fresha: gyra/border
 const Color kBorderMedium = Color(0xFFBDBDBD);     // Fresha: orta gyra
-
-// ── Spacing scale ──
-const double kSpaceXs = 4;
-const double kSpaceSm = 8;
-const double kSpaceMd = 12;
-const double kSpaceLg = 16;
-const double kSpaceXl = 20;
-const double kSpace2xl = 24;
-const double kSpace3xl = 32;
-
-// ── Radius (Fresha: 12–14px tegelekler) ──
-const double kRadiusSm = 8;
-const double kRadiusMd = 12;
-const double kRadiusLg = 14;
-const double kRadiusXl = 20;
-const double kRadiusPill = 24;
 
 // ── Shadows ──
 List<BoxShadow> kShadowSm = [
@@ -107,7 +94,7 @@ List<BoxShadow> kStickerShadow = [
   ),
 ];
 
-BoxDecoration kStickerCardDecoration({double radius = kRadiusLg}) => BoxDecoration(
+BoxDecoration kStickerCardDecoration({double radius = AppRadius.m}) => BoxDecoration(
       color: kCardBg,
       borderRadius: BorderRadius.circular(radius),
       border: Border.all(color: kStickerOutline),
@@ -337,7 +324,7 @@ ThemeData buildParlaTheme() {
     ),
     snackBarTheme: SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kRadiusMd)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.m)),
       elevation: 4,
     ),
     dividerTheme: const DividerThemeData(
@@ -351,7 +338,7 @@ ThemeData buildParlaTheme() {
         foregroundColor: Colors.white,
         elevation: 0,
         minimumSize: const Size(double.infinity, 52),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kRadiusMd)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.m)),
         textStyle: textTheme.labelLarge,
       ),
     ),
@@ -359,7 +346,7 @@ ThemeData buildParlaTheme() {
       style: OutlinedButton.styleFrom(
         side: const BorderSide(color: kBorder),
         foregroundColor: kTextPrimary,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kRadiusMd)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.m)),
         textStyle: textTheme.labelMedium,
       ),
     ),
@@ -371,39 +358,39 @@ ThemeData buildParlaTheme() {
     ),
     cardTheme: CardThemeData(
       elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kRadiusLg)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.m)),
       color: kCardBg,
       margin: EdgeInsets.zero,
       clipBehavior: Clip.antiAlias,
     ),
     listTileTheme: ListTileThemeData(
-      contentPadding: const EdgeInsets.symmetric(horizontal: kSpaceLg, vertical: kSpaceXs),
+      contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.l, vertical: AppSpacing.xs),
       iconColor: kTextSecondary,
       textColor: kTextPrimary,
       tileColor: Colors.transparent,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kRadiusMd)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.m)),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: kSurfaceBg,
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(kRadiusMd),
+        borderRadius: BorderRadius.circular(AppRadius.m),
         borderSide: const BorderSide(color: kBorder),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(kRadiusMd),
+        borderRadius: BorderRadius.circular(AppRadius.m),
         borderSide: const BorderSide(color: kBorder),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(kRadiusMd),
+        borderRadius: BorderRadius.circular(AppRadius.m),
         borderSide: const BorderSide(color: kPrimary, width: 2),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(kRadiusMd),
+        borderRadius: BorderRadius.circular(AppRadius.m),
         borderSide: const BorderSide(color: kError, width: 1.5),
       ),
       focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(kRadiusMd),
+        borderRadius: BorderRadius.circular(AppRadius.m),
         borderSide: const BorderSide(color: kError, width: 2),
       ),
       hintStyle: textTheme.bodyMedium?.copyWith(
@@ -411,7 +398,7 @@ ThemeData buildParlaTheme() {
         fontWeight: FontWeight.w400,
       ),
       labelStyle: textTheme.bodyMedium,
-      contentPadding: const EdgeInsets.symmetric(horizontal: kSpaceLg, vertical: 14),
+      contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.l, vertical: 14),
     ),
   );
 }

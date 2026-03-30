@@ -4,6 +4,9 @@ import '../providers/providers.dart';
 import '../screens/home_screen.dart';
 import '../screens/my_bookings_screen.dart';
 import '../screens/profile_screen.dart';
+import '../app_radius.dart';
+import '../app_sizes.dart';
+import '../app_spacing.dart';
 import '../theme.dart';
 
 /// Icon-only bottom bar; saýlananda M3 ýaly pill indikator we primary reňk.
@@ -27,16 +30,16 @@ class BottomNavShell extends ConsumerWidget {
         child: SafeArea(
           top: false,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(kSpaceLg, kSpaceSm, kSpaceLg, kSpaceSm),
+            padding: const EdgeInsets.fromLTRB(AppSpacing.l, AppSpacing.s, AppSpacing.l, AppSpacing.s),
             child: Container(
               decoration: BoxDecoration(
                 color: kCardBg,
-                borderRadius: BorderRadius.circular(kRadiusPill),
+                borderRadius: BorderRadius.circular(AppRadius.pill),
                 border: Border.all(color: kStickerOutline),
                 boxShadow: kStickerShadow,
               ),
               child: SizedBox(
-                height: kToolbarHeight,
+                height: AppSizes.bottomNavHeight,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [

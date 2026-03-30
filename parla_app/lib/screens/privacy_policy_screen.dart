@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../app_spacing.dart';
 import '../theme.dart';
 
 class PrivacyPolicyScreen extends StatelessWidget {
@@ -10,26 +12,26 @@ class PrivacyPolicyScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Gizlinlik syýasaty')),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpaceMd, kSpaceXl, kSpace3xl),
+        padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.m, AppSpacing.xl, AppSpacing.xxl),
         children: [
           Text(
             'Parla bukilikleriňizi goramaga we gizlinligiňize hörmet etmäge söz berýär.',
             style: tt.bodyLarge,
           ),
-          const SizedBox(height: kSpaceLg),
+          const SizedBox(height: AppSpacing.l),
           _Section(tt: tt, title: 'Ýygnanýan maglumatlar', body: '''
 • Adyňyz we telefon nomeriňiz – bron üçin we siziň bilen habarlaşmak üçin
 • Bron maglumatlary – wagty, salon we hyzmatlar
 • Enjamyňyzdaky sazlamalar (meselem, saýlanan dil)
 
 Bu maglumatlar diňe hyzmaty üpjün etmek we siziň bilen habarlaşmak üçin ulanylýar.'''),
-          const SizedBox(height: kSpaceLg),
+          const SizedBox(height: AppSpacing.l),
           _Section(tt: tt, title: 'Maglumatlary paýlaşmak', body: '''
 Salonlara diňe bron üçin zerur maglumatlar (adyňyz, wagtyňyz) berilýär. Maglumatlaryňyzy üçünji tarapa satmaýarys we reklama üçin üçünji tarapa bermeýäris.'''),
-          const SizedBox(height: kSpaceLg),
+          const SizedBox(height: AppSpacing.l),
           _Section(tt: tt, title: 'Maglumatlary pozmak', body: '''
 Sazlamalaryňyzdan "Maglumatlary pozmak" arkaly profil maglumatlaryňyzy pozup bilersiňiz. Soňundan täzeden dolduryp, hyzmaty dowam etdirip bilersiňiz.'''),
-          const SizedBox(height: kSpaceLg),
+          const SizedBox(height: AppSpacing.l),
           Text(
             'Soraglaryňyz üçin: support@parla.tm',
             style: tt.bodyMedium?.copyWith(color: kTextSecondary, fontStyle: FontStyle.italic),
@@ -53,7 +55,7 @@ class _Section extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(title, style: tt.titleSmall?.copyWith(color: kPrimary)),
-        const SizedBox(height: kSpaceXs),
+        const SizedBox(height: AppSpacing.xs),
         Text(body.trim(), style: tt.bodyMedium),
       ],
     );

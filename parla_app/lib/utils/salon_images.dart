@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../app_radius.dart';
 import '../models/salon.dart';
 import '../theme.dart';
 
@@ -73,7 +74,7 @@ Widget _placeholder({double? width, double? height}) {
     height: height,
     decoration: BoxDecoration(
       color: kPrimarySoft.withValues(alpha: 0.18),
-      borderRadius: BorderRadius.circular(kRadiusMd),
+      borderRadius: BorderRadius.circular(AppRadius.m),
       border: Border.all(color: kBorder.withValues(alpha: 0.7)),
     ),
     alignment: Alignment.center,

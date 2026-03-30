@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/providers.dart';
+import '../app_radius.dart';
+import '../app_spacing.dart';
 import '../theme.dart';
 import 'privacy_policy_screen.dart';
 import 'help_screen.dart';
@@ -16,10 +18,10 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Sazlamalar')),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(kSpaceXl, kSpaceLg, kSpaceXl, kSpace3xl),
+        padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.l, AppSpacing.xl, AppSpacing.xxl),
         children: [
           _SectionLabel('Esasy', tt),
-          const SizedBox(height: kSpaceSm),
+          const SizedBox(height: AppSpacing.s),
           _SettingsCard(
             children: [
               _SettingsTile(
@@ -45,9 +47,9 @@ class SettingsScreen extends ConsumerWidget {
             ],
           ),
 
-          const SizedBox(height: kSpace2xl),
+          const SizedBox(height: AppSpacing.xl),
           _SectionLabel('Maglumat', tt),
-          const SizedBox(height: kSpaceSm),
+          const SizedBox(height: AppSpacing.s),
           _SettingsCard(
             children: [
               _SettingsTile(
@@ -70,9 +72,9 @@ class SettingsScreen extends ConsumerWidget {
             ],
           ),
 
-          const SizedBox(height: kSpace2xl),
+          const SizedBox(height: AppSpacing.xl),
           _SectionLabel('Howply zona', tt, isDestructive: true),
-          const SizedBox(height: kSpaceSm),
+          const SizedBox(height: AppSpacing.s),
           _SettingsCard(
             children: [
               _SettingsTile(
@@ -93,11 +95,11 @@ class SettingsScreen extends ConsumerWidget {
       SnackBar(
         content: const Row(children: [
           Icon(Icons.schedule_rounded, color: Colors.white, size: 20),
-          SizedBox(width: kSpaceSm),
+          SizedBox(width: AppSpacing.s),
           Text('Ýakyn wagtda goşular!'),
         ]),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kRadiusMd)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.m)),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -107,7 +109,7 @@ class SettingsScreen extends ConsumerWidget {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kRadiusLg)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.m)),
         icon: Container(
           width: 56, height: 56,
           decoration: BoxDecoration(color: kError.withValues(alpha: 0.1), shape: BoxShape.circle),
@@ -137,7 +139,7 @@ class SettingsScreen extends ConsumerWidget {
       SnackBar(
         content: const Text('Maglumatlar pozuldy. Profili täzeden dolduryň.'),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kRadiusMd)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.m)),
       ),
     );
     Navigator.pop(context, true);
@@ -153,7 +155,7 @@ class _SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: kSpaceXs),
+      padding: const EdgeInsets.only(left: AppSpacing.xs),
       child: Text(
         text,
         style: tt.labelLarge?.copyWith(
@@ -173,7 +175,7 @@ class _SettingsCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: kCardBg,
-        borderRadius: BorderRadius.circular(kRadiusLg),
+        borderRadius: BorderRadius.circular(AppRadius.m),
         boxShadow: kShadowSm,
         border: Border.all(color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3)),
       ),
@@ -199,18 +201,18 @@ class _SettingsTile extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: kSpaceLg, vertical: kSpaceMd + 4),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.l, vertical: AppSpacing.m + 4),
         child: Row(
           children: [
             Container(
               width: 36, height: 36,
               decoration: BoxDecoration(
                 color: (isDestructive ? kError : kPrimary).withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(kRadiusSm),
+                borderRadius: BorderRadius.circular(AppRadius.s),
               ),
               child: Icon(icon, size: 20, color: iconColor),
             ),
-            const SizedBox(width: kSpaceMd),
+            const SizedBox(width: AppSpacing.m),
             Expanded(child: Text(label, style: tt.bodyLarge?.copyWith(color: color))),
             if (trailing != null) trailing!
             else if (onTap != null) Icon(Icons.chevron_right_rounded, size: 18, color: kTextSecondary.withValues(alpha: 0.5)),
