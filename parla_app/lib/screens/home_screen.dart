@@ -120,11 +120,6 @@ class HomeScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _sectionHeader(context, tt, 'Arzanladyşlar', toDeals: true),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Täzelikler ýakyn',
-                        style: tt.bodySmall?.copyWith(color: kTextTertiary, fontSize: 12),
-                      ),
                     ],
                   ),
                 ),
@@ -185,11 +180,6 @@ class HomeScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _sectionHeader(context, tt, 'Maslahat berilýän'),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Saýlanan salonlar',
-                          style: tt.bodySmall?.copyWith(color: kTextTertiary, fontSize: 12),
-                        ),
                       ],
                     ),
                   ),
@@ -207,11 +197,6 @@ class HomeScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _sectionHeader(context, tt, 'Meşhur'),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Ters tertipde',
-                          style: tt.bodySmall?.copyWith(color: kTextTertiary, fontSize: 12),
-                        ),
                       ],
                     ),
                   ),
@@ -229,11 +214,6 @@ class HomeScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _sectionHeader(context, tt, 'Täze Parla-da'),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Saýlanan salonlar',
-                          style: tt.bodySmall?.copyWith(color: kTextTertiary, fontSize: 12),
-                        ),
                       ],
                     ),
                   ),
