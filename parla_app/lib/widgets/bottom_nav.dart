@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/providers.dart';
@@ -24,52 +25,66 @@ class BottomNavShell extends ConsumerWidget {
     final index = ref.watch(selectedTabIndexProvider);
 
     return Scaffold(
-      body: IndexedStack(index: index, children: _screens),
-      bottomNavigationBar: Container(
-        color: kScaffoldBg,
-        child: SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(AppSpacing.l, AppSpacing.s, AppSpacing.l, AppSpacing.s),
-            child: Container(
-              decoration: BoxDecoration(
-                color: kCardBg,
-                borderRadius: BorderRadius.circular(AppRadius.pill),
-                border: Border.all(color: kStickerOutline),
-                boxShadow: kStickerShadow,
-              ),
-              child: SizedBox(
-                height: AppSizes.bottomNavHeight,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _NavItem(
-                      icon: Icons.home_outlined,
-                      activeIcon: Icons.home_rounded,
-                      label: 'Baş sahypa',
-                      isSelected: index == 0,
-                      onTap: () => ref.read(selectedTabIndexProvider.notifier).state = 0,
+      body: Stack(
+        children: [
+          // 1-nji gatlak: sahypalar (doly ekran)
+          IndexedStack(index: index, children: _screens),
+          // 2-nji gatlak: frosted glass bottom nav (üstünde ýüzýär)
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(32, AppSpacing.s, 32, 24),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(28),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.transparent,
+                        borderRadius: BorderRadius.circular(28),
+                        border: Border.all(color: kStickerOutline),
+                        boxShadow: kStickerShadow,
+                      ),
+                      child: SizedBox(
+                        height: 56,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            _NavItem(
+                              icon: Icons.home_outlined,
+                              activeIcon: Icons.home_rounded,
+                              label: 'Baş sahypa',
+                              isSelected: index == 0,
+                              onTap: () => ref.read(selectedTabIndexProvider.notifier).state = 0,
+                            ),
+                            _NavItem(
+                              icon: Icons.calendar_today_outlined,
+                              activeIcon: Icons.calendar_today_rounded,
+                              label: 'Bronlarym',
+                              isSelected: index == 1,
+                              onTap: () => ref.read(selectedTabIndexProvider.notifier).state = 1,
+                            ),
+                            _NavItem(
+                              icon: Icons.person_outline_rounded,
+                              activeIcon: Icons.person_rounded,
+                              label: 'Profil',
+                              isSelected: index == 2,
+                              onTap: () => ref.read(selectedTabIndexProvider.notifier).state = 2,
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    _NavItem(
-                      icon: Icons.calendar_today_outlined,
-                      activeIcon: Icons.calendar_today_rounded,
-                      label: 'Bronlarym',
-                      isSelected: index == 1,
-                      onTap: () => ref.read(selectedTabIndexProvider.notifier).state = 1,
-                    ),
-                    _NavItem(
-                      icon: Icons.person_outline_rounded,
-                      activeIcon: Icons.person_rounded,
-                      label: 'Profil',
-                      isSelected: index == 2,
-                      onTap: () => ref.read(selectedTabIndexProvider.notifier).state = 2,
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -95,7 +110,7 @@ class _NavItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = isSelected ? kPrimary : kTextTertiary;
-    final iconSize = isSelected ? 26.0 : 24.0;
+    final iconSize = isSelected ? 28.0 : 24.0;
 
     return Semantics(
       label: label,
@@ -115,11 +130,11 @@ class _NavItem extends StatelessWidget {
                   AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
                     curve: Curves.easeOutCubic,
-                    width: 52,
-                    height: 32,
+                    width: 54,
+                    height: 36,
                     decoration: BoxDecoration(
                       color: kPrimary.withValues(alpha: _indicatorAlpha),
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(18),
                     ),
                   ),
                 Icon(isSelected ? activeIcon : icon, size: iconSize, color: color),

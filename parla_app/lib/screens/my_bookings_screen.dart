@@ -142,7 +142,7 @@ class _BookingsBody extends StatelessWidget {
                 const SizedBox(height: AppSpacing.s),
                 ...past.map((b) => _BookingTile(booking: b, isPast: true, onCancel: null)),
               ],
-              const SizedBox(height: AppSpacing.xl),
+              const SizedBox(height: 100),
             ],
           ),
         );
