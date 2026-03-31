@@ -5,8 +5,6 @@ import '../providers/providers.dart';
 import '../screens/home_screen.dart';
 import '../screens/my_bookings_screen.dart';
 import '../screens/profile_screen.dart';
-import '../app_radius.dart';
-import '../app_sizes.dart';
 import '../app_spacing.dart';
 import '../theme.dart';
 

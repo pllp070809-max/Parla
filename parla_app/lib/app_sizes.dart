@@ -6,7 +6,7 @@ class AppSizes {
   AppSizes._();
 
   static const double paddingHorizontal = AppSpacing.screenPadding;
-  static const double sectionSpacing = AppSpacing.xl;
+  static const double sectionSpacing = AppSpacing.m;
   static const double elementSpacing = AppSpacing.m;
   static const double smallSpacing = AppSpacing.s;
 

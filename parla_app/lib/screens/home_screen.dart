@@ -37,6 +37,7 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    const _homeSectionGap = AppSpacing.s; // 8px
     final salons = ref.watch(_featuredProvider);
     final screenW = MediaQuery.of(context).size.width;
     final cardW = (screenW * 0.72).clamp(240.0, 320.0);
@@ -54,7 +55,8 @@ class HomeScreen extends ConsumerWidget {
                 child: SizedBox(
                   height: AppSizes.headerHeight,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingHorizontal),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: AppSizes.paddingHorizontal),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -71,9 +73,14 @@ class HomeScreen extends ConsumerWidget {
                               clipBehavior: Clip.none,
                               children: [
                                 IconButton(
-                                  icon: const Icon(Icons.notifications_outlined, size: 24),
-                                  onPressed: () => Navigator.push(context, fadeSlideRoute(const NotificationsScreen())),
-                                  style: IconButton.styleFrom(foregroundColor: kTextPrimary),
+                                  icon: const Icon(Icons.notifications_outlined,
+                                      size: 24),
+                                  onPressed: () => Navigator.push(
+                                      context,
+                                      fadeSlideRoute(
+                                          const NotificationsScreen())),
+                                  style: IconButton.styleFrom(
+                                      foregroundColor: kTextPrimary),
                                 ),
                                 if (ref.watch(hasUnreadNotificationsProvider))
                                   Positioned(
@@ -85,7 +92,9 @@ class HomeScreen extends ConsumerWidget {
                                       decoration: const BoxDecoration(
                                         color: kError,
                                         shape: BoxShape.circle,
-                                        border: Border.fromBorderSide(BorderSide(color: kCardBg, width: 1)),
+                                        border: Border.fromBorderSide(
+                                            BorderSide(
+                                                color: kCardBg, width: 1)),
                                       ),
                                     ),
                                   ),
@@ -94,7 +103,8 @@ class HomeScreen extends ConsumerWidget {
                             GestureDetector(
                               onTap: () {
                                 HapticFeedback.lightImpact();
-                                Navigator.push(context, fadeSlideRoute(const SearchScreen()));
+                                Navigator.push(context,
+                                    fadeSlideRoute(const SearchScreen()));
                               },
                               child: Container(
                                 width: 36,
@@ -105,7 +115,8 @@ class HomeScreen extends ConsumerWidget {
                                   border: Border.all(color: kBorder),
                                 ),
                                 child: const Center(
-                                  child: Icon(Icons.search_rounded, size: 20, color: kPrimary),
+                                  child: Icon(Icons.search_rounded,
+                                      size: 20, color: kPrimary),
                                 ),
                               ),
                             ),
@@ -128,7 +139,7 @@ class HomeScreen extends ConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(
                     AppSizes.paddingHorizontal,
-                    AppSizes.sectionSpacing,
+                    AppSpacing.s,
                     AppSizes.paddingHorizontal,
                     AppSizes.elementSpacing,
                   ),
@@ -145,15 +156,18 @@ class HomeScreen extends ConsumerWidget {
                   height: AppSizes.exploreCardHeight,
                   child: ListView(
                     scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingHorizontal),
+                    padding:
+                        const EdgeInsets.only(left: AppSizes.paddingHorizontal),
                     children: [
                       Padding(
-                        padding: const EdgeInsets.only(right: AppSizes.elementSpacing),
+                        padding: const EdgeInsets.only(
+                            right: AppSizes.elementSpacing),
                         child: Align(
                           alignment: Alignment.topCenter,
                           child: _DealPreviewCard(
                             title: 'Ilkinji zyýaretde 20%',
-                            onTap: () => Navigator.push(context, fadeSlideRoute(const DealsScreen())),
+                            onTap: () => Navigator.push(
+                                context, fadeSlideRoute(const DealsScreen())),
                             showBadge: true,
                             badgeText: '2 gün',
                             gradientIndex: 0,
@@ -161,12 +175,14 @@ class HomeScreen extends ConsumerWidget {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(right: AppSizes.elementSpacing),
+                        padding: const EdgeInsets.only(
+                            right: AppSizes.elementSpacing),
                         child: Align(
                           alignment: Alignment.topCenter,
                           child: _DealPreviewCard(
                             title: 'Massage paketi 15%',
-                            onTap: () => Navigator.push(context, fadeSlideRoute(const DealsScreen())),
+                            onTap: () => Navigator.push(
+                                context, fadeSlideRoute(const DealsScreen())),
                             showBadge: false,
                             gradientIndex: 1,
                           ),
@@ -176,7 +192,8 @@ class HomeScreen extends ConsumerWidget {
                         alignment: Alignment.topCenter,
                         child: _DealPreviewCard(
                           title: 'Dyrnak + kirpik 10%',
-                          onTap: () => Navigator.push(context, fadeSlideRoute(const DealsScreen())),
+                          onTap: () => Navigator.push(
+                              context, fadeSlideRoute(const DealsScreen())),
                           showBadge: false,
                           gradientIndex: 2,
                         ),
@@ -191,7 +208,7 @@ class HomeScreen extends ConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(
                     AppSizes.paddingHorizontal,
-                    AppSizes.sectionSpacing,
+                    _homeSectionGap,
                     AppSizes.paddingHorizontal,
                     AppSizes.elementSpacing,
                   ),
@@ -213,7 +230,7 @@ class HomeScreen extends ConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(
                     AppSizes.paddingHorizontal,
-                    AppSizes.sectionSpacing,
+                    _homeSectionGap,
                     AppSizes.paddingHorizontal,
                     AppSizes.elementSpacing,
                   ),
@@ -235,7 +252,7 @@ class HomeScreen extends ConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(
                     AppSizes.paddingHorizontal,
-                    AppSizes.sectionSpacing,
+                    _homeSectionGap,
                     AppSizes.paddingHorizontal,
                     AppSizes.elementSpacing,
                   ),
@@ -257,11 +274,12 @@ class HomeScreen extends ConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(
                     AppSizes.paddingHorizontal,
-                    AppSizes.sectionSpacing,
+                    _homeSectionGap,
                     AppSizes.paddingHorizontal,
                     AppSizes.elementSpacing,
                   ),
-                  child: _sectionHeader(context, 'Esasy kategoriýalar', toAllCategories: true),
+                  child: _sectionHeader(context, 'Esasy kategoriýalar',
+                      toAllCategories: true),
                 ),
               ),
 
@@ -273,9 +291,11 @@ class HomeScreen extends ConsumerWidget {
                     children: [
                       ListView.separated(
                         scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingHorizontal),
+                        padding: const EdgeInsets.only(
+                            left: AppSizes.paddingHorizontal),
                         itemCount: _categories.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.xl),
+                        separatorBuilder: (_, __) =>
+                            const SizedBox(width: AppSpacing.xl),
                         itemBuilder: (_, i) {
                           final cat = _categories[i];
                           return _CategoryCircle(
@@ -285,7 +305,8 @@ class HomeScreen extends ConsumerWidget {
                               HapticFeedback.lightImpact();
                               Navigator.push(
                                 context,
-                                fadeSlideRoute(SalonsListScreen(category: cat.key)),
+                                fadeSlideRoute(
+                                    SalonsListScreen(category: cat.key)),
                               );
                             },
                           );
@@ -302,7 +323,10 @@ class HomeScreen extends ConsumerWidget {
                               gradient: LinearGradient(
                                 begin: Alignment.centerLeft,
                                 end: Alignment.centerRight,
-                                colors: [Colors.white.withValues(alpha: 0), Colors.white],
+                                colors: [
+                                  Colors.white.withValues(alpha: 0),
+                                  Colors.white
+                                ],
                               ),
                             ),
                           ),
@@ -319,7 +343,10 @@ class HomeScreen extends ConsumerWidget {
                               gradient: LinearGradient(
                                 begin: Alignment.centerRight,
                                 end: Alignment.centerLeft,
-                                colors: [Colors.white.withValues(alpha: 0), Colors.white],
+                                colors: [
+                                  Colors.white.withValues(alpha: 0),
+                                  Colors.white
+                                ],
                               ),
                             ),
                           ),
@@ -340,7 +367,8 @@ class HomeScreen extends ConsumerWidget {
 
   Widget _upcomingBookingStrip(WidgetRef ref, BuildContext context) {
     final phone = ref.watch(userPhoneProvider);
-    if (phone == null || phone.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
+    if (phone == null || phone.isEmpty)
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
     final bookingsAsync = ref.watch(myBookingsProvider);
     return bookingsAsync.when(
       loading: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
@@ -351,14 +379,15 @@ class HomeScreen extends ConsumerWidget {
             .where((b) => b.slotAt.isAfter(now) && b.status == 'confirmed')
             .toList()
           ..sort((a, b) => a.slotAt.compareTo(b.slotAt));
-        if (upcoming.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
+        if (upcoming.isEmpty)
+          return const SliverToBoxAdapter(child: SizedBox.shrink());
         final b = upcoming.first;
         final dateStr = DateFormat('dd MMM, HH:mm').format(b.slotAt);
         return SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(
               AppSizes.paddingHorizontal,
-              AppSizes.sectionSpacing,
+              AppSpacing.s,
               AppSizes.paddingHorizontal,
               0,
             ),
@@ -366,7 +395,8 @@ class HomeScreen extends ConsumerWidget {
               color: kPrimary.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(AppRadius.m),
               child: InkWell(
-                onTap: () => ref.read(selectedTabIndexProvider.notifier).state = 1,
+                onTap: () =>
+                    ref.read(selectedTabIndexProvider.notifier).state = 1,
                 borderRadius: BorderRadius.circular(AppRadius.m),
                 child: Padding(
                   padding: const EdgeInsets.all(AppSizes.paddingHorizontal),
@@ -379,7 +409,8 @@ class HomeScreen extends ConsumerWidget {
                           color: kPrimary.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(AppRadius.m),
                         ),
-                        child: const Icon(Icons.calendar_today_rounded, color: kPrimary, size: 24),
+                        child: const Icon(Icons.calendar_today_rounded,
+                            color: kPrimary, size: 24),
                       ),
                       const SizedBox(width: 14),
                       Expanded(
@@ -388,16 +419,21 @@ class HomeScreen extends ConsumerWidget {
                           children: [
                             Text(
                               'Siziň geljekki bronyňyz',
-                              style: AppTextStyles.cardMeta.copyWith(color: kTextSecondary),
+                              style: AppTextStyles.cardMeta
+                                  .copyWith(color: kTextSecondary),
                             ),
                             const SizedBox(height: 2),
-                            Text(b.salonName ?? 'Salon #${b.salonId}', style: AppTextStyles.cardTitle),
+                            Text(b.salonName ?? 'Salon #${b.salonId}',
+                                style: AppTextStyles.cardTitle),
                             if (b.serviceName != null)
-                              Text(b.serviceName!, style: AppTextStyles.cardMeta.copyWith(color: kTextSecondary)),
+                              Text(b.serviceName!,
+                                  style: AppTextStyles.cardMeta
+                                      .copyWith(color: kTextSecondary)),
                             const SizedBox(height: 2),
                             Text(
                               dateStr,
-                              style: AppTextStyles.cardMeta.copyWith(color: kPrimary, fontWeight: FontWeight.w600),
+                              style: AppTextStyles.cardMeta.copyWith(
+                                  color: kPrimary, fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),
@@ -414,16 +450,20 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _recentlyViewedRow(AsyncValue<List<Salon>> salons, WidgetRef ref, BuildContext context, double cardW) {
+  Widget _recentlyViewedRow(AsyncValue<List<Salon>> salons, WidgetRef ref,
+      BuildContext context, double cardW) {
     final recentIds = ref.watch(recentViewedSalonIdsProvider);
-    if (recentIds.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
+    if (recentIds.isEmpty)
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
     return salons.when(
       loading: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
       error: (_, __) => const SliverToBoxAdapter(child: SizedBox.shrink()),
       data: (allSalons) {
         final idToSalon = {for (var s in allSalons) s.id: s};
-        final list = recentIds.map((id) => idToSalon[id]).whereType<Salon>().toList();
-        if (list.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
+        final list =
+            recentIds.map((id) => idToSalon[id]).whereType<Salon>().toList();
+        if (list.isEmpty)
+          return const SliverToBoxAdapter(child: SizedBox.shrink());
         return SliverToBoxAdapter(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -431,7 +471,7 @@ class HomeScreen extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(
                   AppSizes.paddingHorizontal,
-                  AppSizes.sectionSpacing + 4,
+                  AppSpacing.s,
                   AppSizes.paddingHorizontal,
                   AppSizes.elementSpacing,
                 ),
@@ -444,21 +484,30 @@ class HomeScreen extends ConsumerWidget {
                 height: 300,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingHorizontal),
+                  padding:
+                      const EdgeInsets.only(left: AppSizes.paddingHorizontal),
                   itemCount: list.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: AppSizes.elementSpacing),
+                  separatorBuilder: (_, __) =>
+                      const SizedBox(width: AppSizes.elementSpacing),
                   itemBuilder: (_, i) => SizedBox(
                     width: cardW,
                     child: Align(
                       alignment: Alignment.topLeft,
                       child: _VenueCard(
                         salon: list[i],
-                        onTap: () => Navigator.push(context, fadeSlideRoute(SalonDetailScreen(salonId: list[i].id))),
+                        onTap: () => Navigator.push(
+                            context,
+                            fadeSlideRoute(
+                                SalonDetailScreen(salonId: list[i].id))),
                         onFavouriteTap: () {
                           HapticFeedback.lightImpact();
-                          ref.read(favouriteSalonsProvider.notifier).toggle(list[i].id);
+                          ref
+                              .read(favouriteSalonsProvider.notifier)
+                              .toggle(list[i].id);
                         },
-                        isFavourite: ref.watch(favouriteSalonsProvider).contains(list[i].id),
+                        isFavourite: ref
+                            .watch(favouriteSalonsProvider)
+                            .contains(list[i].id),
                       ),
                     ),
                   ),
@@ -471,7 +520,8 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _sectionHeader(BuildContext context, String title, {bool toAllCategories = false, bool toDeals = false}) {
+  Widget _sectionHeader(BuildContext context, String title,
+      {bool toAllCategories = false, bool toDeals = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -482,7 +532,8 @@ class HomeScreen extends ConsumerWidget {
         GestureDetector(
           onTap: () {
             if (toAllCategories) {
-              Navigator.push(context, fadeSlideRoute(const AllCategoriesScreen()));
+              Navigator.push(
+                  context, fadeSlideRoute(const AllCategoriesScreen()));
             } else if (toDeals) {
               Navigator.push(context, fadeSlideRoute(const DealsScreen()));
             } else {
@@ -511,9 +562,10 @@ class HomeScreen extends ConsumerWidget {
           height: 300,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingHorizontal),
+            padding: const EdgeInsets.only(left: AppSizes.paddingHorizontal),
             itemCount: 3,
-            separatorBuilder: (_, __) => const SizedBox(width: AppSizes.elementSpacing),
+            separatorBuilder: (_, __) =>
+                const SizedBox(width: AppSizes.elementSpacing),
             itemBuilder: (_, __) => SizedBox(
               width: cardW,
               child: const _VenueCardSkeleton(),
@@ -528,10 +580,12 @@ class HomeScreen extends ConsumerWidget {
         ),
       ),
       data: (salons) {
-        final location = ref.watch(selectedLocationProvider).trim().toLowerCase();
+        final location =
+            ref.watch(selectedLocationProvider).trim().toLowerCase();
         var list = salons.where((s) {
           if (location.isEmpty) return true;
-          if (s.address != null && s.address!.toLowerCase().contains(location)) return true;
+          if (s.address != null && s.address!.toLowerCase().contains(location))
+            return true;
           if (s.name.toLowerCase().contains(location)) return true;
           return false;
         }).toList();
@@ -542,17 +596,21 @@ class HomeScreen extends ConsumerWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSizes.paddingHorizontal,
-                vertical: AppSizes.sectionSpacing,
+                vertical: AppSpacing.s,
               ),
               child: Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.storefront_outlined, size: 48, color: kTextTertiary),
+                    Icon(Icons.storefront_outlined,
+                        size: 48, color: kTextTertiary),
                     const SizedBox(height: AppSizes.elementSpacing),
                     Text(
                       'Bu bölümde häzir salon ýok',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: kTextSecondary),
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.copyWith(color: kTextSecondary),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -566,9 +624,10 @@ class HomeScreen extends ConsumerWidget {
             height: 300,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingHorizontal),
+              padding: const EdgeInsets.only(left: AppSizes.paddingHorizontal),
               itemCount: list.length,
-              separatorBuilder: (_, __) => const SizedBox(width: AppSizes.elementSpacing),
+              separatorBuilder: (_, __) =>
+                  const SizedBox(width: AppSizes.elementSpacing),
               itemBuilder: (_, i) => SizedBox(
                 width: cardW,
                 child: Align(
@@ -581,9 +640,12 @@ class HomeScreen extends ConsumerWidget {
                     ),
                     onFavouriteTap: () {
                       HapticFeedback.lightImpact();
-                      ref.read(favouriteSalonsProvider.notifier).toggle(list[i].id);
+                      ref
+                          .read(favouriteSalonsProvider.notifier)
+                          .toggle(list[i].id);
                     },
-                    isFavourite: ref.watch(favouriteSalonsProvider).contains(list[i].id),
+                    isFavourite:
+                        ref.watch(favouriteSalonsProvider).contains(list[i].id),
                   ),
                 ),
               ),
@@ -610,7 +672,8 @@ class _CategoryCircle extends StatelessWidget {
   final String label;
   final IconData icon;
   final VoidCallback onTap;
-  const _CategoryCircle({required this.label, required this.icon, required this.onTap});
+  const _CategoryCircle(
+      {required this.label, required this.icon, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -690,11 +753,13 @@ class _VenueCard extends StatelessWidget {
       decoration: kStickerCardDecoration(),
       clipBehavior: Clip.antiAlias,
       child: Semantics(
-        label: '${salon.name}, reýting $_rating, $_reviews syn, takmynan $_distanceKm. Bron etmek üçin basyň.',
+        label:
+            '${salon.name}, reýting $_rating, $_reviews syn, takmynan $_distanceKm. Bron etmek üçin basyň.',
         button: true,
         child: Material(
           color: Colors.transparent,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.m)),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadius.m)),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             onTap: onTap,
@@ -738,7 +803,9 @@ class _VenueCard extends StatelessWidget {
                                 ],
                               ),
                               child: Icon(
-                                isFavourite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                                isFavourite
+                                    ? Icons.favorite_rounded
+                                    : Icons.favorite_border_rounded,
                                 size: 18,
                                 color: isFavourite ? kError : kTextPrimary,
                               ),
@@ -750,7 +817,8 @@ class _VenueCard extends StatelessWidget {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(AppSpacing.l, 10, AppSpacing.l, AppSpacing.m),
+                  padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.l, 10, AppSpacing.l, AppSpacing.m),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -765,19 +833,24 @@ class _VenueCard extends StatelessWidget {
                         message: 'Reýting we uzaklyk nümunä maglumat',
                         child: Row(
                           children: [
-                            const Icon(Icons.star_rounded, size: 15, color: kStar),
+                            const Icon(Icons.star_rounded,
+                                size: 15, color: kStar),
                             const SizedBox(width: 4),
                             Text(
                               _rating.toStringAsFixed(1),
-                              style: AppTextStyles.cardMeta.copyWith(color: kTextPrimary, fontWeight: FontWeight.w600),
+                              style: AppTextStyles.cardMeta.copyWith(
+                                  color: kTextPrimary,
+                                  fontWeight: FontWeight.w600),
                             ),
                             Text(
                               ' ($_reviews)',
-                              style: AppTextStyles.cardMeta.copyWith(color: kTextSecondary),
+                              style: AppTextStyles.cardMeta
+                                  .copyWith(color: kTextSecondary),
                             ),
                             Text(
                               ' • ~$_distanceKm',
-                              style: AppTextStyles.cardMeta.copyWith(color: kTextSecondary),
+                              style: AppTextStyles.cardMeta
+                                  .copyWith(color: kTextSecondary),
                             ),
                           ],
                         ),
@@ -786,7 +859,8 @@ class _VenueCard extends StatelessWidget {
                         const SizedBox(height: 2),
                         Text(
                           salon.address!,
-                          style: AppTextStyles.cardMeta.copyWith(color: kTextSecondary),
+                          style: AppTextStyles.cardMeta
+                              .copyWith(color: kTextSecondary),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -795,7 +869,8 @@ class _VenueCard extends StatelessWidget {
                         const SizedBox(height: 1),
                         Text(
                           _catLabel(salon.category!),
-                          style: AppTextStyles.cardMeta.copyWith(color: kTextTertiary),
+                          style: AppTextStyles.cardMeta
+                              .copyWith(color: kTextTertiary),
                         ),
                       ],
                     ],
@@ -862,11 +937,20 @@ class _DealPreviewCard extends StatelessWidget {
   List<Color> _gradientColors() {
     switch (gradientIndex % 3) {
       case 1:
-        return [kPrimary.withValues(alpha: 0.22), kAccentLight.withValues(alpha: 0.08)];
+        return [
+          kPrimary.withValues(alpha: 0.22),
+          kAccentLight.withValues(alpha: 0.08)
+        ];
       case 2:
-        return [kSecondary.withValues(alpha: 0.2), kPrimary.withValues(alpha: 0.06)];
+        return [
+          kSecondary.withValues(alpha: 0.2),
+          kPrimary.withValues(alpha: 0.06)
+        ];
       default:
-        return [kPrimary.withValues(alpha: 0.18), kPrimary.withValues(alpha: 0.08)];
+        return [
+          kPrimary.withValues(alpha: 0.18),
+          kPrimary.withValues(alpha: 0.08)
+        ];
     }
   }
 
@@ -887,7 +971,8 @@ class _DealPreviewCard extends StatelessWidget {
           children: [
             Container(
               width: AppSizes.cardWidth,
-              padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingHorizontal, vertical: 14),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppSizes.paddingHorizontal, vertical: 14),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.centerLeft,
@@ -907,7 +992,8 @@ class _DealPreviewCard extends StatelessWidget {
                       color: kPrimary.withValues(alpha: 0.25),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.local_offer_rounded, color: kPrimary, size: 24),
+                    child: const Icon(Icons.local_offer_rounded,
+                        color: kPrimary, size: 24),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
@@ -926,7 +1012,8 @@ class _DealPreviewCard extends StatelessWidget {
                 top: 8,
                 right: 8,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
                     color: kError,
                     borderRadius: BorderRadius.circular(6),
@@ -954,7 +1041,10 @@ class _VenueCardSkeleton extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SkeletonBox(width: double.infinity, height: AppSizes.cardImageHeight, radius: AppRadius.m),
+        SkeletonBox(
+            width: double.infinity,
+            height: AppSizes.cardImageHeight,
+            radius: AppRadius.m),
         const SizedBox(height: 10),
         const SkeletonBox(width: 140, height: 16),
         const SizedBox(height: 6),
