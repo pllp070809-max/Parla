@@ -37,10 +37,9 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    const _homeSectionGap = AppSpacing.s; // 8px
+    const homeSectionGap = AppSizes.sectionGap;
     final salons = ref.watch(_featuredProvider);
-    final screenW = MediaQuery.of(context).size.width;
-    final cardW = (screenW * 0.72).clamp(240.0, 320.0);
+    final cardW = AppSizes.cardWidth;
 
     return Scaffold(
       backgroundColor: kScaffoldBg,
@@ -73,7 +72,8 @@ class HomeScreen extends ConsumerWidget {
                               clipBehavior: Clip.none,
                               children: [
                                 IconButton(
-                                  icon: const Icon(Icons.notifications_outlined,
+                                  icon: const Icon(
+                                      Icons.notifications_outlined,
                                       size: 24),
                                   onPressed: () => Navigator.push(
                                       context,
@@ -139,7 +139,7 @@ class HomeScreen extends ConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(
                     AppSizes.paddingHorizontal,
-                    AppSpacing.s,
+                    homeSectionGap,
                     AppSizes.paddingHorizontal,
                     AppSizes.elementSpacing,
                   ),
@@ -208,7 +208,7 @@ class HomeScreen extends ConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(
                     AppSizes.paddingHorizontal,
-                    _homeSectionGap,
+                    homeSectionGap,
                     AppSizes.paddingHorizontal,
                     AppSizes.elementSpacing,
                   ),
@@ -230,7 +230,7 @@ class HomeScreen extends ConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(
                     AppSizes.paddingHorizontal,
-                    _homeSectionGap,
+                    homeSectionGap,
                     AppSizes.paddingHorizontal,
                     AppSizes.elementSpacing,
                   ),
@@ -252,7 +252,7 @@ class HomeScreen extends ConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(
                     AppSizes.paddingHorizontal,
-                    _homeSectionGap,
+                    homeSectionGap,
                     AppSizes.paddingHorizontal,
                     AppSizes.elementSpacing,
                   ),
@@ -274,7 +274,7 @@ class HomeScreen extends ConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(
                     AppSizes.paddingHorizontal,
-                    _homeSectionGap,
+                    homeSectionGap,
                     AppSizes.paddingHorizontal,
                     AppSizes.elementSpacing,
                   ),
@@ -367,8 +367,9 @@ class HomeScreen extends ConsumerWidget {
 
   Widget _upcomingBookingStrip(WidgetRef ref, BuildContext context) {
     final phone = ref.watch(userPhoneProvider);
-    if (phone == null || phone.isEmpty)
+    if (phone == null || phone.isEmpty) {
       return const SliverToBoxAdapter(child: SizedBox.shrink());
+    }
     final bookingsAsync = ref.watch(myBookingsProvider);
     return bookingsAsync.when(
       loading: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
@@ -379,39 +380,33 @@ class HomeScreen extends ConsumerWidget {
             .where((b) => b.slotAt.isAfter(now) && b.status == 'confirmed')
             .toList()
           ..sort((a, b) => a.slotAt.compareTo(b.slotAt));
-        if (upcoming.isEmpty)
+        if (upcoming.isEmpty) {
           return const SliverToBoxAdapter(child: SizedBox.shrink());
+        }
         final b = upcoming.first;
         final dateStr = DateFormat('dd MMM, HH:mm').format(b.slotAt);
         return SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(
               AppSizes.paddingHorizontal,
-              AppSpacing.s,
+              AppSpacing.m,
               AppSizes.paddingHorizontal,
               0,
             ),
             child: Material(
-              color: kPrimary.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(AppRadius.m),
+              color: Colors.transparent,
               child: InkWell(
                 onTap: () =>
                     ref.read(selectedTabIndexProvider.notifier).state = 1,
-                borderRadius: BorderRadius.circular(AppRadius.m),
                 child: Padding(
-                  padding: const EdgeInsets.all(AppSizes.paddingHorizontal),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.paddingHorizontal,
+                    vertical: AppSpacing.s,
+                  ),
                   child: Row(
                     children: [
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: kPrimary.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(AppRadius.m),
-                        ),
-                        child: const Icon(Icons.calendar_today_rounded,
-                            color: kPrimary, size: 24),
-                      ),
+                      const Icon(Icons.calendar_today_rounded,
+                          color: kPrimary, size: 28),
                       const SizedBox(width: 14),
                       Expanded(
                         child: Column(
@@ -453,8 +448,9 @@ class HomeScreen extends ConsumerWidget {
   Widget _recentlyViewedRow(AsyncValue<List<Salon>> salons, WidgetRef ref,
       BuildContext context, double cardW) {
     final recentIds = ref.watch(recentViewedSalonIdsProvider);
-    if (recentIds.isEmpty)
+    if (recentIds.isEmpty) {
       return const SliverToBoxAdapter(child: SizedBox.shrink());
+    }
     return salons.when(
       loading: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
       error: (_, __) => const SliverToBoxAdapter(child: SizedBox.shrink()),
@@ -462,8 +458,9 @@ class HomeScreen extends ConsumerWidget {
         final idToSalon = {for (var s in allSalons) s.id: s};
         final list =
             recentIds.map((id) => idToSalon[id]).whereType<Salon>().toList();
-        if (list.isEmpty)
+        if (list.isEmpty) {
           return const SliverToBoxAdapter(child: SizedBox.shrink());
+        }
         return SliverToBoxAdapter(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -471,7 +468,7 @@ class HomeScreen extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(
                   AppSizes.paddingHorizontal,
-                  AppSpacing.s,
+                  AppSizes.sectionGap,
                   AppSizes.paddingHorizontal,
                   AppSizes.elementSpacing,
                 ),
@@ -481,7 +478,7 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ),
               SizedBox(
-                height: 300,
+                height: AppSizes.cardHeight,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   padding:
@@ -559,7 +556,7 @@ class HomeScreen extends ConsumerWidget {
     return data.when(
       loading: () => SliverToBoxAdapter(
         child: SizedBox(
-          height: 300,
+          height: AppSizes.cardHeight,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.only(left: AppSizes.paddingHorizontal),
@@ -583,10 +580,15 @@ class HomeScreen extends ConsumerWidget {
         final location =
             ref.watch(selectedLocationProvider).trim().toLowerCase();
         var list = salons.where((s) {
-          if (location.isEmpty) return true;
-          if (s.address != null && s.address!.toLowerCase().contains(location))
+          if (location.isEmpty) {
             return true;
-          if (s.name.toLowerCase().contains(location)) return true;
+          }
+          if (s.address != null && s.address!.toLowerCase().contains(location)) {
+            return true;
+          }
+          if (s.name.toLowerCase().contains(location)) {
+            return true;
+          }
           return false;
         }).toList();
         if (list.isEmpty) list = List.from(salons);
@@ -621,7 +623,7 @@ class HomeScreen extends ConsumerWidget {
         }
         return SliverToBoxAdapter(
           child: SizedBox(
-            height: 300,
+            height: AppSizes.cardHeight,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.only(left: AppSizes.paddingHorizontal),
@@ -695,11 +697,9 @@ class _CategoryCircle extends StatelessWidget {
                 child: Container(
                   width: AppSizes.categorySize,
                   height: AppSizes.categorySize,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: kPrimarySoft,
                     shape: BoxShape.circle,
-                    border: Border.all(color: kStickerOutline, width: 1.5),
-                    boxShadow: kStickerShadow,
                   ),
                   child: Icon(icon, color: kPrimary, size: 31),
                 ),
@@ -749,21 +749,18 @@ class _VenueCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: kStickerCardDecoration(),
-      clipBehavior: Clip.antiAlias,
-      child: Semantics(
-        label:
-            '${salon.name}, reýting $_rating, $_reviews syn, takmynan $_distanceKm. Bron etmek üçin basyň.',
-        button: true,
+    final radius = BorderRadius.circular(AppRadius.m);
+    return Semantics(
+      label:
+          '${salon.name}, reýting $_rating, $_reviews syn, takmynan $_distanceKm. Bron etmek üçin basyň.',
+      button: true,
+      child: ClipRRect(
+        borderRadius: radius,
         child: Material(
           color: Colors.transparent,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppRadius.m)),
-          clipBehavior: Clip.antiAlias,
           child: InkWell(
             onTap: onTap,
-            borderRadius: BorderRadius.circular(AppRadius.m),
+            borderRadius: radius,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -771,54 +768,50 @@ class _VenueCard extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   height: AppSizes.cardImageHeight,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      Image.asset(
-                        salonMainImage(salon),
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => _placeholder(),
-                      ),
-                      Positioned(
-                        top: 10,
-                        right: 10,
-                        child: GestureDetector(
-                          onTap: onFavouriteTap,
-                          child: AnimatedScale(
-                            scale: isFavourite ? 1.15 : 1.0,
-                            duration: const Duration(milliseconds: 200),
-                            curve: Curves.easeOut,
-                            child: Container(
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(
-                                color: kCardBg,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.08),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Icon(
-                                isFavourite
-                                    ? Icons.favorite_rounded
-                                    : Icons.favorite_border_rounded,
-                                size: 18,
-                                color: isFavourite ? kError : kTextPrimary,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(AppRadius.m),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Image.asset(
+                          salonMainImage(salon),
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => _placeholder(),
+                        ),
+                        Positioned(
+                          top: 10,
+                          right: 10,
+                          child: GestureDetector(
+                            onTap: onFavouriteTap,
+                            child: AnimatedScale(
+                              scale: isFavourite ? 1.15 : 1.0,
+                              duration: const Duration(milliseconds: 200),
+                              curve: Curves.easeOut,
+                              child: Container(
+                                width: 32,
+                                height: 32,
+                                decoration: const BoxDecoration(
+                                  color: kCardBg,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  isFavourite
+                                      ? Icons.favorite_rounded
+                                      : Icons.favorite_border_rounded,
+                                  size: 18,
+                                  color: isFavourite ? kError : kTextPrimary,
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.l, 10, AppSpacing.l, AppSpacing.m),
+                      0, 10, AppSpacing.l, AppSpacing.m),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -980,8 +973,6 @@ class _DealPreviewCard extends StatelessWidget {
                   colors: _gradientColors(),
                 ),
                 borderRadius: BorderRadius.circular(AppRadius.m),
-                border: Border.all(color: kStickerOutline),
-                boxShadow: kStickerShadow,
               ),
               child: Row(
                 children: [

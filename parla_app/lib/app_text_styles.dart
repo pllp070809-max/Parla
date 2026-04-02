@@ -22,7 +22,7 @@ class AppTextStyles {
   static const TextStyle sectionTitle = TextStyle(
     fontFamily: kFontBody,
     fontFamilyFallback: _bodyFallback,
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: FontWeight.w600,
     height: 1.28,
     letterSpacing: -0.08,
@@ -41,7 +41,7 @@ class AppTextStyles {
   static const TextStyle cardTitle = TextStyle(
     fontFamily: kFontBody,
     fontFamilyFallback: _bodyFallback,
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: FontWeight.w600,
     height: 1.3,
     color: kTextPrimary,
@@ -50,7 +50,7 @@ class AppTextStyles {
   static const TextStyle cardMeta = TextStyle(
     fontFamily: kFontBody,
     fontFamilyFallback: _bodyFallback,
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: FontWeight.w400,
     height: 1.4,
     color: kTextPrimary,

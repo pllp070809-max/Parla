@@ -17,6 +17,10 @@ class BottomNavShell extends ConsumerWidget {
     MyBookingsScreen(),
     ProfileScreen(),
   ];
+  static const _navHeight = 56.0;
+  static const _indicatorWidth = 54.0;
+  static const _indicatorHeight = 36.0;
+  static const _animDuration = Duration(milliseconds: 260);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -48,32 +52,64 @@ class BottomNavShell extends ConsumerWidget {
                         boxShadow: kStickerShadow,
                       ),
                       child: SizedBox(
-                        height: 56,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            _NavItem(
-                              icon: Icons.home_outlined,
-                              activeIcon: Icons.home_rounded,
-                              label: 'Baş sahypa',
-                              isSelected: index == 0,
-                              onTap: () => ref.read(selectedTabIndexProvider.notifier).state = 0,
-                            ),
-                            _NavItem(
-                              icon: Icons.calendar_today_outlined,
-                              activeIcon: Icons.calendar_today_rounded,
-                              label: 'Bronlarym',
-                              isSelected: index == 1,
-                              onTap: () => ref.read(selectedTabIndexProvider.notifier).state = 1,
-                            ),
-                            _NavItem(
-                              icon: Icons.person_outline_rounded,
-                              activeIcon: Icons.person_rounded,
-                              label: 'Profil',
-                              isSelected: index == 2,
-                              onTap: () => ref.read(selectedTabIndexProvider.notifier).state = 2,
-                            ),
-                          ],
+                        height: _navHeight,
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            final slotWidth = constraints.maxWidth / _screens.length;
+                            final indicatorLeft =
+                                (slotWidth * index) + ((slotWidth - _indicatorWidth) / 2);
+                            return Stack(
+                              children: [
+                                AnimatedPositioned(
+                                  duration: _animDuration,
+                                  curve: Curves.easeOutCubic,
+                                  left: indicatorLeft,
+                                  top: (_navHeight - _indicatorHeight) / 2,
+                                  child: IgnorePointer(
+                                    child: Container(
+                                      width: _indicatorWidth,
+                                      height: _indicatorHeight,
+                                      decoration: BoxDecoration(
+                                        color: kPrimary.withValues(alpha: 0.12),
+                                        borderRadius: BorderRadius.circular(18),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _NavItem(
+                                        icon: Icons.home_outlined,
+                                        activeIcon: Icons.home_rounded,
+                                        label: 'Baş sahypa',
+                                        isSelected: index == 0,
+                                        onTap: () => ref.read(selectedTabIndexProvider.notifier).state = 0,
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: _NavItem(
+                                        icon: Icons.calendar_today_outlined,
+                                        activeIcon: Icons.calendar_today_rounded,
+                                        label: 'Bronlarym',
+                                        isSelected: index == 1,
+                                        onTap: () => ref.read(selectedTabIndexProvider.notifier).state = 1,
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: _NavItem(
+                                        icon: Icons.person_outline_rounded,
+                                        activeIcon: Icons.person_rounded,
+                                        label: 'Profil',
+                                        isSelected: index == 2,
+                                        onTap: () => ref.read(selectedTabIndexProvider.notifier).state = 2,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            );
+                          },
                         ),
                       ),
                     ),
@@ -102,8 +138,7 @@ class _NavItem extends StatelessWidget {
     required this.isSelected,
     required this.onTap,
   });
-
-  static const _indicatorAlpha = 0.12;
+  static const _animDuration = Duration(milliseconds: 260);
 
   @override
   Widget build(BuildContext context) {
@@ -120,23 +155,38 @@ class _NavItem extends StatelessWidget {
         child: ConstrainedBox(
           constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
           child: Center(
-            child: Stack(
-              alignment: Alignment.center,
-              clipBehavior: Clip.none,
-              children: [
-                if (isSelected)
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeOutCubic,
-                    width: 54,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: kPrimary.withValues(alpha: _indicatorAlpha),
-                      borderRadius: BorderRadius.circular(18),
-                    ),
+            child: TweenAnimationBuilder<double>(
+              duration: _animDuration,
+              curve: Curves.easeOutCubic,
+              tween: Tween<double>(begin: isSelected ? 0.94 : 1.0, end: isSelected ? 1.0 : 0.92),
+              builder: (context, scale, child) {
+                return Transform.scale(scale: scale, child: child);
+              },
+              child: AnimatedOpacity(
+                duration: _animDuration,
+                curve: Curves.easeOutCubic,
+                opacity: isSelected ? 1.0 : 0.88,
+                child: AnimatedSwitcher(
+                  duration: _animDuration,
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeInCubic,
+                  transitionBuilder: (child, animation) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: ScaleTransition(
+                        scale: Tween<double>(begin: 0.9, end: 1.0).animate(animation),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: Icon(
+                    isSelected ? activeIcon : icon,
+                    key: ValueKey<bool>(isSelected),
+                    size: iconSize,
+                    color: color,
                   ),
-                Icon(isSelected ? activeIcon : icon, size: iconSize, color: color),
-              ],
+                ),
+              ),
             ),
           ),
         ),
