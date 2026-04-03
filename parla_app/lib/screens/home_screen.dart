@@ -26,12 +26,12 @@ class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   static const _categories = [
-    _Cat('Saç salony', 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=200&h=200', 'salon'),
-    _Cat('Barberhana', 'https://images.unsplash.com/photo-1622286342621-4bd786c2447c?auto=format&fit=crop&w=200&h=200', 'barber'),
-    _Cat('Dyrnak', 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=200&h=200', 'salon'),
-    _Cat('Kirpik', 'https://images.unsplash.com/photo-1583001931096-959e9a1a6223?auto=format&fit=crop&w=200&h=200', 'gözellik'),
-    _Cat('Makiýaž', 'https://images.unsplash.com/photo-1516975080661-46bfa20db7b4?auto=format&fit=crop&w=200&h=200', 'gözellik'),
-    _Cat('Spa', 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=200&h=200', 'spa'),
+    _Cat('Saç salony', 'images/BOLUMLER/SAC_SALONY.jpg', 'salon'),
+    _Cat('Barberhana', 'images/BOLUMLER/BARBERHANA.png', 'barber'),
+    _Cat('Dyrnak', 'images/BOLUMLER/DYRNAK.png', 'salon'),
+    _Cat('Kirpik', 'images/BOLUMLER/KIRPIK.png', 'gözellik'),
+    _Cat('Makiýaž', 'images/BOLUMLER/MAKIYAZ.png', 'gözellik'),
+    _Cat('Spa', 'images/BOLUMLER/SPA.png', 'spa'),
   ];
 
   @override
@@ -231,7 +231,7 @@ class HomeScreen extends ConsumerWidget {
                       final cat = _categories[index];
                       return _CategoryCircle(
                         label: cat.label,
-                        imageUrl: cat.imageUrl,
+                        imagePath: cat.imagePath,
                         onTap: () {
                           HapticFeedback.lightImpact();
                           Navigator.push(
@@ -550,19 +550,19 @@ class HomeScreen extends ConsumerWidget {
 
 class _Cat {
   final String label;
-  final String imageUrl;
+  final String imagePath;
   final String key;
-  const _Cat(this.label, this.imageUrl, this.key);
+  const _Cat(this.label, this.imagePath, this.key);
 }
 
 // ── Category Circle (Fresha style) ──
 
 class _CategoryCircle extends StatelessWidget {
   final String label;
-  final String imageUrl;
+  final String imagePath;
   final VoidCallback onTap;
   const _CategoryCircle(
-      {required this.label, required this.imageUrl, required this.onTap});
+      {required this.label, required this.imagePath, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -585,8 +585,8 @@ class _CategoryCircle extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                   child: ClipOval(
-                    child: Image.network(
-                      imageUrl,
+                    child: Image.asset(
+                      imagePath,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(color: kCardBg),
                     ),
