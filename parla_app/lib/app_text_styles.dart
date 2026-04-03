@@ -59,7 +59,7 @@ class AppTextStyles {
   static const TextStyle categoryLabel = TextStyle(
     fontFamily: kFontBody,
     fontFamilyFallback: _bodyFallback,
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: FontWeight.w500,
     height: 1.25,
     color: kTextPrimary,

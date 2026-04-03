@@ -17,14 +17,11 @@ class AppSizes {
   static const double bottomNavHeight = 64;
   static const double sectionGap = 32;
 
-  static const double cardWidth = 260;
-  static const double cardHeight = 254;
-  static const double cardImageHeight = 140;
+  static const double cardWidth = 240;
+  static const double cardHeight = 294;
+  static const double cardImageHeight = 180;
   static const double exploreCardHeight = 100;
 
   /// Category circle diameter (tap target).
-  static const double categorySize = 72;
-
-  /// Min width for category column (label under circle).
-  static const double categoryColumnWidth = 88;
+  static const double categorySize = 90;
 }

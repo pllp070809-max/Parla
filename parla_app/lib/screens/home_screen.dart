@@ -16,7 +16,7 @@ import 'salon_detail_screen.dart';
 import 'search_screen.dart';
 import 'all_categories_screen.dart';
 import 'notifications_screen.dart';
-import 'deals_screen.dart';
+
 
 final _featuredProvider = FutureProvider<List<Salon>>((ref) {
   return ref.read(apiServiceProvider).getSalons();
@@ -26,13 +26,12 @@ class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   static const _categories = [
-    _Cat('Saç salony', Icons.content_cut_rounded, 'salon'),
-    _Cat('Barberhana', Icons.face_rounded, 'barber'),
-    _Cat('Dyrnak', Icons.brush_rounded, 'salon'),
-    _Cat('Kirpik', Icons.visibility_rounded, 'gözellik'),
-    _Cat('Massage', Icons.spa_rounded, 'spa'),
-    _Cat('Makiýaž', Icons.palette_rounded, 'gözellik'),
-    _Cat('Spa', Icons.hot_tub_rounded, 'spa'),
+    _Cat('Saç salony', 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=200&h=200', 'salon'),
+    _Cat('Barberhana', 'https://images.unsplash.com/photo-1622286342621-4bd786c2447c?auto=format&fit=crop&w=200&h=200', 'barber'),
+    _Cat('Dyrnak', 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=200&h=200', 'salon'),
+    _Cat('Kirpik', 'https://images.unsplash.com/photo-1583001931096-959e9a1a6223?auto=format&fit=crop&w=200&h=200', 'gözellik'),
+    _Cat('Makiýaž', 'https://images.unsplash.com/photo-1516975080661-46bfa20db7b4?auto=format&fit=crop&w=200&h=200', 'gözellik'),
+    _Cat('Spa', 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=200&h=200', 'spa'),
   ];
 
   @override
@@ -134,74 +133,7 @@ class HomeScreen extends ConsumerWidget {
               // ── Soňky görülen salonlar ──
               _recentlyViewedRow(salons, ref, context, cardW),
 
-              // ── Arzanladyşlar ──
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSizes.paddingHorizontal,
-                    homeSectionGap,
-                    AppSizes.paddingHorizontal,
-                    AppSizes.elementSpacing,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _sectionHeader(context, 'Arzanladyşlar', toDeals: true),
-                    ],
-                  ),
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: SizedBox(
-                  height: AppSizes.exploreCardHeight,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    padding:
-                        const EdgeInsets.only(left: AppSizes.paddingHorizontal),
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(
-                            right: AppSizes.elementSpacing),
-                        child: Align(
-                          alignment: Alignment.topCenter,
-                          child: _DealPreviewCard(
-                            title: 'Ilkinji zyýaretde 20%',
-                            onTap: () => Navigator.push(
-                                context, fadeSlideRoute(const DealsScreen())),
-                            showBadge: true,
-                            badgeText: '2 gün',
-                            gradientIndex: 0,
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                            right: AppSizes.elementSpacing),
-                        child: Align(
-                          alignment: Alignment.topCenter,
-                          child: _DealPreviewCard(
-                            title: 'Massage paketi 15%',
-                            onTap: () => Navigator.push(
-                                context, fadeSlideRoute(const DealsScreen())),
-                            showBadge: false,
-                            gradientIndex: 1,
-                          ),
-                        ),
-                      ),
-                      Align(
-                        alignment: Alignment.topCenter,
-                        child: _DealPreviewCard(
-                          title: 'Dyrnak + kirpik 10%',
-                          onTap: () => Navigator.push(
-                              context, fadeSlideRoute(const DealsScreen())),
-                          showBadge: false,
-                          gradientIndex: 2,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+
 
               // ── Maslahat berilýän ──
               SliverToBoxAdapter(
@@ -276,83 +208,40 @@ class HomeScreen extends ConsumerWidget {
                     AppSizes.paddingHorizontal,
                     homeSectionGap,
                     AppSizes.paddingHorizontal,
-                    AppSizes.elementSpacing,
+                    24, // As per UI spec: 24px margin bottom below header
                   ),
                   child: _sectionHeader(context, 'Esasy kategoriýalar',
                       toAllCategories: true),
                 ),
               ),
 
-              // ── Category circles + sag tarap fade (scroll görkezijisi) ──
-              SliverToBoxAdapter(
-                child: SizedBox(
-                  height: AppSizes.categorySize + AppSizes.smallSpacing + 36,
-                  child: Stack(
-                    children: [
-                      ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.only(
-                            left: AppSizes.paddingHorizontal),
-                        itemCount: _categories.length,
-                        separatorBuilder: (_, __) =>
-                            const SizedBox(width: AppSpacing.xl),
-                        itemBuilder: (_, i) {
-                          final cat = _categories[i];
-                          return _CategoryCircle(
-                            label: cat.label,
-                            icon: cat.icon,
-                            onTap: () {
-                              HapticFeedback.lightImpact();
-                              Navigator.push(
-                                context,
-                                fadeSlideRoute(
-                                    SalonsListScreen(category: cat.key)),
-                              );
-                            },
+              // ── Category Grid ──
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.paddingHorizontal),
+                sliver: SliverGrid(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    mainAxisSpacing: AppSizes.sectionGap - 8,
+                    crossAxisSpacing: AppSpacing.m,
+                    mainAxisExtent: 132, // Accommodates 90px image + margin + text size
+                  ),
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final cat = _categories[index];
+                      return _CategoryCircle(
+                        label: cat.label,
+                        imageUrl: cat.imageUrl,
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          Navigator.push(
+                            context,
+                            fadeSlideRoute(SalonsListScreen(category: cat.key)),
                           );
                         },
-                      ),
-                      Positioned(
-                        top: 0,
-                        right: 0,
-                        bottom: 0,
-                        width: 24,
-                        child: IgnorePointer(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.centerLeft,
-                                end: Alignment.centerRight,
-                                colors: [
-                                  Colors.white.withValues(alpha: 0),
-                                  Colors.white
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        top: 0,
-                        left: 0,
-                        bottom: 0,
-                        width: 24,
-                        child: IgnorePointer(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.centerRight,
-                                end: Alignment.centerLeft,
-                                colors: [
-                                  Colors.white.withValues(alpha: 0),
-                                  Colors.white
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                      );
+                    },
+                    childCount: _categories.length,
                   ),
                 ),
               ),
@@ -518,7 +407,7 @@ class HomeScreen extends ConsumerWidget {
   }
 
   Widget _sectionHeader(BuildContext context, String title,
-      {bool toAllCategories = false, bool toDeals = false}) {
+      {bool toAllCategories = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -531,8 +420,6 @@ class HomeScreen extends ConsumerWidget {
             if (toAllCategories) {
               Navigator.push(
                   context, fadeSlideRoute(const AllCategoriesScreen()));
-            } else if (toDeals) {
-              Navigator.push(context, fadeSlideRoute(const DealsScreen()));
             } else {
               Navigator.push(context, fadeSlideRoute(const SalonsListScreen()));
             }
@@ -663,59 +550,72 @@ class HomeScreen extends ConsumerWidget {
 
 class _Cat {
   final String label;
-  final IconData icon;
+  final String imageUrl;
   final String key;
-  const _Cat(this.label, this.icon, this.key);
+  const _Cat(this.label, this.imageUrl, this.key);
 }
 
 // ── Category Circle (Fresha style) ──
 
 class _CategoryCircle extends StatelessWidget {
   final String label;
-  final IconData icon;
+  final String imageUrl;
   final VoidCallback onTap;
   const _CategoryCircle(
-      {required this.label, required this.icon, required this.onTap});
+      {required this.label, required this.imageUrl, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
       label: label,
       button: true,
-      child: SizedBox(
-        width: AppSizes.categoryColumnWidth,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Material(
-              color: kCardBg,
-              shape: const CircleBorder(),
-              clipBehavior: Clip.antiAlias,
-              child: InkWell(
-                onTap: onTap,
-                customBorder: const CircleBorder(),
-                child: Container(
-                  width: AppSizes.categorySize,
-                  height: AppSizes.categorySize,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: AppSizes.categorySize,
+            height: AppSizes.categorySize,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Container(
                   decoration: const BoxDecoration(
-                    color: kPrimarySoft,
+                    color: kCardBg,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(icon, color: kPrimary, size: 31),
+                  child: ClipOval(
+                    child: Image.network(
+                      imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(color: kCardBg),
+                    ),
+                  ),
                 ),
-              ),
+                Positioned.fill(
+                  child: Material(
+                    color: Colors.transparent,
+                    shape: const CircleBorder(),
+                    clipBehavior: Clip.antiAlias,
+                    child: InkWell(
+                      onTap: onTap,
+                      customBorder: const CircleBorder(),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: AppSizes.smallSpacing),
-            Text(
-              label,
-              style: AppTextStyles.categoryLabel,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              softWrap: false,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: AppSizes.smallSpacing + 4),
+          Text(
+            label,
+            style: AppTextStyles.categoryLabel,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            softWrap: false,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
   }
