@@ -18,19 +18,44 @@ class BottomNavShell extends ConsumerWidget {
     ProfileScreen(),
   ];
   static const _navHeight = 56.0;
-  static const _indicatorWidth = 54.0;
+  static const _indicatorWidth = 52.0;
   static const _indicatorHeight = 36.0;
   static const _animDuration = Duration(milliseconds: 260);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final index = ref.watch(selectedTabIndexProvider);
+    final bottomInset = MediaQuery.of(context).viewPadding.bottom;
+    final featherHeight = _navHeight + bottomInset + 50;
 
     return Scaffold(
       body: Stack(
         children: [
           // 1-nji gatlak: sahypalar (doly ekran)
           IndexedStack(index: index, children: _screens),
+          // 2-nji gatlak: sistem nav area üçin statik feather.
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: IgnorePointer(
+              child: Container(
+                height: featherHeight,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: [
+                      Colors.black.withValues(alpha: 0.42),
+                      Colors.black.withValues(alpha: 0.18),
+                      Colors.transparent,
+                    ],
+                    stops: [0.0, 0.5, 1.0],
+                  ),
+                ),
+              ),
+            ),
+          ),
           // 2-nji gatlak: frosted glass bottom nav (üstünde ýüzýär)
           Positioned(
             left: 0,
@@ -80,8 +105,7 @@ class BottomNavShell extends ConsumerWidget {
                                   children: [
                                     Expanded(
                                       child: _NavItem(
-                                        icon: Icons.home_outlined,
-                                        activeIcon: Icons.home_rounded,
+                                        icon: Icons.home_rounded,
                                         label: 'Baş sahypa',
                                         isSelected: index == 0,
                                         onTap: () => ref.read(selectedTabIndexProvider.notifier).state = 0,
@@ -89,8 +113,7 @@ class BottomNavShell extends ConsumerWidget {
                                     ),
                                     Expanded(
                                       child: _NavItem(
-                                        icon: Icons.calendar_today_outlined,
-                                        activeIcon: Icons.calendar_today_rounded,
+                                        icon: Icons.calendar_today_rounded,
                                         label: 'Bronlarym',
                                         isSelected: index == 1,
                                         onTap: () => ref.read(selectedTabIndexProvider.notifier).state = 1,
@@ -98,8 +121,7 @@ class BottomNavShell extends ConsumerWidget {
                                     ),
                                     Expanded(
                                       child: _NavItem(
-                                        icon: Icons.person_outline_rounded,
-                                        activeIcon: Icons.person_rounded,
+                                        icon: Icons.person_rounded,
                                         label: 'Profil',
                                         isSelected: index == 2,
                                         onTap: () => ref.read(selectedTabIndexProvider.notifier).state = 2,
@@ -126,14 +148,12 @@ class BottomNavShell extends ConsumerWidget {
 
 class _NavItem extends StatelessWidget {
   final IconData icon;
-  final IconData activeIcon;
   final String label;
   final bool isSelected;
   final VoidCallback onTap;
 
   const _NavItem({
     required this.icon,
-    required this.activeIcon,
     required this.label,
     required this.isSelected,
     required this.onTap,
@@ -142,8 +162,10 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isSelected ? kPrimary : kTextTertiary;
     final iconSize = isSelected ? 28.0 : 24.0;
+    final color = isSelected ? kPrimary : kTextTertiary;
+
+    final iconWidget = Icon(icon, size: iconSize, color: color);
 
     return Semantics(
       label: label,
@@ -166,26 +188,7 @@ class _NavItem extends StatelessWidget {
                 duration: _animDuration,
                 curve: Curves.easeOutCubic,
                 opacity: isSelected ? 1.0 : 0.88,
-                child: AnimatedSwitcher(
-                  duration: _animDuration,
-                  switchInCurve: Curves.easeOutCubic,
-                  switchOutCurve: Curves.easeInCubic,
-                  transitionBuilder: (child, animation) {
-                    return FadeTransition(
-                      opacity: animation,
-                      child: ScaleTransition(
-                        scale: Tween<double>(begin: 0.9, end: 1.0).animate(animation),
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: Icon(
-                    isSelected ? activeIcon : icon,
-                    key: ValueKey<bool>(isSelected),
-                    size: iconSize,
-                    color: color,
-                  ),
-                ),
+                child: iconWidget,
               ),
             ),
           ),

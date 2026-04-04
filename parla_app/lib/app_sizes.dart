@@ -8,6 +8,8 @@ class AppSizes {
   static const double paddingHorizontal = AppSpacing.screenPadding;
   static const double sectionSpacing = AppSpacing.m;
   static const double elementSpacing = AppSpacing.m;
+  /// Vertical gap below section title row before horizontal card list.
+  static const double sectionTitleToCardGap = 12;
   static const double smallSpacing = AppSpacing.s;
 
   static const double radiusMd = AppRadius.m;

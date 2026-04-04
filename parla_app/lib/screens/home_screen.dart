@@ -73,7 +73,7 @@ class HomeScreen extends ConsumerWidget {
                                 IconButton(
                                   icon: const Icon(
                                       Icons.notifications_outlined,
-                                      size: 24),
+                                      size: 26),
                                   onPressed: () => Navigator.push(
                                       context,
                                       fadeSlideRoute(
@@ -99,6 +99,7 @@ class HomeScreen extends ConsumerWidget {
                                   ),
                               ],
                             ),
+                            const SizedBox(width: 4),
                             GestureDetector(
                               onTap: () {
                                 HapticFeedback.lightImpact();
@@ -106,8 +107,8 @@ class HomeScreen extends ConsumerWidget {
                                     fadeSlideRoute(const SearchScreen()));
                               },
                               child: Container(
-                                width: 36,
-                                height: 36,
+                                width: 40,
+                                height: 40,
                                 decoration: BoxDecoration(
                                   color: kSurfaceBg,
                                   shape: BoxShape.circle,
@@ -115,7 +116,7 @@ class HomeScreen extends ConsumerWidget {
                                 ),
                                 child: const Center(
                                   child: Icon(Icons.search_rounded,
-                                      size: 20, color: kPrimary),
+                                      size: 22, color: kPrimary),
                                 ),
                               ),
                             ),
@@ -142,7 +143,7 @@ class HomeScreen extends ConsumerWidget {
                     AppSizes.paddingHorizontal,
                     homeSectionGap,
                     AppSizes.paddingHorizontal,
-                    AppSizes.elementSpacing,
+                    AppSizes.sectionTitleToCardGap,
                   ),
                   child: Semantics(
                     label: 'Maslahat berilýän salonlar',
@@ -164,7 +165,7 @@ class HomeScreen extends ConsumerWidget {
                     AppSizes.paddingHorizontal,
                     homeSectionGap,
                     AppSizes.paddingHorizontal,
-                    AppSizes.elementSpacing,
+                    AppSizes.sectionTitleToCardGap,
                   ),
                   child: Semantics(
                     label: 'Meşhur salonlar',
@@ -186,7 +187,7 @@ class HomeScreen extends ConsumerWidget {
                     AppSizes.paddingHorizontal,
                     homeSectionGap,
                     AppSizes.paddingHorizontal,
-                    AppSizes.elementSpacing,
+                    AppSizes.sectionTitleToCardGap,
                   ),
                   child: Semantics(
                     label: 'Täze Parla-da goşulan salonlar',
@@ -222,9 +223,9 @@ class HomeScreen extends ConsumerWidget {
                 sliver: SliverGrid(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
-                    mainAxisSpacing: AppSizes.sectionGap - 8,
-                    crossAxisSpacing: AppSpacing.m,
-                    mainAxisExtent: 132, // Accommodates 90px image + margin + text size
+                    mainAxisSpacing: AppSizes.sectionGap,
+                    crossAxisSpacing: 24,
+                    mainAxisExtent: 142, // 96 image + 12 gap + label space
                   ),
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
@@ -359,7 +360,7 @@ class HomeScreen extends ConsumerWidget {
                   AppSizes.paddingHorizontal,
                   AppSizes.sectionGap,
                   AppSizes.paddingHorizontal,
-                  AppSizes.elementSpacing,
+                  AppSizes.sectionTitleToCardGap,
                 ),
                 child: Text(
                   'Soňky görülen salonlar',
@@ -574,8 +575,8 @@ class _CategoryCircle extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
-            width: AppSizes.categorySize,
-            height: AppSizes.categorySize,
+            width: 96,
+            height: 96,
             child: Stack(
               fit: StackFit.expand,
               children: [
@@ -606,14 +607,17 @@ class _CategoryCircle extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: AppSizes.smallSpacing + 4),
-          Text(
-            label,
-            style: AppTextStyles.categoryLabel,
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            softWrap: false,
-            overflow: TextOverflow.ellipsis,
+          const SizedBox(height: 12),
+          SizedBox(
+            width: 104,
+            child: Text(
+              label,
+              style: AppTextStyles.categoryLabel,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              softWrap: false,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
       ),

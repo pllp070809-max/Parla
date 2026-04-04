@@ -8,5 +8,5 @@ class AppSpacing {
   static const double l = 16.0;
   static const double xl = 16.0;
   static const double xxl = 16.0;
-  static const double screenPadding = 18.0;
+  static const double screenPadding = 16.0;
 }

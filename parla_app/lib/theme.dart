@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'app_radius.dart';
 import 'app_spacing.dart';
 
-const String kFontDisplay = 'Tartuffo';
-const String kFontBody = 'Roobert';
+const String kFontDisplay = 'Plus Jakarta Sans';
+const String kFontBody = 'Inter';
 
 // ── Colors (Fresha style, cyan variant) ──
 const Color kPrimary = Color(0xFF00ACC1);       // Fresha #7C40F6 → cyan
@@ -132,32 +133,23 @@ ThemeData buildParlaTheme() {
     onSurfaceVariant: kTextSecondary,
   );
 
-  const displayFallback = ['Times New Roman', 'serif'];
-  const bodyFallback = ['Roboto', 'Arial', 'sans-serif'];
-
-  final textTheme = const TextTheme(
+  final textTheme = TextTheme(
     // H1 — Main title (Tartuffo, 32-40)
-    displayLarge: TextStyle(
-      fontFamily: kFontDisplay,
-      fontFamilyFallback: displayFallback,
+    displayLarge: GoogleFonts.plusJakartaSans(
       fontSize: 34,
       fontWeight: FontWeight.w600,
       height: 1.12,
       letterSpacing: -0.5,
       color: kTextPrimary,
     ),
-    displayMedium: TextStyle(
-      fontFamily: kFontDisplay,
-      fontFamilyFallback: displayFallback,
+    displayMedium: GoogleFonts.plusJakartaSans(
       fontSize: 30,
       fontWeight: FontWeight.w600,
       height: 1.14,
       letterSpacing: -0.35,
       color: kTextPrimary,
     ),
-    displaySmall: TextStyle(
-      fontFamily: kFontDisplay,
-      fontFamilyFallback: displayFallback,
+    displaySmall: GoogleFonts.plusJakartaSans(
       fontSize: 26,
       fontWeight: FontWeight.w700,
       height: 1.16,
@@ -165,27 +157,21 @@ ThemeData buildParlaTheme() {
       color: kTextPrimary,
     ),
     // H2 — Section title (Tartuffo, 24-28)
-    headlineLarge: TextStyle(
-      fontFamily: kFontDisplay,
-      fontFamilyFallback: displayFallback,
+    headlineLarge: GoogleFonts.plusJakartaSans(
       fontSize: 24,
       fontWeight: FontWeight.w600,
       color: kTextPrimary,
       letterSpacing: -0.15,
       height: 1.22,
     ),
-    headlineMedium: TextStyle(
-      fontFamily: kFontDisplay,
-      fontFamilyFallback: displayFallback,
+    headlineMedium: GoogleFonts.plusJakartaSans(
       fontSize: 22,
       fontWeight: FontWeight.w600,
       color: kTextPrimary,
       letterSpacing: -0.1,
       height: 1.24,
     ),
-    headlineSmall: TextStyle(
-      fontFamily: kFontDisplay,
-      fontFamilyFallback: displayFallback,
+    headlineSmall: GoogleFonts.plusJakartaSans(
       fontSize: 20,
       fontWeight: FontWeight.w600,
       color: kTextPrimary,
@@ -193,70 +179,54 @@ ThemeData buildParlaTheme() {
       height: 1.26,
     ),
     // H3 — Subsection (Roobert, 18-22)
-    titleLarge: TextStyle(
-      fontFamily: kFontBody,
-      fontFamilyFallback: bodyFallback,
+    titleLarge: GoogleFonts.inter(
       fontSize: 22,
       fontWeight: FontWeight.w600,
       color: kTextPrimary,
       height: 1.28,
       letterSpacing: -0.1,
     ),
-    titleMedium: TextStyle(
-      fontFamily: kFontBody,
-      fontFamilyFallback: bodyFallback,
+    titleMedium: GoogleFonts.inter(
       fontSize: 20,
       fontWeight: FontWeight.w600,
       color: kTextPrimary,
       height: 1.3,
       letterSpacing: -0.05,
     ),
-    titleSmall: TextStyle(
-      fontFamily: kFontBody,
-      fontFamilyFallback: bodyFallback,
+    titleSmall: GoogleFonts.inter(
       fontSize: 18,
       fontWeight: FontWeight.w500,
       color: kTextPrimary,
       height: 1.33,
     ),
     // Body (Roobert, 14-16)
-    bodyLarge: TextStyle(
-      fontFamily: kFontBody,
-      fontFamilyFallback: bodyFallback,
+    bodyLarge: GoogleFonts.inter(
       fontSize: 16,
       fontWeight: FontWeight.w400,
       color: kTextPrimary,
       height: 1.5,
     ),
-    bodyMedium: TextStyle(
-      fontFamily: kFontBody,
-      fontFamilyFallback: bodyFallback,
+    bodyMedium: GoogleFonts.inter(
       fontSize: 15,
       fontWeight: FontWeight.w400,
       color: kTextSecondary,
       height: 1.5,
     ),
-    bodySmall: TextStyle(
-      fontFamily: kFontBody,
-      fontFamilyFallback: bodyFallback,
+    bodySmall: GoogleFonts.inter(
       fontSize: 14,
       fontWeight: FontWeight.w400,
       color: kTextSecondary,
       height: 1.45,
     ),
     // Buttons / labels
-    labelLarge: TextStyle(
-      fontFamily: kFontBody,
-      fontFamilyFallback: bodyFallback,
+    labelLarge: GoogleFonts.inter(
       fontSize: 16,
       fontWeight: FontWeight.w600,
       color: kTextPrimary,
       height: 1.25,
       letterSpacing: 0.1,
     ),
-    labelMedium: TextStyle(
-      fontFamily: kFontBody,
-      fontFamilyFallback: bodyFallback,
+    labelMedium: GoogleFonts.inter(
       fontSize: 14,
       fontWeight: FontWeight.w500,
       color: kTextPrimary,
@@ -264,9 +234,7 @@ ThemeData buildParlaTheme() {
       letterSpacing: 0.1,
     ),
     // Small / Caption (Roobert, 12)
-    labelSmall: TextStyle(
-      fontFamily: kFontBody,
-      fontFamilyFallback: bodyFallback,
+    labelSmall: GoogleFonts.inter(
       fontSize: 12,
       fontWeight: FontWeight.w400,
       color: kTextTertiary,
@@ -303,18 +271,14 @@ ThemeData buildParlaTheme() {
       }),
       labelTextStyle: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
-          return const TextStyle(
-            fontFamily: kFontBody,
-            fontFamilyFallback: bodyFallback,
+          return GoogleFonts.inter(
             fontSize: 12,
             fontWeight: FontWeight.w600,
             color: kPrimary,
             height: 1.3,
           );
         }
-        return const TextStyle(
-          fontFamily: kFontBody,
-          fontFamilyFallback: bodyFallback,
+        return GoogleFonts.inter(
           fontSize: 12,
           fontWeight: FontWeight.w500,
           color: kTextSecondary,
