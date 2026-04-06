@@ -14,7 +14,6 @@ import '../widgets/shared_widgets.dart';
 import 'salons_list_screen.dart';
 import 'salon_detail_screen.dart';
 import 'search_screen.dart';
-import 'all_categories_screen.dart';
 import 'notifications_screen.dart';
 
 
@@ -67,57 +66,30 @@ class HomeScreen extends ConsumerWidget {
                                 style: AppTextStyles.headerTitle,
                               ),
                             ),
-                            Stack(
-                              clipBehavior: Clip.none,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(
-                                      Icons.notifications_outlined,
-                                      size: 26),
-                                  onPressed: () => Navigator.push(
-                                      context,
-                                      fadeSlideRoute(
-                                          const NotificationsScreen())),
-                                  style: IconButton.styleFrom(
-                                      foregroundColor: kTextPrimary),
-                                ),
-                                if (ref.watch(hasUnreadNotificationsProvider))
-                                  Positioned(
-                                    top: 8,
-                                    right: 8,
-                                    child: Container(
-                                      width: 8,
-                                      height: 8,
-                                      decoration: const BoxDecoration(
-                                        color: kError,
-                                        shape: BoxShape.circle,
-                                        border: Border.fromBorderSide(
-                                            BorderSide(
-                                                color: kCardBg, width: 1)),
-                                      ),
-                                    ),
-                                  ),
-                              ],
+                            IconButton(
+                              icon: const Icon(
+                                Icons.notifications_none_rounded,
+                                size: 26,
+                              ),
+                              onPressed: () => Navigator.push(
+                                context,
+                                fadeSlideRoute(const NotificationsScreen()),
+                              ),
+                              style: IconButton.styleFrom(
+                                foregroundColor: kTextSecondary,
+                              ),
                             ),
                             const SizedBox(width: 4),
-                            GestureDetector(
-                              onTap: () {
+                            IconButton(
+                              onPressed: () {
                                 HapticFeedback.lightImpact();
                                 Navigator.push(context,
                                     fadeSlideRoute(const SearchScreen()));
                               },
-                              child: Container(
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  color: kSurfaceBg,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(color: kBorder),
-                                ),
-                                child: const Center(
-                                  child: Icon(Icons.search_rounded,
-                                      size: 22, color: kPrimary),
-                                ),
+                              icon: const Icon(
+                                Icons.search_rounded,
+                                size: 24,
+                                color: Color(0xFF0E7490),
                               ),
                             ),
                           ],
@@ -211,8 +183,10 @@ class HomeScreen extends ConsumerWidget {
                     AppSizes.paddingHorizontal,
                     24, // As per UI spec: 24px margin bottom below header
                   ),
-                  child: _sectionHeader(context, 'Esasy kategoriýalar',
-                      toAllCategories: true),
+                  child: Text(
+                    'Esasy kategoriýalar',
+                    style: AppTextStyles.sectionTitle,
+                  ),
                 ),
               ),
 
@@ -295,8 +269,8 @@ class HomeScreen extends ConsumerWidget {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.calendar_today_rounded,
-                          color: kPrimary, size: 28),
+                      const Icon(Icons.calendar_month_rounded,
+                          color: Color(0xFF0E7490), size: 28),
                       const SizedBox(width: 14),
                       Expanded(
                         child: Column(
@@ -318,12 +292,12 @@ class HomeScreen extends ConsumerWidget {
                             Text(
                               dateStr,
                               style: AppTextStyles.cardMeta.copyWith(
-                                  color: kPrimary, fontWeight: FontWeight.w600),
+                                  color: const Color(0xFF0E7490), fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),
                       ),
-                      const Icon(Icons.chevron_right_rounded, color: kPrimary),
+                      const Icon(Icons.arrow_forward_rounded, color: Color(0xFF0E7490), size: 20),
                     ],
                   ),
                 ),
@@ -371,8 +345,9 @@ class HomeScreen extends ConsumerWidget {
                 height: AppSizes.cardHeight,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
-                  padding:
-                      const EdgeInsets.only(left: AppSizes.paddingHorizontal),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.paddingHorizontal,
+                  ),
                   itemCount: list.length,
                   separatorBuilder: (_, __) =>
                       const SizedBox(width: AppSizes.elementSpacing),
@@ -407,8 +382,7 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _sectionHeader(BuildContext context, String title,
-      {bool toAllCategories = false}) {
+  Widget _sectionHeader(BuildContext context, String title) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -418,12 +392,7 @@ class HomeScreen extends ConsumerWidget {
         ),
         GestureDetector(
           onTap: () {
-            if (toAllCategories) {
-              Navigator.push(
-                  context, fadeSlideRoute(const AllCategoriesScreen()));
-            } else {
-              Navigator.push(context, fadeSlideRoute(const SalonsListScreen()));
-            }
+            Navigator.push(context, fadeSlideRoute(const SalonsListScreen()));
           },
           child: Text(
             'Ählisi',
@@ -447,7 +416,9 @@ class HomeScreen extends ConsumerWidget {
           height: AppSizes.cardHeight,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.only(left: AppSizes.paddingHorizontal),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSizes.paddingHorizontal,
+            ),
             itemCount: 3,
             separatorBuilder: (_, __) =>
                 const SizedBox(width: AppSizes.elementSpacing),
@@ -492,7 +463,7 @@ class HomeScreen extends ConsumerWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.storefront_outlined,
+                    Icon(Icons.storefront_rounded,
                         size: 48, color: kTextTertiary),
                     const SizedBox(height: AppSizes.elementSpacing),
                     Text(
@@ -514,7 +485,9 @@ class HomeScreen extends ConsumerWidget {
             height: AppSizes.cardHeight,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.only(left: AppSizes.paddingHorizontal),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSizes.paddingHorizontal,
+              ),
               itemCount: list.length,
               separatorBuilder: (_, __) =>
                   const SizedBox(width: AppSizes.elementSpacing),

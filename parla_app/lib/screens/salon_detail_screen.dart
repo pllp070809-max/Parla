@@ -369,9 +369,9 @@ class _HeroSection extends StatelessWidget {
               fit: BoxFit.cover,
               errorBuilder: (_, __, ___) => Container(
                   color: kPrimary.withValues(alpha: 0.12),
-                  child: const Center(
+                      child: const Center(
                       child:
-                          Icon(Icons.storefront, size: 72, color: kPrimary))),
+                          Icon(Icons.storefront_rounded, size: 72, color: kPrimary))),
             ),
           ),
 
@@ -400,7 +400,7 @@ class _HeroSection extends StatelessWidget {
                     icon: Icons.arrow_back_rounded,
                     onTap: () => Navigator.pop(context)),
                 const Spacer(),
-                _HeroBtn(icon: Icons.ios_share_rounded, onTap: () {}),
+                _HeroBtn(icon: Icons.share_rounded, onTap: () {}),
                 const SizedBox(width: AppSpacing.s),
                 _HeroBtn(icon: Icons.favorite_border_rounded, onTap: () {}),
               ],
@@ -521,9 +521,6 @@ class _InfoBlock extends StatelessWidget {
   }
 }
 
-// ═════════════════════════════════════════════
-// Chip bar delegate
-// ═════════════════════════════════════════════
 class _ChipBarDelegate extends SliverPersistentHeaderDelegate {
   final List<String> tabs;
   final int activeTab;
@@ -567,7 +564,7 @@ class _ChipBarDelegate extends SliverPersistentHeaderDelegate {
                         style: tt.titleSmall
                             ?.copyWith(fontWeight: FontWeight.w800)),
                     const Spacer(),
-                    _HeroBtn(icon: Icons.ios_share_rounded, onTap: () {}),
+                    _HeroBtn(icon: Icons.share_rounded, onTap: () {}),
                     const SizedBox(width: AppSpacing.s),
                     _HeroBtn(icon: Icons.favorite_border_rounded, onTap: () {}),
                   ],
@@ -841,7 +838,7 @@ class _TeamSection extends StatelessWidget {
                 );
               },
               style: TextButton.styleFrom(
-                foregroundColor: kPrimary,
+                foregroundColor: const Color(0xFF0E7490),
                 padding: EdgeInsets.zero,
                 minimumSize: Size.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -849,7 +846,7 @@ class _TeamSection extends StatelessWidget {
               child: Text(
                 'Ählisi',
                 style: tt.labelMedium
-                    ?.copyWith(color: kPrimary, fontWeight: FontWeight.w600),
+                    ?.copyWith(color: const Color(0xFF0E7490), fontWeight: FontWeight.w600),
               ),
             ),
           ],
@@ -1229,7 +1226,7 @@ class _NearbySalonsSection extends StatelessWidget {
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => Container(
                             color: kSurfaceBg,
-                            child: const Icon(Icons.storefront)),
+                            child: const Icon(Icons.storefront_rounded)),
                       ),
                     ),
                     Padding(
@@ -1297,10 +1294,10 @@ class _BottomBookBar extends StatelessWidget {
           ),
           FilledButton.icon(
             onPressed: onBook,
-            icon: const Icon(Icons.calendar_today_rounded, size: 18),
+            icon: const Icon(Icons.calendar_month_rounded, size: 18),
             label: const Text('Bron et'),
             style: FilledButton.styleFrom(
-              backgroundColor: kPrimary,
+              backgroundColor: const Color(0xFF0E7490),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppRadius.m)),
               padding: const EdgeInsets.symmetric(
@@ -1483,9 +1480,11 @@ class _SalonMapSectionState extends State<_SalonMapSection> {
                 const SizedBox(width: AppSpacing.s),
                 FilledButton.tonalIcon(
                   onPressed: () => openMapsDirection(salon),
-                  icon: const Icon(Icons.directions_rounded, size: 18),
+                  icon: const Icon(Icons.navigation_rounded, size: 18),
                   label: const Text('Ugur'),
                   style: FilledButton.styleFrom(
+                      foregroundColor: const Color(0xFF0E7490),
+                      backgroundColor: const Color(0x1F0E7490),
                       padding: const EdgeInsets.symmetric(
                           horizontal: AppSpacing.m, vertical: AppSpacing.s),
                       textStyle: tt.labelLarge?.copyWith(fontSize: 13)),

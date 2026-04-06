@@ -371,7 +371,7 @@ class _ServiceStep extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Icon(sel ? Icons.check_circle_rounded : Icons.circle_outlined, color: sel ? kPrimary : kBorderMedium, size: 28),
+                  Icon(sel ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded, color: sel ? kPrimary : kBorderMedium, size: 28),
                 ],
               ),
             ),
@@ -428,7 +428,7 @@ class _StaffStep extends StatelessWidget {
                       child: Image.asset(
                         imageForKey(null, fallbackId: s.id),
                         width: 52, height: 52, fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(width: 52, height: 52, color: kSurfaceBg, child: const Icon(Icons.person)),
+                        errorBuilder: (_, __, ___) => Container(width: 52, height: 52, color: kSurfaceBg, child: const Icon(Icons.person_rounded)),
                       ),
                     ),
                   const SizedBox(width: AppSpacing.m),
@@ -450,7 +450,7 @@ class _StaffStep extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Icon(sel ? Icons.check_circle_rounded : Icons.circle_outlined, color: sel ? kPrimary : kBorderMedium, size: 28),
+                  Icon(sel ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded, color: sel ? kPrimary : kBorderMedium, size: 28),
                 ],
               ),
             ),
@@ -605,7 +605,7 @@ class _GuestCountStep extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _CounterBtn(icon: Icons.remove, onTap: count > 1 ? () => onChanged(count - 1) : null),
+              _CounterBtn(icon: Icons.remove_rounded, onTap: count > 1 ? () => onChanged(count - 1) : null),
               SizedBox(
                 width: 80,
                 child: Column(
@@ -615,7 +615,7 @@ class _GuestCountStep extends StatelessWidget {
                   ],
                 ),
               ),
-              _CounterBtn(icon: Icons.add, onTap: count < 10 ? () => onChanged(count + 1) : null, filled: true),
+              _CounterBtn(icon: Icons.add_rounded, onTap: count < 10 ? () => onChanged(count + 1) : null, filled: true),
             ],
           ),
           const SizedBox(height: AppSpacing.l),
@@ -747,13 +747,13 @@ class _ContactStep extends StatelessWidget {
         const SizedBox(height: AppSpacing.xl),
         TextField(
           controller: nameCtrl,
-          decoration: InputDecoration(labelText: 'Adyňyz', prefixIcon: const Icon(Icons.person_outline_rounded)),
+          decoration: InputDecoration(labelText: 'Adyňyz', prefixIcon: const Icon(Icons.person_rounded)),
           textCapitalization: TextCapitalization.words,
         ),
         const SizedBox(height: AppSpacing.l),
         TextField(
           controller: phoneCtrl,
-          decoration: InputDecoration(labelText: 'Telefon', prefixIcon: const Icon(Icons.phone_outlined), hintText: '+993...'),
+          decoration: InputDecoration(labelText: 'Telefon', prefixIcon: const Icon(Icons.phone_rounded), hintText: '+993...'),
           keyboardType: TextInputType.phone,
         ),
       ],
@@ -799,7 +799,7 @@ class _ReviewStep extends StatelessWidget {
         ]),
         const SizedBox(height: AppSpacing.m),
         _RevCard(children: [
-          _RevRow(icon: Icons.calendar_today_rounded, label: 'Senä', value: dateLabel),
+          _RevRow(icon: Icons.calendar_month_rounded, label: 'Senä', value: dateLabel),
           const Divider(height: 1),
           _RevRow(icon: Icons.access_time_rounded, label: 'Wagt', value: timeLabel),
         ]),

@@ -41,7 +41,7 @@ class SalonStaffScreen extends StatelessWidget {
               ),
               title: Text(s.name, style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
               subtitle: Text(s.role, style: tt.bodySmall?.copyWith(color: kTextSecondary)),
-              trailing: const Icon(Icons.chevron_right_rounded, color: kTextTertiary),
+              trailing: const Icon(Icons.arrow_forward_rounded, color: kTextTertiary, size: 20),
             ),
           );
         },

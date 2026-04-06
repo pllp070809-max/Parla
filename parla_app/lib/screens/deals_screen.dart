@@ -41,7 +41,7 @@ class DealsScreen extends ConsumerWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.local_offer_outlined, size: 72, color: kTextTertiary),
+                  Icon(Icons.local_offer_rounded, size: 72, color: kTextTertiary),
                   const SizedBox(height: 16),
                   Text('Häzir arzanladyş ýok', style: tt.titleMedium),
                 ],
@@ -142,7 +142,7 @@ class _DealCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right_rounded, color: kPrimary),
+              const Icon(Icons.arrow_forward_rounded, color: kPrimary, size: 20),
             ],
           ),
         ),

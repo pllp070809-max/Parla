@@ -171,7 +171,7 @@ class _SalonTile extends StatelessWidget {
                 onPressed: onFavouriteToggle,
                 tooltip: isFavourite ? 'Saýlananlardan aýyr' : 'Saýlananlara goş',
               ),
-              const Icon(Icons.chevron_right_rounded, color: kTextTertiary),
+              const Icon(Icons.arrow_forward_rounded, color: kTextTertiary, size: 20),
             ],
           ),
         ),

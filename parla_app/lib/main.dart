@@ -10,7 +10,7 @@ const _systemUiOverlayStyle = SystemUiOverlayStyle(
   statusBarBrightness: Brightness.dark,
   systemNavigationBarColor: Colors.transparent,
   systemNavigationBarDividerColor: Colors.transparent,
-  systemNavigationBarIconBrightness: Brightness.light,
+  systemNavigationBarIconBrightness: Brightness.dark,
 );
 
 void main() {

@@ -215,7 +215,7 @@ class _SettingsTile extends StatelessWidget {
             const SizedBox(width: AppSpacing.m),
             Expanded(child: Text(label, style: tt.bodyLarge?.copyWith(color: color))),
             if (trailing != null) trailing!
-            else if (onTap != null) Icon(Icons.chevron_right_rounded, size: 18, color: kTextSecondary.withValues(alpha: 0.5)),
+            else if (onTap != null) Icon(Icons.arrow_forward_rounded, size: 18, color: kTextSecondary.withValues(alpha: 0.5)),
           ],
         ),
       ),

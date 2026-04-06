@@ -20,7 +20,7 @@ class NotificationsScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () {},
-            child: Text('Hemmesini okalan et', style: TextStyle(fontSize: 13, color: kPrimary)),
+            child: const Text('Hemmesini okalan et', style: TextStyle(fontSize: 13)),
           ),
         ],
       ),

@@ -7,6 +7,8 @@ import 'app_spacing.dart';
 const String kFontDisplay = 'Plus Jakarta Sans';
 const String kFontBody = 'Inter';
 
+const Color _buttonPrimaryColor = Color(0xFF0E7490);
+
 // ── Colors (Fresha style, cyan variant) ──
 const Color kPrimary = Color(0xFF00ACC1);       // Fresha #7C40F6 → cyan
 const Color kPrimarySoft = Color(0xFFE8F8FA); // saýlanan kartlar üçin ýeňil cyan fon
@@ -298,10 +300,18 @@ ThemeData buildParlaTheme() {
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: kPrimary,
+        backgroundColor: _buttonPrimaryColor,
         foregroundColor: Colors.white,
         elevation: 0,
         minimumSize: const Size(double.infinity, 52),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.m)),
+        textStyle: textTheme.labelLarge,
+      ),
+    ),
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        backgroundColor: _buttonPrimaryColor,
+        foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.m)),
         textStyle: textTheme.labelLarge,
       ),
@@ -316,7 +326,7 @@ ThemeData buildParlaTheme() {
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
-        foregroundColor: kPrimary,
+        foregroundColor: _buttonPrimaryColor,
         textStyle: textTheme.labelMedium,
       ),
     ),

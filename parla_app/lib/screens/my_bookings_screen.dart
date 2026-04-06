@@ -54,7 +54,7 @@ class _NoPhoneView extends StatelessWidget {
                 color: kPrimary.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.person_outline_rounded, size: 48, color: kPrimary.withValues(alpha: 0.5)),
+              child: Icon(Icons.person_rounded, size: 48, color: kPrimary.withValues(alpha: 0.5)),
             ),
             const SizedBox(height: AppSpacing.xl),
             Text('Profiliňizi dolduryň', style: tt.titleLarge, textAlign: TextAlign.center),
@@ -99,7 +99,7 @@ class _BookingsBody extends StatelessWidget {
       data: (bookings) {
         if (bookings.isEmpty) {
           return EmptyStateWidget(
-            icon: Icons.calendar_today_outlined,
+            icon: Icons.calendar_month_outlined,
             title: 'Siziň entäk bronyňyz ýok',
             subtitle: 'Salon tapyp bron ediň – bronlaryňyz bu ýerde awtomatiki görüner',
             actionLabel: 'Salonlara geçmek',
@@ -212,7 +212,7 @@ class _BookingTile extends StatelessWidget {
                       borderRadius: BorderRadius.circular(AppRadius.m),
                     ),
                     child: Icon(
-                      isPast ? Icons.check_circle_outline : Icons.calendar_today,
+                      isPast ? Icons.task_alt_rounded : Icons.calendar_month_rounded,
                       color: isPast ? kTextTertiary : kPrimary,
                     ),
                   ),
@@ -252,7 +252,7 @@ class _BookingTile extends StatelessWidget {
                     onPressed: () async {
                       await onCancel?.call();
                     },
-                    icon: const Icon(Icons.cancel_outlined, size: 18),
+                    icon: const Icon(Icons.cancel_rounded, size: 18),
                     label: const Text('Ýatyrmak'),
                   ),
                 ),

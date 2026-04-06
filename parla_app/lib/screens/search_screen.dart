@@ -158,7 +158,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               ),
               title: Text(s.name, style: tt.titleSmall),
               subtitle: s.address != null ? Text(s.address!, style: tt.bodySmall, maxLines: 1) : null,
-              trailing: const Icon(Icons.chevron_right_rounded, color: kTextTertiary),
+              trailing: const Icon(Icons.arrow_forward_rounded, color: kTextTertiary, size: 20),
               onTap: () => Navigator.push(context, fadeSlideRoute(SalonDetailScreen(salonId: s.id))),
             );
           },
