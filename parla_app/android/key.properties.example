@@ -1,0 +1,5 @@
+# Copy to key.properties and fill in. Never commit key.properties or keystore files.
+storePassword=your-store-password
+keyPassword=your-key-password
+keyAlias=upload
+storeFile=upload-keystore.jks

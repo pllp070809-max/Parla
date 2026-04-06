@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show RenderAbstractViewport;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -13,7 +14,6 @@ import '../models/salon.dart';
 import '../theme.dart';
 import '../widgets/shared_widgets.dart';
 import '../utils/launch_utils.dart';
-import '../utils/service_categories.dart';
 import '../utils/salon_images.dart';
 import 'booking_screen.dart';
 import 'salon_gallery_screen.dart';
@@ -70,20 +70,116 @@ const _kAdditionalInfo = [
   {'icon': Icons.child_friendly_rounded, 'label': 'Çagalar üçin amatly'},
 ];
 
+const _kDetailDivider = Color(0xFFF0F1F5);
+const _kDetailButtonBorder = Color(0xFFE6E7EC);
+const _kDetailChipLavenderBg = Color(0xFFF2EDFF);
+const _kDetailChipLavenderFg = Color(0xFF6F5CC2);
+const _kDetailChipMintBg = Color(0xFFEAF8EF);
+const _kDetailChipMintFg = Color(0xFF258A52);
+const _kDetailButtonBg = Color(0xFF151517);
+const _kDetailMeta = Color(0xFF8D8D98);
+
+const _kDetailBadges = [
+  (
+    label: 'Maslahat berilýär',
+    background: _kDetailChipLavenderBg,
+    foreground: _kDetailChipLavenderFg,
+  ),
+  (
+    label: 'Arzanladyş',
+    background: _kDetailChipMintBg,
+    foreground: _kDetailChipMintFg,
+  ),
+];
+
+class _SalonStatusInfo {
+  final bool isOpen;
+  final String title;
+  final String subtitle;
+
+  const _SalonStatusInfo({
+    required this.isOpen,
+    required this.title,
+    required this.subtitle,
+  });
+}
+
+_SalonStatusInfo _mockStatusForNow([DateTime? now]) {
+  final current = now ?? DateTime.now();
+  final hours = _openingRangeForWeekday(current.weekday);
+  final openAt = DateTime(
+    current.year,
+    current.month,
+    current.day,
+    hours.hour.hour,
+    hours.hour.minute,
+  );
+  final closeAt = DateTime(
+    current.year,
+    current.month,
+    current.day,
+    hours.close.hour,
+    hours.close.minute,
+  );
+  if (current.isBefore(openAt)) {
+    return _SalonStatusInfo(
+      isOpen: false,
+      title: 'Ýapyk',
+      subtitle: 'Irden ${_formatClock(openAt)}-da açylýar',
+    );
+  }
+  if (current.isBefore(closeAt)) {
+    return _SalonStatusInfo(
+      isOpen: true,
+      title: 'Açyk',
+      subtitle: 'Bu gün ${_formatClock(closeAt)}-da ýapylýar',
+    );
+  }
+  final nextDay = current.add(const Duration(days: 1));
+  final nextOpenRange = _openingRangeForWeekday(nextDay.weekday);
+  final nextOpenAt = DateTime(
+    nextDay.year,
+    nextDay.month,
+    nextDay.day,
+    nextOpenRange.hour.hour,
+    nextOpenRange.hour.minute,
+  );
+  return _SalonStatusInfo(
+    isOpen: false,
+    title: 'Ýapyk',
+    subtitle: 'Ertir ${_formatClock(nextOpenAt)}-da açylýar',
+  );
+}
+
+({TimeOfDay hour, TimeOfDay close}) _openingRangeForWeekday(int weekday) {
+  switch (weekday) {
+    case DateTime.sunday:
+      return (hour: const TimeOfDay(hour: 10, minute: 0), close: const TimeOfDay(hour: 18, minute: 0));
+    default:
+      return (hour: const TimeOfDay(hour: 10, minute: 0), close: const TimeOfDay(hour: 21, minute: 0));
+  }
+}
+
+String _formatClock(DateTime time) {
+  final hh = time.hour.toString().padLeft(2, '0');
+  final mm = time.minute.toString().padLeft(2, '0');
+  return '$hh:$mm';
+}
+
 // ── Helpers ──
 
 Future<LatLng?> _getUserLocation() async {
-  bool enabled = await Geolocator.isLocationServiceEnabled();
-  if (!enabled) return null;
-  LocationPermission perm = await Geolocator.checkPermission();
-  if (perm == LocationPermission.denied) {
-    perm = await Geolocator.requestPermission();
-  }
-  if (perm == LocationPermission.denied ||
-      perm == LocationPermission.deniedForever) {
-    return null;
-  }
   try {
+    bool enabled = await Geolocator.isLocationServiceEnabled();
+    if (!enabled) return null;
+    LocationPermission perm = await Geolocator.checkPermission();
+    if (perm == LocationPermission.denied) {
+      perm = await Geolocator.requestPermission();
+    }
+    if (perm == LocationPermission.denied ||
+        perm == LocationPermission.deniedForever) {
+      return null;
+    }
     final pos = await Geolocator.getCurrentPosition(
       locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.medium, timeLimit: Duration(seconds: 5)),
@@ -155,17 +251,22 @@ class _SalonDetailBody extends StatefulWidget {
 
 class _SalonDetailBodyState extends State<_SalonDetailBody> {
   final _scrollCtrl = ScrollController();
-  final _tabs = const ['Hyzmatlar', 'Topar', 'Portefolio', 'Barada'];
+  final _tabs = const ['Hyzmatlar', 'Topar', 'Portfolio', 'Barada'];
   int _activeTab = 0;
-  bool _showTopBar = false;
   int _heroPage = 0;
+  bool _showStickyNav = false;
 
   final _sectionKeys = List.generate(4, (_) => GlobalKey());
+  static const double _kStickyTabHeight = 44;
+  static const double _kStickyTopRowHeight = 52;
+  static const double _kStickyChromeHeight =
+      _kStickyTopRowHeight + _kStickyTabHeight;
 
   @override
   void initState() {
     super.initState();
     _scrollCtrl.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _onScroll());
   }
 
   @override
@@ -176,18 +277,33 @@ class _SalonDetailBodyState extends State<_SalonDetailBody> {
   }
 
   void _onScroll() {
-    final offset = _scrollCtrl.offset;
-    final show = offset > 240;
-    if (show != _showTopBar) setState(() => _showTopBar = show);
+    final root = context.findRenderObject();
+    if (root == null) return;
 
+    final safeTop = MediaQuery.of(context).padding.top;
+    final revealThreshold = safeTop + _kStickyChromeHeight + 24;
+    final servicesCtx = _sectionKeys[0].currentContext;
+    if (servicesCtx != null) {
+      final servicesBox = servicesCtx.findRenderObject() as RenderBox?;
+      if (servicesBox != null) {
+        final servicesPos =
+            servicesBox.localToGlobal(Offset.zero, ancestor: root);
+        final shouldShow = servicesPos.dy <= revealThreshold;
+        if (shouldShow != _showStickyNav) {
+          setState(() => _showStickyNav = shouldShow);
+        }
+      }
+    }
+
+    final sectionTriggerLine =
+        safeTop + (_showStickyNav ? _kStickyChromeHeight + 16 : 140);
     for (int i = _sectionKeys.length - 1; i >= 0; i--) {
       final key = _sectionKeys[i];
       final ctx = key.currentContext;
       if (ctx != null) {
         final box = ctx.findRenderObject() as RenderBox;
-        final pos = box.localToGlobal(Offset.zero,
-            ancestor: context.findRenderObject());
-        if (pos.dy < 160) {
+        final pos = box.localToGlobal(Offset.zero, ancestor: root);
+        if (pos.dy <= sectionTriggerLine) {
           if (_activeTab != i) setState(() => _activeTab = i);
           return;
         }
@@ -200,10 +316,20 @@ class _SalonDetailBodyState extends State<_SalonDetailBody> {
     setState(() => _activeTab = i);
     final ctx = _sectionKeys[i].currentContext;
     if (ctx != null) {
-      Scrollable.ensureVisible(ctx,
-          duration: const Duration(milliseconds: 400),
-          curve: Curves.easeOutCubic,
-          alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart);
+      final renderObject = ctx.findRenderObject();
+      if (renderObject == null) return;
+      final viewport = RenderAbstractViewport.of(renderObject);
+      final target = viewport.getOffsetToReveal(renderObject, 0).offset;
+      final safeTop = MediaQuery.of(context).padding.top;
+      final adjusted = (target - safeTop - _kStickyChromeHeight - 14).clamp(
+        _scrollCtrl.position.minScrollExtent,
+        _scrollCtrl.position.maxScrollExtent,
+      );
+      _scrollCtrl.animateTo(
+        adjusted.toDouble(),
+        duration: const Duration(milliseconds: 420),
+        curve: Curves.easeOutCubic,
+      );
     }
   }
 
@@ -245,24 +371,16 @@ class _SalonDetailBodyState extends State<_SalonDetailBody> {
             // ── Info block ──
             SliverToBoxAdapter(child: _InfoBlock(salon: salon)),
 
-            // ── Sticky chip bar ──
-            SliverPersistentHeader(
-              pinned: true,
-              delegate: _ChipBarDelegate(
-                tabs: _tabs,
-                activeTab: _activeTab,
-                onTap: _scrollToSection,
-                salon: salon,
-                showTitle: _showTopBar,
-              ),
-            ),
-
             // ── Hyzmatlar ──
             SliverToBoxAdapter(
               child: Padding(
                 key: _sectionKeys[0],
-                padding:
-                    const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.l, AppSpacing.xl, 0),
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.xl,
+                  AppSpacing.m,
+                  AppSpacing.xl,
+                  0,
+                ),
                 child: _ServicesSection(
                     salon: salon,
                     onBook: (svc) =>
@@ -274,8 +392,12 @@ class _SalonDetailBodyState extends State<_SalonDetailBody> {
             SliverToBoxAdapter(
               child: Padding(
                 key: _sectionKeys[1],
-                padding:
-                    const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, 0),
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.xl,
+                  AppSpacing.xl,
+                  AppSpacing.xl,
+                  0,
+                ),
                 child: _TeamSection(salon: salon),
               ),
             ),
@@ -323,6 +445,38 @@ class _SalonDetailBodyState extends State<_SalonDetailBody> {
           ],
         ),
 
+        Positioned(
+          left: 0,
+          right: 0,
+          top: 0,
+          child: SafeArea(
+            bottom: false,
+            child: IgnorePointer(
+              ignoring: !_showStickyNav,
+              child: AnimatedSlide(
+                offset: _showStickyNav
+                    ? Offset.zero
+                    : const Offset(0, -0.14),
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOutCubic,
+                child: AnimatedOpacity(
+                  key: const ValueKey('sticky-section-nav-opacity'),
+                  opacity: _showStickyNav ? 1 : 0,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOutCubic,
+                  child: _StickySectionNav(
+                    key: const ValueKey('sticky-section-nav'),
+                    salonName: salon.name,
+                    tabs: _tabs,
+                    activeTab: _activeTab,
+                    onTap: _scrollToSection,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+
         // ── Bottom bar ──
         Positioned(
           left: 0,
@@ -357,7 +511,7 @@ class _HeroSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 300,
+      height: 286,
       child: Stack(
         fit: StackFit.expand,
         children: [
@@ -442,10 +596,17 @@ class _HeroBtn extends StatelessWidget {
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.35),
+          color: Colors.white.withValues(alpha: 0.96),
           shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.12),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
-        child: Icon(icon, color: Colors.white, size: 20),
+        child: Icon(icon, color: kTextPrimary, size: 20),
       ),
     );
   }
@@ -461,166 +622,268 @@ class _InfoBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
-    return Padding(
-      padding:
-          const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.l, AppSpacing.xl, AppSpacing.s),
+    final status = _mockStatusForNow();
+    final statusColor = status.isOpen ? kSuccess : kError;
+    return Container(
+      width: double.infinity,
+      color: kScaffoldBg,
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.xl,
+        AppSpacing.xl,
+        AppSpacing.xl,
+        AppSpacing.s,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(salon.name,
-              style: tt.headlineMedium?.copyWith(fontWeight: FontWeight.w800)),
-          const SizedBox(height: AppSpacing.s),
-          Row(
+          Text(
+            salon.name,
+            style: tt.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: kTextPrimary,
+              letterSpacing: -0.2,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 6,
+            runSpacing: 6,
             children: [
-              Text('$_kMockRating',
-                  style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
-              const SizedBox(width: 4),
-              ...List.generate(5, (i) {
-                if (i < _kMockRating.floor()) {
-                  return const Icon(Icons.star_rounded, size: 18, color: kStar);
-                }
-                if (i < _kMockRating.ceil() && _kMockRating % 1 >= 0.3) {
-                  return const Icon(Icons.star_half_rounded,
-                      size: 18, color: kStar);
-                }
-                return Icon(Icons.star_outline_rounded,
-                    size: 18, color: kStar.withValues(alpha: 0.4));
-              }),
-              const SizedBox(width: 6),
-              Text('($_kMockReviewCount)',
-                  style: tt.bodySmall?.copyWith(color: kTextTertiary)),
+              Text(
+                _kMockRating.toStringAsFixed(1),
+                style: tt.bodyMedium?.copyWith(
+                  color: kTextPrimary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const Icon(Icons.star_rounded, size: 16, color: kStar),
+              Text(
+                '($_kMockReviewCount syn)',
+                style: tt.bodySmall?.copyWith(color: _kDetailMeta),
+              ),
             ],
           ),
-          const SizedBox(height: AppSpacing.s),
-          if (salon.address != null) Text(salon.address!, style: tt.bodyMedium),
-          const SizedBox(height: AppSpacing.s),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: kError.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(AppRadius.pill),
+          if (salon.address != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              salon.address!,
+              style: tt.bodyMedium?.copyWith(color: _kDetailMeta),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                    width: 7,
-                    height: 7,
-                    decoration: const BoxDecoration(
-                        color: kError, shape: BoxShape.circle)),
-                const SizedBox(width: 6),
-                Text('Ýapyk',
-                    style: tt.bodySmall
-                        ?.copyWith(color: kError, fontWeight: FontWeight.w600)),
-              ],
-            ),
+          ],
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: statusColor,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '${status.title} • ${status.subtitle}',
+                  style: tt.bodySmall?.copyWith(
+                    color: statusColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
           ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _kDetailBadges
+                .map(
+                  (badge) => _InfoBadge(
+                    label: badge.label,
+                    background: badge.background,
+                    foreground: badge.foreground,
+                  ),
+                )
+                .toList(),
+          ),
+          const SizedBox(height: 8),
+          const Divider(height: 1, color: _kDetailDivider),
         ],
       ),
     );
   }
 }
 
-class _ChipBarDelegate extends SliverPersistentHeaderDelegate {
+class _StickySectionNav extends StatelessWidget {
+  final String salonName;
   final List<String> tabs;
   final int activeTab;
   final ValueChanged<int> onTap;
-  final Salon salon;
-  final bool showTitle;
 
-  _ChipBarDelegate(
-      {required this.tabs,
-      required this.activeTab,
-      required this.onTap,
-      required this.salon,
-      required this.showTitle});
-
-  @override
-  double get minExtent => 50;
-  @override
-  double get maxExtent => 50;
+  const _StickySectionNav({
+    super.key,
+    required this.salonName,
+    required this.tabs,
+    required this.activeTab,
+    required this.onTap,
+  });
 
   @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
-    return Container(
-      color: kScaffoldBg,
-      child: Column(
-        children: [
-          if (showTitle)
-            SizedBox(
-              height: 0,
-              child: OverflowBox(
-                maxHeight: 0,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _HeroBtn(
-                        icon: Icons.arrow_back_rounded,
-                        onTap: () => Navigator.pop(context)),
-                    const SizedBox(width: AppSpacing.s),
-                    Text(salon.name,
-                        style: tt.titleSmall
-                            ?.copyWith(fontWeight: FontWeight.w800)),
-                    const Spacer(),
-                    _HeroBtn(icon: Icons.share_rounded, onTap: () {}),
-                    const SizedBox(width: AppSpacing.s),
-                    _HeroBtn(icon: Icons.favorite_border_rounded, onTap: () {}),
-                  ],
-                ),
-              ),
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        decoration: BoxDecoration(
+          color: kScaffoldBg,
+          border: const Border(bottom: BorderSide(color: _kDetailDivider)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.045),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
             ),
-          Expanded(
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-              itemCount: tabs.length,
-              separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.m),
-              itemBuilder: (_, i) {
-                final sel = i == activeTab;
-                return GestureDetector(
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    onTap(i);
-                  },
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: Text(
-                          tabs[i],
-                          style: tt.titleSmall?.copyWith(
-                            fontWeight: sel ? FontWeight.w800 : FontWeight.w500,
-                            color: sel ? kTextPrimary : kTextSecondary,
-                          ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              height: _SalonDetailBodyState._kStickyTopRowHeight,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 88),
+                      child: Text(
+                        salonName,
+                        key: const ValueKey('sticky-salon-title'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: tt.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: kTextPrimary,
                         ),
                       ),
-                      const SizedBox(height: 6),
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        height: 2.5,
-                        width: sel ? 40 : 0,
-                        decoration: BoxDecoration(
-                            color: kPrimary,
-                            borderRadius: BorderRadius.circular(2)),
-                      ),
-                    ],
+                    ),
                   ),
-                );
-              },
+                  Positioned.fill(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Row(
+                        children: [
+                          _TopChromeIconBtn(
+                            key: const ValueKey('sticky-back-button'),
+                            icon: Icons.arrow_back_rounded,
+                            onTap: () => Navigator.pop(context),
+                          ),
+                          const Spacer(),
+                          _TopChromeIconBtn(
+                            key: const ValueKey('sticky-share-button'),
+                            icon: Icons.share_outlined,
+                            onTap: () {},
+                          ),
+                          _TopChromeIconBtn(
+                            key: const ValueKey('sticky-favorite-button'),
+                            icon: Icons.favorite_border_rounded,
+                            onTap: () {},
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          Container(height: 1, color: kBorder),
-        ],
+            SizedBox(
+              height: _SalonDetailBodyState._kStickyTabHeight,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+                itemCount: tabs.length,
+                separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.l),
+                itemBuilder: (_, i) {
+                  final sel = i == activeTab;
+                  return Semantics(
+                    button: true,
+                    selected: sel,
+                    child: GestureDetector(
+                      key: ValueKey('sticky-tab-$i'),
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        onTap(i);
+                      },
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            tabs[i],
+                            style: tt.labelLarge?.copyWith(
+                              fontSize: 15,
+                              fontWeight:
+                                  sel ? FontWeight.w700 : FontWeight.w500,
+                              color: sel ? kTextPrimary : _kDetailMeta,
+                            ),
+                          ),
+                          const SizedBox(height: 7),
+                          AnimatedContainer(
+                            key:
+                                sel ? ValueKey('sticky-tab-indicator-$i') : null,
+                            duration: const Duration(milliseconds: 220),
+                            curve: Curves.easeOutCubic,
+                            height: 2.2,
+                            width: sel ? 34 : 0,
+                            decoration: BoxDecoration(
+                              color: kTextPrimary,
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
+}
+
+class _TopChromeIconBtn extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _TopChromeIconBtn({
+    super.key,
+    required this.icon,
+    required this.onTap,
+  });
 
   @override
-  bool shouldRebuild(covariant _ChipBarDelegate old) =>
-      old.activeTab != activeTab || old.showTitle != showTitle;
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: onTap,
+      splashRadius: 22,
+      icon: Icon(
+        icon,
+        color: kTextPrimary,
+        size: 22,
+      ),
+      visualDensity: VisualDensity.compact,
+      style: IconButton.styleFrom(
+        minimumSize: const Size(40, 40),
+        padding: EdgeInsets.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+    );
+  }
 }
 
 // ═════════════════════════════════════════════
@@ -636,126 +899,85 @@ class _ServicesSection extends StatefulWidget {
 }
 
 class _ServicesSectionState extends State<_ServicesSection> {
-  int _activeTab = 0;
-  static const int _initialVisibleCount = 4;
-
-  List<Service> get _visibleServices {
-    final all = widget.salon.services;
-    if (_activeTab == 0) return all;
-    final key = kServiceCategories[_activeTab - 1]['key'];
-    return all.where((s) => s.categoryKey == key).toList();
-  }
+  static const int _initialVisibleCount = 5;
+  bool _showAll = false;
 
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
-    final visible = _visibleServices;
-    final display = visible.take(_initialVisibleCount).toList();
-    final showViewAll = visible.length > _initialVisibleCount;
+    final allServices = widget.salon.services;
+    final display = _showAll
+        ? allServices
+        : allServices.take(_initialVisibleCount).toList();
+    final showViewAll = allServices.length > _initialVisibleCount;
+    final content = <Widget>[
+      Text(
+        'Hyzmatlar',
+        key: const ValueKey('section-title-services'),
+        style: tt.titleLarge?.copyWith(
+          fontWeight: FontWeight.w800,
+          color: kTextPrimary,
+          letterSpacing: -0.1,
+        ),
+      ),
+      const SizedBox(height: 18),
+    ];
+
+    if (allServices.isEmpty) {
+      content.add(
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24),
+          child: Text(
+            'Bu bölümde hyzmat ýok',
+            style: tt.bodyMedium?.copyWith(color: _kDetailMeta),
+          ),
+        ),
+      );
+    } else {
+      for (int i = 0; i < display.length; i++) {
+        final svc = display[i];
+        content.add(
+          Column(
+            children: [
+              if (i > 0) const Divider(height: 1, color: _kDetailDivider),
+              _ServiceRow(service: svc, onBook: () => widget.onBook(svc)),
+            ],
+          ),
+        );
+      }
+      if (showViewAll) {
+        content.addAll([
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: () => setState(() => _showAll = !_showAll),
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: _kDetailButtonBorder),
+                foregroundColor: kTextPrimary,
+                backgroundColor: kCardBg,
+                shape: const StadiumBorder(),
+                elevation: 0,
+                minimumSize: const Size.fromHeight(46),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.xl,
+                  vertical: 12,
+                ),
+                textStyle: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
+                ),
+              ),
+              child: Text(_showAll ? 'Az görkez' : 'Hemmesini görkez'),
+            ),
+          ),
+        ]);
+      }
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Hyzmatlar',
-            style: tt.titleLarge
-                ?.copyWith(fontWeight: FontWeight.w800, color: kTextPrimary)),
-        const SizedBox(height: 24),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              _ServiceTab(
-                  label: 'Hemmesi',
-                  isActive: _activeTab == 0,
-                  onTap: () => setState(() => _activeTab = 0)),
-              ...kServiceCategories.asMap().entries.map((e) {
-                final tabIndex = e.key + 1;
-                return Padding(
-                  padding: const EdgeInsets.only(left: 16),
-                  child: _ServiceTab(
-                    label: e.value['label']!,
-                    isActive: _activeTab == tabIndex,
-                    onTap: () => setState(() => _activeTab = tabIndex),
-                  ),
-                );
-              }),
-            ],
-          ),
-        ),
-        const SizedBox(height: 24),
-        if (visible.isEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24),
-            child: Text('Bu bölümde hyzmat ýok',
-                style: tt.bodyMedium?.copyWith(color: kTextSecondary)),
-          )
-        else ...[
-          ...display.asMap().entries.map((e) {
-            final i = e.key;
-            final svc = e.value;
-            return Column(
-              children: [
-                if (i > 0) const Divider(height: 1, color: kBorder),
-                _ServiceRow(service: svc, onBook: () => widget.onBook(svc)),
-              ],
-            );
-          }),
-          if (showViewAll) ...[
-            const SizedBox(height: 16),
-            Center(
-              child: OutlinedButton(
-                onPressed: () {},
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: kStickerOutline, width: 1.5),
-                  foregroundColor: kTextPrimary,
-                  backgroundColor: kCardBg,
-                  shape: const StadiumBorder(),
-                  elevation: 0,
-                  minimumSize: const Size(500, 45),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.xxl, vertical: 14),
-                  textStyle: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                  ),
-                ),
-                child: const Text('Hemmesi'),
-              ),
-            ),
-            const SizedBox(height: 8),
-          ],
-        ],
-      ],
-    );
-  }
-}
-
-class _ServiceTab extends StatelessWidget {
-  final String label;
-  final bool isActive;
-  final VoidCallback onTap;
-  const _ServiceTab(
-      {required this.label, required this.isActive, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isActive ? kTextPrimary : Colors.transparent,
-          borderRadius: BorderRadius.circular(999),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: isActive ? kCardBg : kTextPrimary,
-          ),
-        ),
-      ),
+      children: content,
     );
   }
 }
@@ -769,37 +991,60 @@ class _ServiceRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 20),
+      padding: const EdgeInsets.symmetric(vertical: 18),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(service.name,
-                    style: tt.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w600, color: kTextPrimary)),
-                const SizedBox(height: 4),
-                Text('${service.durationMinutes} min',
-                    style: tt.bodySmall?.copyWith(color: kTextSecondary)),
-                const SizedBox(height: 4),
-                Text('${service.price?.toStringAsFixed(0) ?? '?'} TMT',
-                    style: tt.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600, color: kTextPrimary)),
+                Text(
+                  service.name,
+                  style: tt.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: kTextPrimary,
+                    height: 1.3,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  '${service.durationMinutes} min',
+                  style: tt.bodySmall?.copyWith(
+                    color: _kDetailMeta,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  '${service.price?.toStringAsFixed(0) ?? '?'} TMT',
+                  style: tt.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: kTextPrimary,
+                  ),
+                ),
               ],
             ),
           ),
-          OutlinedButton(
-            onPressed: onBook,
-            style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: kStickerOutline, width: 1.5),
-              foregroundColor: kTextPrimary,
-              backgroundColor: kCardBg,
-              shape: const StadiumBorder(),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          const SizedBox(width: 12),
+          Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: OutlinedButton(
+              onPressed: onBook,
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: _kDetailButtonBorder),
+                foregroundColor: kTextPrimary,
+                backgroundColor: kCardBg,
+                shape: const StadiumBorder(),
+                minimumSize: const Size(118, 38),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                textStyle: tt.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: kTextPrimary,
+                ),
+              ),
+              child: const Text('Bron et'),
             ),
-            child: const Text('Bron et'),
           ),
         ],
       ),
@@ -824,6 +1069,7 @@ class _TeamSection extends StatelessWidget {
           children: [
             Text(
               'Topar',
+              key: const ValueKey('section-title-team'),
               style: tt.titleLarge?.copyWith(
                 fontWeight: FontWeight.w800,
                 color: kTextPrimary,
@@ -831,6 +1077,7 @@ class _TeamSection extends StatelessWidget {
             ),
             const Spacer(),
             TextButton(
+              key: const ValueKey('team-see-all'),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -838,78 +1085,133 @@ class _TeamSection extends StatelessWidget {
                 );
               },
               style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFF0E7490),
+                foregroundColor: _kDetailMeta,
                 padding: EdgeInsets.zero,
                 minimumSize: Size.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
               child: Text(
                 'Ählisi',
-                style: tt.labelMedium
-                    ?.copyWith(color: const Color(0xFF0E7490), fontWeight: FontWeight.w600),
+                style: tt.labelMedium?.copyWith(
+                  color: _kDetailMeta,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],
         ),
-        const SizedBox(height: AppSpacing.xl),
+        const SizedBox(height: 14),
         SizedBox(
-          height: 216,
+          height: 158,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.only(right: AppSpacing.s),
             itemCount: _kMockStaff.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 16),
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
             itemBuilder: (_, i) {
               final s = _kMockStaff[i];
               final name = (s['name'] as String).toUpperCase();
               final role = (s['role'] as String).toUpperCase();
               final imagePath = s['imagePath'] as String;
+              final rating = s['rating'] as double?;
               return SizedBox(
-                width: 118,
+                width: 92,
                 child: Column(
                   children: [
-                    Container(
-                      width: 96,
-                      height: 96,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: kStickerOutline, width: 1.5),
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: Image.asset(
-                        imagePath,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          color: kSurfaceBg,
-                          alignment: Alignment.center,
-                          child: Text(
-                            name[0],
-                            style: tt.titleLarge
-                                ?.copyWith(fontWeight: FontWeight.w800),
+                    SizedBox(
+                      width: 78,
+                      height: 88,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        alignment: Alignment.topCenter,
+                        children: [
+                          Container(
+                            width: 78,
+                            height: 78,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: _kDetailDivider,
+                                width: 1.2,
+                              ),
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            child: Image.asset(
+                              imagePath,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => Container(
+                                color: kSurfaceBg,
+                                alignment: Alignment.center,
+                                child: Text(
+                                  name[0],
+                                  style: tt.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
+                          if (rating != null)
+                            Positioned(
+                              bottom: 0,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 7,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(
+                                    AppRadius.pill,
+                                  ),
+                                  border: Border.all(
+                                    color: _kDetailDivider,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.star_rounded,
+                                      size: 11,
+                                      color: kStar,
+                                    ),
+                                    const SizedBox(width: 3),
+                                    Text(
+                                      rating.toStringAsFixed(1),
+                                      style: tt.labelSmall?.copyWith(
+                                        color: kTextPrimary,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     Text(
                       name,
-                      style: tt.titleSmall?.copyWith(
+                      style: tt.labelMedium?.copyWith(
                         fontWeight: FontWeight.w800,
                         color: kTextPrimary,
                         letterSpacing: 0.2,
-                        fontSize: 14,
+                        fontSize: 12.5,
                       ),
                       textAlign: TextAlign.center,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Text(
                       role,
-                      style: tt.bodySmall?.copyWith(
-                        color: kTeamRoleText,
+                      style: tt.labelSmall?.copyWith(
+                        color: _kDetailMeta,
                         fontWeight: FontWeight.w500,
                         letterSpacing: 0.3,
-                        fontSize: 11.5,
+                        fontSize: 10.5,
                       ),
                       textAlign: TextAlign.center,
                       maxLines: 1,
@@ -937,7 +1239,10 @@ class _PortfolioSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
-    final visibleCount = math.min(9, images.length);
+    final totalCount = images.length;
+    final showOverflowTile = totalCount > 9;
+    final visibleCount = showOverflowTile ? 9 : math.min(9, totalCount);
+    final hiddenCount = showOverflowTile ? totalCount - 8 : 0;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -946,85 +1251,90 @@ class _PortfolioSection extends StatelessWidget {
           children: [
             Text(
               'Portfolio',
+              key: const ValueKey('section-title-portfolio'),
               style: tt.titleLarge
                   ?.copyWith(fontWeight: FontWeight.w800, color: kTextPrimary),
             ),
-            const SizedBox(width: AppSpacing.s + 2),
-            Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: AppSpacing.s + 2, vertical: 6),
-              decoration: BoxDecoration(
-                color: kPrimarySoft,
-                borderRadius: BorderRadius.circular(AppRadius.pill),
-                border: Border.all(color: kStickerOutline),
-              ),
-              alignment: Alignment.center,
+            const SizedBox(width: 6),
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
               child: Text(
-                '48',
-                style: tt.labelMedium?.copyWith(
-                  color: kTextSecondary,
-                  fontWeight: FontWeight.w500,
+                '$totalCount',
+                style: tt.labelSmall?.copyWith(
+                  color: _kDetailMeta,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
           ],
         ),
-        const SizedBox(height: AppSpacing.xl),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: visibleCount,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: AppSpacing.m,
-            mainAxisSpacing: AppSpacing.m,
-            childAspectRatio: 1,
-          ),
-          itemBuilder: (_, i) => ClipRRect(
-            borderRadius: BorderRadius.circular(AppRadius.m),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Image.asset(
-                  images[i],
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
-                    color: kSurfaceBg,
-                    child: const Icon(Icons.image_not_supported_rounded),
+        const SizedBox(height: 14),
+        if (images.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: Text(
+              'Surat ýok',
+              style: tt.bodyMedium?.copyWith(color: _kDetailMeta),
+            ),
+          )
+        else
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: visibleCount,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+              childAspectRatio: 1,
+            ),
+            itemBuilder: (_, i) => ClipRRect(
+              borderRadius: BorderRadius.circular(AppRadius.s),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.asset(
+                    images[i],
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: kSurfaceBg,
+                      child: const Icon(Icons.image_not_supported_rounded),
+                    ),
                   ),
-                ),
-                if (i == visibleCount - 1)
+                  if (showOverflowTile && i == visibleCount - 1)
+                    Positioned.fill(
+                      child: Container(
+                        color: Colors.black.withValues(alpha: 0.42),
+                        alignment: Alignment.center,
+                        child: Text(
+                          '+$hiddenCount',
+                          style: tt.headlineLarge?.copyWith(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
                   Positioned.fill(
-                    child: Container(
-                      color: Colors.black.withValues(alpha: 0.35),
-                      alignment: Alignment.center,
-                      child: Text(
-                        '+39',
-                        style: tt.headlineLarge?.copyWith(
-                          color: Colors.white,
-                          fontSize: 26,
-                          fontWeight: FontWeight.w700,
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        key: ValueKey('portfolio-tile-$i'),
+                        onTap: () => Navigator.push(
+                          context,
+                          fadeSlideRoute(
+                            SalonGalleryScreen(salon: salon, initialIndex: i),
+                          ),
                         ),
+                        child: const SizedBox.expand(),
                       ),
                     ),
                   ),
-                Positioned.fill(
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () => Navigator.push(
-                        context,
-                        fadeSlideRoute(
-                          SalonGalleryScreen(salon: salon, initialIndex: i),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
       ],
     );
   }
@@ -1273,6 +1583,7 @@ class _BottomBookBar extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: kCardBg,
+        border: const Border(top: BorderSide(color: _kDetailDivider)),
         boxShadow: kShadowUpMd,
       ),
       padding: EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.m, AppSpacing.xl,
@@ -1284,11 +1595,17 @@ class _BottomBookBar extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('${minPrice.toStringAsFixed(0)} TMT-dan',
-                    style:
-                        tt.titleMedium?.copyWith(fontWeight: FontWeight.w900)),
-                Text(salonName,
-                    style: tt.bodySmall?.copyWith(color: kTextSecondary)),
+                Text(
+                  '${minPrice.toStringAsFixed(0)} TMT-dan',
+                  style: tt.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: kTextPrimary,
+                  ),
+                ),
+                Text(
+                  salonName,
+                  style: tt.bodySmall?.copyWith(color: _kDetailMeta),
+                ),
               ],
             ),
           ),
@@ -1297,14 +1614,45 @@ class _BottomBookBar extends StatelessWidget {
             icon: const Icon(Icons.calendar_month_rounded, size: 18),
             label: const Text('Bron et'),
             style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFF0E7490),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.m)),
+              backgroundColor: _kDetailButtonBg,
+              foregroundColor: Colors.white,
+              shape: const StadiumBorder(),
               padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.xl, vertical: AppSpacing.m),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _InfoBadge extends StatelessWidget {
+  final String label;
+  final Color background;
+  final Color foreground;
+
+  const _InfoBadge({
+    required this.label,
+    required this.background,
+    required this.foreground,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+      ),
+      child: Text(
+        label,
+        style: tt.labelSmall?.copyWith(
+          color: foreground,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }
