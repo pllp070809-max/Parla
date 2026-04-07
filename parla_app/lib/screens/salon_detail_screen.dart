@@ -1,3 +1,4 @@
+import 'dart:async' show unawaited;
 import 'dart:ui' as ui;
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
@@ -154,9 +155,15 @@ _SalonStatusInfo _mockStatusForNow([DateTime? now]) {
 ({TimeOfDay hour, TimeOfDay close}) _openingRangeForWeekday(int weekday) {
   switch (weekday) {
     case DateTime.sunday:
-      return (hour: const TimeOfDay(hour: 10, minute: 0), close: const TimeOfDay(hour: 18, minute: 0));
+      return (
+        hour: const TimeOfDay(hour: 10, minute: 0),
+        close: const TimeOfDay(hour: 18, minute: 0)
+      );
     default:
-      return (hour: const TimeOfDay(hour: 10, minute: 0), close: const TimeOfDay(hour: 21, minute: 0));
+      return (
+        hour: const TimeOfDay(hour: 10, minute: 0),
+        close: const TimeOfDay(hour: 21, minute: 0)
+      );
   }
 }
 
@@ -249,16 +256,80 @@ class _SalonDetailBody extends StatefulWidget {
   State<_SalonDetailBody> createState() => _SalonDetailBodyState();
 }
 
+@immutable
+class _StickyNavState {
+  final double revealProgress;
+  final int activeTab;
+
+  const _StickyNavState({
+    required this.revealProgress,
+    required this.activeTab,
+  });
+
+  static const initial = _StickyNavState(revealProgress: 0, activeTab: 0);
+
+  _StickyNavState copyWith({
+    double? revealProgress,
+    int? activeTab,
+  }) {
+    return _StickyNavState(
+      revealProgress: revealProgress ?? this.revealProgress,
+      activeTab: activeTab ?? this.activeTab,
+    );
+  }
+}
+
+class _StickyNavController extends ValueNotifier<_StickyNavState> {
+  _StickyNavController() : super(_StickyNavState.initial);
+
+  static const double _kProgressEpsilon = 0.001;
+
+  bool _lockActiveTabFromScroll = false;
+  int _latestRequestId = 0;
+
+  void syncFromScroll({
+    required double revealProgress,
+    required int activeTab,
+  }) {
+    final progressChanged =
+        (revealProgress - value.revealProgress).abs() > _kProgressEpsilon;
+    final nextActiveTab =
+        _lockActiveTabFromScroll ? value.activeTab : activeTab;
+    final tabChanged = nextActiveTab != value.activeTab;
+    if (!progressChanged && !tabChanged) return;
+
+    value = value.copyWith(
+      revealProgress: progressChanged ? revealProgress : value.revealProgress,
+      activeTab: tabChanged ? nextActiveTab : value.activeTab,
+    );
+  }
+
+  int beginManualTabScroll(int activeTab) {
+    _lockActiveTabFromScroll = true;
+    final requestId = ++_latestRequestId;
+    if (value.activeTab != activeTab) {
+      value = value.copyWith(activeTab: activeTab);
+    }
+    return requestId;
+  }
+
+  void finishManualTabScrollIfLatest(int requestId) {
+    if (requestId != _latestRequestId) return;
+    _lockActiveTabFromScroll = false;
+  }
+}
+
 class _SalonDetailBodyState extends State<_SalonDetailBody> {
   final _scrollCtrl = ScrollController();
+  final _stickyNavController = _StickyNavController();
   final _tabs = const ['Hyzmatlar', 'Topar', 'Portfolio', 'Barada'];
-  int _activeTab = 0;
   int _heroPage = 0;
-  bool _showStickyNav = false;
 
   final _sectionKeys = List.generate(4, (_) => GlobalKey());
-  static const double _kStickyTabHeight = 44;
-  static const double _kStickyTopRowHeight = 52;
+  static const double _kStickyRevealStart = 12;
+  static const double _kStickyRevealEnd = 78;
+  static const double _kStickyTabHeight = 58;
+  static const double _kStickyTopRowHeight = 64;
   static const double _kStickyChromeHeight =
       _kStickyTopRowHeight + _kStickyTabHeight;
 
@@ -273,30 +344,30 @@ class _SalonDetailBodyState extends State<_SalonDetailBody> {
   void dispose() {
     _scrollCtrl.removeListener(_onScroll);
     _scrollCtrl.dispose();
+    _stickyNavController.dispose();
     super.dispose();
   }
 
   void _onScroll() {
+    if (!_scrollCtrl.hasClients) return;
     final root = context.findRenderObject();
     if (root == null) return;
 
+    final stickyRawProgress = ((_scrollCtrl.offset - _kStickyRevealStart) /
+            (_kStickyRevealEnd - _kStickyRevealStart))
+        .clamp(0.0, 1.0);
+    final stickyRevealVisualProgress =
+        Curves.easeOutCubic.transform(stickyRawProgress);
     final safeTop = MediaQuery.of(context).padding.top;
-    final revealThreshold = safeTop + _kStickyChromeHeight + 24;
-    final servicesCtx = _sectionKeys[0].currentContext;
-    if (servicesCtx != null) {
-      final servicesBox = servicesCtx.findRenderObject() as RenderBox?;
-      if (servicesBox != null) {
-        final servicesPos =
-            servicesBox.localToGlobal(Offset.zero, ancestor: root);
-        final shouldShow = servicesPos.dy <= revealThreshold;
-        if (shouldShow != _showStickyNav) {
-          setState(() => _showStickyNav = shouldShow);
-        }
-      }
-    }
+    final sectionTriggerLine = safeTop +
+        (ui.lerpDouble(
+              140,
+              _kStickyChromeHeight + 16,
+              stickyRevealVisualProgress,
+            ) ??
+            140);
 
-    final sectionTriggerLine =
-        safeTop + (_showStickyNav ? _kStickyChromeHeight + 16 : 140);
+    int nextActiveTab = 0;
     for (int i = _sectionKeys.length - 1; i >= 0; i--) {
       final key = _sectionKeys[i];
       final ctx = key.currentContext;
@@ -304,32 +375,55 @@ class _SalonDetailBodyState extends State<_SalonDetailBody> {
         final box = ctx.findRenderObject() as RenderBox;
         final pos = box.localToGlobal(Offset.zero, ancestor: root);
         if (pos.dy <= sectionTriggerLine) {
-          if (_activeTab != i) setState(() => _activeTab = i);
-          return;
+          nextActiveTab = i;
+          break;
         }
       }
     }
-    if (_activeTab != 0) setState(() => _activeTab = 0);
+
+    _stickyNavController.syncFromScroll(
+      revealProgress: stickyRawProgress,
+      activeTab: nextActiveTab,
+    );
   }
 
   void _scrollToSection(int i) {
-    setState(() => _activeTab = i);
+    unawaited(_scrollToSectionImpl(i));
+  }
+
+  void _unlockTabScrollIfLatest(int requestId) {
+    if (!mounted) return;
+    _stickyNavController.finishManualTabScrollIfLatest(requestId);
+    _onScroll();
+  }
+
+  Future<void> _scrollToSectionImpl(int i) async {
+    final requestId = _stickyNavController.beginManualTabScroll(i);
     final ctx = _sectionKeys[i].currentContext;
-    if (ctx != null) {
-      final renderObject = ctx.findRenderObject();
-      if (renderObject == null) return;
-      final viewport = RenderAbstractViewport.of(renderObject);
-      final target = viewport.getOffsetToReveal(renderObject, 0).offset;
-      final safeTop = MediaQuery.of(context).padding.top;
-      final adjusted = (target - safeTop - _kStickyChromeHeight - 14).clamp(
-        _scrollCtrl.position.minScrollExtent,
-        _scrollCtrl.position.maxScrollExtent,
-      );
-      _scrollCtrl.animateTo(
+    if (ctx == null) {
+      _unlockTabScrollIfLatest(requestId);
+      return;
+    }
+    final renderObject = ctx.findRenderObject();
+    if (renderObject == null) {
+      _unlockTabScrollIfLatest(requestId);
+      return;
+    }
+    final viewport = RenderAbstractViewport.of(renderObject);
+    final target = viewport.getOffsetToReveal(renderObject, 0).offset;
+    final safeTop = MediaQuery.of(context).padding.top;
+    final adjusted = (target - safeTop - _kStickyChromeHeight - 14).clamp(
+      _scrollCtrl.position.minScrollExtent,
+      _scrollCtrl.position.maxScrollExtent,
+    );
+    try {
+      await _scrollCtrl.animateTo(
         adjusted.toDouble(),
         duration: const Duration(milliseconds: 420),
         curve: Curves.easeOutCubic,
       );
+    } finally {
+      _unlockTabScrollIfLatest(requestId);
     }
   }
 
@@ -406,8 +500,8 @@ class _SalonDetailBodyState extends State<_SalonDetailBody> {
             SliverToBoxAdapter(
               child: Padding(
                 key: _sectionKeys[2],
-                padding:
-                    const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, 0),
+                padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, 0),
                 child: _PortfolioSection(salon: salon, images: images),
               ),
             ),
@@ -416,8 +510,8 @@ class _SalonDetailBodyState extends State<_SalonDetailBody> {
             SliverToBoxAdapter(
               child: Padding(
                 key: _sectionKeys[3],
-                padding:
-                    const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, 0),
+                padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, 0),
                 child: _AboutSection(salon: salon),
               ),
             ),
@@ -435,8 +529,8 @@ class _SalonDetailBodyState extends State<_SalonDetailBody> {
             // ── Nearby ──
             SliverToBoxAdapter(
               child: Padding(
-                padding:
-                    const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, 0),
+                padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, 0),
                 child: _NearbySalonsSection(currentSalon: salon),
               ),
             ),
@@ -449,31 +543,24 @@ class _SalonDetailBodyState extends State<_SalonDetailBody> {
           left: 0,
           right: 0,
           top: 0,
-          child: SafeArea(
-            bottom: false,
-            child: IgnorePointer(
-              ignoring: !_showStickyNav,
-              child: AnimatedSlide(
-                offset: _showStickyNav
-                    ? Offset.zero
-                    : const Offset(0, -0.14),
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeOutCubic,
-                child: AnimatedOpacity(
-                  key: const ValueKey('sticky-section-nav-opacity'),
-                  opacity: _showStickyNav ? 1 : 0,
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeOutCubic,
+          child: ValueListenableBuilder<_StickyNavState>(
+            valueListenable: _stickyNavController,
+            builder: (context, stickyNavState, _) {
+              return IgnorePointer(
+                ignoring: stickyNavState.revealProgress <= 0,
+                child: RepaintBoundary(
                   child: _StickySectionNav(
                     key: const ValueKey('sticky-section-nav'),
+                    topInset: MediaQuery.of(context).padding.top,
+                    revealProgress: stickyNavState.revealProgress,
                     salonName: salon.name,
                     tabs: _tabs,
-                    activeTab: _activeTab,
+                    activeTab: stickyNavState.activeTab,
                     onTap: _scrollToSection,
                   ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
         ),
 
@@ -523,9 +610,9 @@ class _HeroSection extends StatelessWidget {
               fit: BoxFit.cover,
               errorBuilder: (_, __, ___) => Container(
                   color: kPrimary.withValues(alpha: 0.12),
-                      child: const Center(
-                      child:
-                          Icon(Icons.storefront_rounded, size: 72, color: kPrimary))),
+                  child: const Center(
+                      child: Icon(Icons.storefront_rounded,
+                          size: 72, color: kPrimary))),
             ),
           ),
 
@@ -717,6 +804,8 @@ class _InfoBlock extends StatelessWidget {
 }
 
 class _StickySectionNav extends StatelessWidget {
+  final double topInset;
+  final double revealProgress;
   final String salonName;
   final List<String> tabs;
   final int activeTab;
@@ -724,6 +813,8 @@ class _StickySectionNav extends StatelessWidget {
 
   const _StickySectionNav({
     super.key,
+    required this.topInset,
+    required this.revealProgress,
     required this.salonName,
     required this.tabs,
     required this.activeTab,
@@ -733,120 +824,226 @@ class _StickySectionNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
+    double segmentProgress(double start, double end, Curve curve) {
+      final normalized =
+          ((revealProgress - start) / (end - start)).clamp(0.0, 1.0).toDouble();
+      return curve.transform(normalized);
+    }
+
+    final headerSurfaceProgress =
+        segmentProgress(0.08, 0.52, Curves.easeOutCubic);
+    final headerSurfaceOffsetY =
+        ui.lerpDouble(-8, 0, headerSurfaceProgress) ?? 0;
+    final headerContentProgress =
+        segmentProgress(0.12, 0.56, Curves.easeOutCubic);
+    final headerContentOffsetY =
+        ui.lerpDouble(-10, 0, headerContentProgress) ?? 0;
+    final tabSurfaceProgress = segmentProgress(0.48, 0.82, Curves.easeOutCubic);
+    final tabSurfaceOffsetY = ui.lerpDouble(-10, 0, tabSurfaceProgress) ?? 0;
+    final tabRowProgress = segmentProgress(0.54, 1.0, Curves.easeOutQuart);
+    final tabRowOffsetY = ui.lerpDouble(-14, 0, tabRowProgress) ?? 0;
+    final stickyNavOpacity =
+        math.max(headerSurfaceProgress, tabSurfaceProgress);
+    final navOffsetY = ui.lerpDouble(-8, 0, stickyNavOpacity) ?? 0;
     return Material(
       color: Colors.transparent,
-      child: Container(
-        decoration: BoxDecoration(
-          color: kScaffoldBg,
-          border: const Border(bottom: BorderSide(color: _kDetailDivider)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.045),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
+      child: Transform.translate(
+        offset: Offset(0, navOffsetY),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(
-              height: _SalonDetailBodyState._kStickyTopRowHeight,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 88),
-                      child: Text(
-                        salonName,
-                        key: const ValueKey('sticky-salon-title'),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                        style: tt.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: kTextPrimary,
+            Opacity(
+              key: const ValueKey('sticky-header-surface-opacity'),
+              opacity: headerSurfaceProgress,
+              child: Transform.translate(
+                offset: Offset(0, headerSurfaceOffsetY),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: kScaffoldBg,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(
+                          alpha:
+                              ui.lerpDouble(0, 0.035, headerSurfaceProgress) ??
+                                  0.035,
+                        ),
+                        blurRadius:
+                            ui.lerpDouble(8, 18, headerSurfaceProgress) ?? 18,
+                        offset: Offset(
+                            0, ui.lerpDouble(2, 6, headerSurfaceProgress) ?? 6),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.only(top: topInset),
+                    child: Opacity(
+                      key: const ValueKey('sticky-top-row-opacity'),
+                      opacity: headerContentProgress,
+                      child: Transform.translate(
+                        offset: Offset(0, headerContentOffsetY),
+                        child: SizedBox(
+                          height: _SalonDetailBodyState._kStickyTopRowHeight,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 92),
+                                  child: Text(
+                                    salonName,
+                                    key: const ValueKey('sticky-salon-title'),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.center,
+                                    style: tt.headlineSmall?.copyWith(
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 21,
+                                      height: 1.1,
+                                      letterSpacing: -0.5,
+                                      color: kTextPrimary,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Positioned.fill(
+                                child: Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 6),
+                                  child: Row(
+                                    children: [
+                                      _TopChromeIconBtn(
+                                        key: const ValueKey(
+                                            'sticky-back-button'),
+                                        icon: Icons.arrow_back_rounded,
+                                        onTap: () => Navigator.pop(context),
+                                      ),
+                                      const Spacer(),
+                                      _TopChromeIconBtn(
+                                        key: const ValueKey(
+                                            'sticky-share-button'),
+                                        icon: Icons.share_outlined,
+                                        onTap: () {},
+                                      ),
+                                      _TopChromeIconBtn(
+                                        key: const ValueKey(
+                                            'sticky-favorite-button'),
+                                        icon: Icons.favorite_border_rounded,
+                                        onTap: () {},
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
-                  Positioned.fill(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: Row(
-                        children: [
-                          _TopChromeIconBtn(
-                            key: const ValueKey('sticky-back-button'),
-                            icon: Icons.arrow_back_rounded,
-                            onTap: () => Navigator.pop(context),
+                ),
+              ),
+            ),
+            Opacity(
+              key: const ValueKey('sticky-tab-surface-opacity'),
+              opacity: tabSurfaceProgress,
+              child: Transform.translate(
+                offset: Offset(0, tabSurfaceOffsetY),
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: kScaffoldBg,
+                    border: Border(
+                      bottom: BorderSide(color: _kDetailDivider),
+                    ),
+                  ),
+                  child: Opacity(
+                    key: const ValueKey('sticky-section-nav-opacity'),
+                    opacity: stickyNavOpacity,
+                    child: Opacity(
+                      key: const ValueKey('sticky-tab-row-opacity'),
+                      opacity: tabRowProgress,
+                      child: Transform.translate(
+                        offset: Offset(0, tabRowOffsetY),
+                        child: IgnorePointer(
+                          ignoring: tabRowProgress < 0.95,
+                          child: SizedBox(
+                            height: _SalonDetailBodyState._kStickyTabHeight,
+                            child: ListView.separated(
+                              key: const ValueKey('sticky-tabs-scroll'),
+                              scrollDirection: Axis.horizontal,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.xl,
+                              ),
+                              itemCount: tabs.length,
+                              separatorBuilder: (_, __) =>
+                                  const SizedBox(width: 28),
+                              itemBuilder: (_, i) {
+                                final sel = i == activeTab;
+                                final indicatorWidth = math
+                                    .max(36.0,
+                                        math.min(86.0, tabs[i].length * 8.5))
+                                    .toDouble();
+                                return Semantics(
+                                  button: true,
+                                  selected: sel,
+                                  child: GestureDetector(
+                                    key: ValueKey('sticky-tab-$i'),
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () {
+                                      HapticFeedback.selectionClick();
+                                      onTap(i);
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(top: 6),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          Text(
+                                            tabs[i],
+                                            style: tt.titleLarge?.copyWith(
+                                              fontSize: 18,
+                                              fontWeight: sel
+                                                  ? FontWeight.w700
+                                                  : FontWeight.w600,
+                                              letterSpacing: -0.35,
+                                              height: 1.1,
+                                              color: sel
+                                                  ? kTextPrimary
+                                                  : _kDetailMeta,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 11),
+                                          AnimatedContainer(
+                                            key: sel
+                                                ? ValueKey(
+                                                    'sticky-tab-indicator-$i')
+                                                : null,
+                                            duration: const Duration(
+                                                milliseconds: 220),
+                                            curve: Curves.easeOutCubic,
+                                            height: 3,
+                                            width: sel ? indicatorWidth : 0,
+                                            decoration: BoxDecoration(
+                                              color: kTextPrimary,
+                                              borderRadius:
+                                                  BorderRadius.circular(999),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 6),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
                           ),
-                          const Spacer(),
-                          _TopChromeIconBtn(
-                            key: const ValueKey('sticky-share-button'),
-                            icon: Icons.share_outlined,
-                            onTap: () {},
-                          ),
-                          _TopChromeIconBtn(
-                            key: const ValueKey('sticky-favorite-button'),
-                            icon: Icons.favorite_border_rounded,
-                            onTap: () {},
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
-                ],
-              ),
-            ),
-            SizedBox(
-              height: _SalonDetailBodyState._kStickyTabHeight,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-                itemCount: tabs.length,
-                separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.l),
-                itemBuilder: (_, i) {
-                  final sel = i == activeTab;
-                  return Semantics(
-                    button: true,
-                    selected: sel,
-                    child: GestureDetector(
-                      key: ValueKey('sticky-tab-$i'),
-                      onTap: () {
-                        HapticFeedback.selectionClick();
-                        onTap(i);
-                      },
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            tabs[i],
-                            style: tt.labelLarge?.copyWith(
-                              fontSize: 15,
-                              fontWeight:
-                                  sel ? FontWeight.w700 : FontWeight.w500,
-                              color: sel ? kTextPrimary : _kDetailMeta,
-                            ),
-                          ),
-                          const SizedBox(height: 7),
-                          AnimatedContainer(
-                            key:
-                                sel ? ValueKey('sticky-tab-indicator-$i') : null,
-                            duration: const Duration(milliseconds: 220),
-                            curve: Curves.easeOutCubic,
-                            height: 2.2,
-                            width: sel ? 34 : 0,
-                            decoration: BoxDecoration(
-                              color: kTextPrimary,
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+                ),
               ),
             ),
           ],
@@ -870,15 +1067,15 @@ class _TopChromeIconBtn extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       onPressed: onTap,
-      splashRadius: 22,
+      splashRadius: 24,
       icon: Icon(
         icon,
         color: kTextPrimary,
-        size: 22,
+        size: 24,
       ),
-      visualDensity: VisualDensity.compact,
+      visualDensity: VisualDensity.standard,
       style: IconButton.styleFrom(
-        minimumSize: const Size(40, 40),
+        minimumSize: const Size(44, 44),
         padding: EdgeInsets.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
@@ -1037,7 +1234,8 @@ class _ServiceRow extends StatelessWidget {
                 backgroundColor: kCardBg,
                 shape: const StadiumBorder(),
                 minimumSize: const Size(118, 38),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 textStyle: tt.labelMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: kTextPrimary,

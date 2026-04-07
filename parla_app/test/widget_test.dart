@@ -39,17 +39,56 @@ void main() {
         .first;
   }
 
+  double stickyHeaderSurfaceOpacity(WidgetTester tester) {
+    return tester
+        .widget<Opacity>(
+            find.byKey(const ValueKey('sticky-header-surface-opacity')))
+        .opacity;
+  }
+
+  double stickyTabSurfaceOpacity(WidgetTester tester) {
+    return tester
+        .widget<Opacity>(
+            find.byKey(const ValueKey('sticky-tab-surface-opacity')))
+        .opacity;
+  }
+
+  double stickyNavOpacity(WidgetTester tester) {
+    final headerOpacity = stickyHeaderSurfaceOpacity(tester);
+    final tabOpacity = stickyTabSurfaceOpacity(tester);
+    return headerOpacity > tabOpacity ? headerOpacity : tabOpacity;
+  }
+
+  double stickyTopRowOpacity(WidgetTester tester) {
+    return tester
+        .widget<Opacity>(find.byKey(const ValueKey('sticky-top-row-opacity')))
+        .opacity;
+  }
+
+  double stickyTabRowOpacity(WidgetTester tester) {
+    return tester
+        .widget<Opacity>(find.byKey(const ValueKey('sticky-tab-row-opacity')))
+        .opacity;
+  }
+
   testWidgets('Salon detail renders services and opens booking flow',
       (WidgetTester tester) async {
     await pumpSalonDetail(tester);
+    final mainScroll = mainVerticalScroll();
+    final serviceBookButton =
+        find.widgetWithText(OutlinedButton, 'Bron et').first;
 
     expect(find.text('Indi Salonlary'), findsWidgets);
-    expect(find.byKey(const ValueKey('section-title-services')), findsOneWidget);
+    expect(
+        find.byKey(const ValueKey('section-title-services')), findsOneWidget);
     expect(find.text('Aýal saç kesimi'), findsOneWidget);
-    expect(find.widgetWithText(FilledButton, 'Bron et'), findsOneWidget);
+    expect(serviceBookButton, findsOneWidget);
 
-    await tester.ensureVisible(find.widgetWithText(FilledButton, 'Bron et'));
-    await tester.tap(find.widgetWithText(FilledButton, 'Bron et'));
+    await tester.scrollUntilVisible(serviceBookButton, 160,
+        scrollable: mainScroll);
+    await tester.drag(mainScroll, const Offset(0, 120));
+    await tester.pumpAndSettle();
+    await tester.tap(serviceBookButton);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 900));
 
@@ -61,15 +100,46 @@ void main() {
       (WidgetTester tester) async {
     await pumpSalonDetail(tester);
     final mainScroll = mainVerticalScroll();
-    final opacityFinder = find.byKey(
-      const ValueKey('sticky-section-nav-opacity'),
-    );
 
     expect(find.byKey(const ValueKey('sticky-section-nav')), findsOneWidget);
-    expect(
-      tester.widget<AnimatedOpacity>(opacityFinder).opacity,
-      equals(0),
-    );
+    expect(stickyHeaderSurfaceOpacity(tester), equals(0));
+    expect(stickyTopRowOpacity(tester), equals(0));
+    expect(stickyTabSurfaceOpacity(tester), equals(0));
+    expect(stickyTabRowOpacity(tester), equals(0));
+
+    await tester.drag(mainScroll, const Offset(0, -20));
+    await tester.pump();
+
+    expect(stickyHeaderSurfaceOpacity(tester), greaterThan(0));
+    expect(stickyTopRowOpacity(tester), greaterThan(0));
+    expect(stickyTopRowOpacity(tester), lessThan(1));
+    expect(stickyTabSurfaceOpacity(tester), equals(0));
+    expect(stickyTabRowOpacity(tester), equals(0));
+
+    await tester.drag(mainScroll, const Offset(0, -28));
+    await tester.pump();
+
+    expect(stickyHeaderSurfaceOpacity(tester), greaterThan(0.99));
+    expect(stickyTopRowOpacity(tester), greaterThan(0.99));
+    expect(stickyTabSurfaceOpacity(tester), greaterThan(0));
+    expect(stickyTabSurfaceOpacity(tester), lessThan(1));
+    expect(stickyTabRowOpacity(tester), greaterThan(0));
+    expect(stickyTabRowOpacity(tester), lessThan(1));
+
+    await tester.drag(mainScroll, const Offset(0, 60));
+    await tester.pumpAndSettle();
+
+    expect(stickyHeaderSurfaceOpacity(tester), equals(0));
+    expect(stickyTopRowOpacity(tester), equals(0));
+    expect(stickyTabSurfaceOpacity(tester), equals(0));
+    expect(stickyTabRowOpacity(tester), equals(0));
+  });
+
+  testWidgets(
+      'Sticky section navigator becomes fully visible after deeper scroll',
+      (WidgetTester tester) async {
+    await pumpSalonDetail(tester);
+    final mainScroll = mainVerticalScroll();
 
     await tester.scrollUntilVisible(
       find.byKey(const ValueKey('section-title-team')),
@@ -78,15 +148,23 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    expect(stickyNavOpacity(tester), equals(1));
+    expect(stickyHeaderSurfaceOpacity(tester), equals(1));
+    expect(stickyTopRowOpacity(tester), equals(1));
+    expect(stickyTabSurfaceOpacity(tester), equals(1));
+    expect(stickyTabRowOpacity(tester), equals(1));
     expect(
-      tester.widget<AnimatedOpacity>(opacityFinder).opacity,
-      equals(1),
+      tester.getTopLeft(find.byKey(const ValueKey('sticky-section-nav'))).dy,
+      equals(0),
     );
     expect(find.byKey(const ValueKey('sticky-salon-title')), findsOneWidget);
     expect(find.byKey(const ValueKey('sticky-back-button')), findsOneWidget);
     expect(find.byKey(const ValueKey('sticky-share-button')), findsOneWidget);
-    expect(find.byKey(const ValueKey('sticky-favorite-button')), findsOneWidget);
-    expect(find.byKey(const ValueKey('sticky-tab-indicator-0')), findsOneWidget);
+    expect(
+        find.byKey(const ValueKey('sticky-favorite-button')), findsOneWidget);
+    expect(find.byKey(const ValueKey('sticky-tabs-scroll')), findsOneWidget);
+    expect(
+        find.byKey(const ValueKey('sticky-tab-indicator-0')), findsOneWidget);
   });
 
   testWidgets('Sticky tabs jump to sections and review block stays hidden',
@@ -101,14 +179,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(
-      tester
-          .widget<AnimatedOpacity>(
-            find.byKey(const ValueKey('sticky-section-nav-opacity')),
-          )
-          .opacity,
-      equals(1),
-    );
+    expect(stickyNavOpacity(tester), equals(1));
     expect(find.text('Synlar'), findsNothing);
     expect(find.text('Review'), findsNothing);
 
@@ -119,16 +190,71 @@ void main() {
         tester.getTopLeft(find.byKey(const ValueKey('section-title-team'))).dy;
     expect(teamDy, greaterThan(0));
     expect(teamDy, lessThan(260));
-    expect(find.byKey(const ValueKey('sticky-tab-indicator-1')), findsOneWidget);
+    expect(
+        find.byKey(const ValueKey('sticky-tab-indicator-1')), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('sticky-tab-2')));
     await tester.pumpAndSettle();
 
-    final portfolioDy =
-        tester.getTopLeft(find.byKey(const ValueKey('section-title-portfolio'))).dy;
+    final portfolioDy = tester
+        .getTopLeft(find.byKey(const ValueKey('section-title-portfolio')))
+        .dy;
     expect(portfolioDy, greaterThan(0));
     expect(portfolioDy, lessThan(260));
-    expect(find.byKey(const ValueKey('sticky-tab-indicator-2')), findsOneWidget);
+    expect(
+        find.byKey(const ValueKey('sticky-tab-indicator-2')), findsOneWidget);
+  });
+
+  testWidgets('Latest sticky tab tap wins during overlapping scroll animations',
+      (WidgetTester tester) async {
+    await pumpSalonDetail(tester);
+    final mainScroll = mainVerticalScroll();
+
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('section-title-team')),
+      220,
+      scrollable: mainScroll,
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('sticky-tab-2')));
+    await tester.pump(const Duration(milliseconds: 80));
+    await tester.tap(find.byKey(const ValueKey('sticky-tab-3')));
+    await tester.pump(const Duration(milliseconds: 360));
+
+    expect(
+        find.byKey(const ValueKey('sticky-tab-indicator-3')), findsOneWidget);
+
+    await tester.pumpAndSettle();
+    expect(
+        find.byKey(const ValueKey('sticky-tab-indicator-3')), findsOneWidget);
+  });
+
+  testWidgets('Sticky nav keeps latest tab after rapid drag and taps',
+      (WidgetTester tester) async {
+    await pumpSalonDetail(tester);
+    final mainScroll = mainVerticalScroll();
+
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('section-title-team')),
+      220,
+      scrollable: mainScroll,
+    );
+    await tester.pumpAndSettle();
+
+    await tester.drag(mainScroll, const Offset(0, -80));
+    await tester.pump();
+    await tester.drag(mainScroll, const Offset(0, 35));
+    await tester.pump();
+
+    await tester.tap(find.byKey(const ValueKey('sticky-tab-2')));
+    await tester.pump(const Duration(milliseconds: 80));
+    await tester.tap(find.byKey(const ValueKey('sticky-tab-3')));
+    await tester.pump(const Duration(milliseconds: 360));
+
+    expect(stickyNavOpacity(tester), equals(1));
+    expect(
+        find.byKey(const ValueKey('sticky-tab-indicator-3')), findsOneWidget);
   });
 
   testWidgets('Team action and portfolio tiles open next screens',
