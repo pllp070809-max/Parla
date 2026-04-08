@@ -564,6 +564,30 @@ class _SalonDetailBodyState extends State<_SalonDetailBody> {
           ),
         ),
 
+        Positioned.fill(
+          child: ValueListenableBuilder<_StickyNavState>(
+            valueListenable: _stickyNavController,
+            builder: (context, stickyNavState, _) {
+              return Stack(
+                children: [
+                  _UnifiedBackButtonOverlay(
+                    revealProgress: stickyNavState.revealProgress,
+                    onTap: () => Navigator.pop(context),
+                  ),
+                  _UnifiedShareButtonOverlay(
+                    revealProgress: stickyNavState.revealProgress,
+                    onTap: () {},
+                  ),
+                  _UnifiedFavoriteButtonOverlay(
+                    revealProgress: stickyNavState.revealProgress,
+                    onTap: () {},
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+
         // ── Bottom bar ──
         Positioned(
           left: 0,
@@ -630,24 +654,6 @@ class _HeroSection extends StatelessWidget {
                         colors: [Colors.black38, Colors.transparent]))),
           ),
 
-          // Top buttons
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 8,
-            left: AppSpacing.m,
-            right: AppSpacing.m,
-            child: Row(
-              children: [
-                _HeroBtn(
-                    icon: Icons.arrow_back_rounded,
-                    onTap: () => Navigator.pop(context)),
-                const Spacer(),
-                _HeroBtn(icon: Icons.share_rounded, onTap: () {}),
-                const SizedBox(width: AppSpacing.s),
-                _HeroBtn(icon: Icons.favorite_border_rounded, onTap: () {}),
-              ],
-            ),
-          ),
-
           // Page counter
           Positioned(
             bottom: 12,
@@ -665,35 +671,6 @@ class _HeroSection extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _HeroBtn extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-  const _HeroBtn({required this.icon, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.96),
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.12),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Icon(icon, color: kTextPrimary, size: 20),
       ),
     );
   }
@@ -912,25 +889,7 @@ class _StickySectionNav extends StatelessWidget {
                                       const EdgeInsets.symmetric(horizontal: 6),
                                   child: Row(
                                     children: [
-                                      _TopChromeIconBtn(
-                                        key: const ValueKey(
-                                            'sticky-back-button'),
-                                        icon: Icons.arrow_back_rounded,
-                                        onTap: () => Navigator.pop(context),
-                                      ),
                                       const Spacer(),
-                                      _TopChromeIconBtn(
-                                        key: const ValueKey(
-                                            'sticky-share-button'),
-                                        icon: Icons.share_outlined,
-                                        onTap: () {},
-                                      ),
-                                      _TopChromeIconBtn(
-                                        key: const ValueKey(
-                                            'sticky-favorite-button'),
-                                        icon: Icons.favorite_border_rounded,
-                                        onTap: () {},
-                                      ),
                                     ],
                                   ),
                                 ),
@@ -1053,31 +1012,160 @@ class _StickySectionNav extends StatelessWidget {
   }
 }
 
-class _TopChromeIconBtn extends StatelessWidget {
+class _UnifiedTopActionButtonOverlay extends StatelessWidget {
+  final double revealProgress;
+  final VoidCallback onTap;
   final IconData icon;
+  final double? left;
+  final double? right;
+  final Key? buttonKey;
+
+  const _UnifiedTopActionButtonOverlay({
+    this.buttonKey,
+    required this.revealProgress,
+    required this.onTap,
+    required this.icon,
+    this.left,
+    this.right,
+  }) : assert((left == null) != (right == null));
+
+  @override
+  Widget build(BuildContext context) {
+    final safeTop = MediaQuery.of(context).padding.top;
+    final raw = revealProgress.clamp(0.0, 1.0);
+    final p = raw <= 0.3
+        ? Curves.easeInOut.transform(raw / 0.3) * 0.3
+        : 0.3 + Curves.easeOutCubic.transform((raw - 0.3) / 0.7) * 0.7;
+    final backgroundColor = Color.lerp(
+      Colors.white.withValues(alpha: 0.96),
+      Colors.white.withValues(alpha: 0.0),
+      p,
+    );
+    final shadowAlpha = ui.lerpDouble(0.12, 0.0, p) ?? 0.0;
+    final shadowBlur = ui.lerpDouble(10, 0, p) ?? 0.0;
+    final shadowYOffset = ui.lerpDouble(3, 0, p) ?? 0.0;
+    return Positioned(
+      left: left,
+      right: right,
+      top: safeTop + 15,
+      child: SizedBox(
+        width: 40,
+        height: 40,
+        child: Material(
+          color: Colors.transparent,
+          shape: const CircleBorder(),
+          child: Ink(
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              shape: BoxShape.circle,
+              boxShadow: shadowAlpha > 0
+                  ? [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: shadowAlpha),
+                        blurRadius: shadowBlur,
+                        offset: Offset(0, shadowYOffset),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: InkWell(
+              key: buttonKey,
+              customBorder: const CircleBorder(),
+              onTap: onTap,
+              child: Center(
+                child: Icon(
+                  icon,
+                  color: kTextPrimary,
+                  size: 18,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _UnifiedBackButtonOverlay extends StatelessWidget {
+  final double revealProgress;
   final VoidCallback onTap;
 
-  const _TopChromeIconBtn({
-    super.key,
-    required this.icon,
+  const _UnifiedBackButtonOverlay({
+    required this.revealProgress,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: onTap,
-      splashRadius: 24,
-      icon: Icon(
-        icon,
-        color: kTextPrimary,
-        size: 24,
+    return IgnorePointer(
+      ignoring: false,
+      child: Stack(
+        children: [
+          _UnifiedTopActionButtonOverlay(
+            revealProgress: revealProgress,
+            onTap: onTap,
+            icon: Icons.arrow_back_rounded,
+            left: AppSpacing.m,
+            buttonKey: const ValueKey('unified-back-button'),
+          ),
+        ],
       ),
-      visualDensity: VisualDensity.standard,
-      style: IconButton.styleFrom(
-        minimumSize: const Size(44, 44),
-        padding: EdgeInsets.zero,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    );
+  }
+}
+
+class _UnifiedShareButtonOverlay extends StatelessWidget {
+  final double revealProgress;
+  final VoidCallback onTap;
+
+  const _UnifiedShareButtonOverlay({
+    required this.revealProgress,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      ignoring: false,
+      child: Stack(
+        children: [
+          _UnifiedTopActionButtonOverlay(
+            revealProgress: revealProgress,
+            onTap: onTap,
+            icon: Icons.share_rounded,
+            right: AppSpacing.m + 31 + AppSpacing.s,
+            buttonKey: const ValueKey('unified-share-button'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _UnifiedFavoriteButtonOverlay extends StatelessWidget {
+  final double revealProgress;
+  final VoidCallback onTap;
+
+  const _UnifiedFavoriteButtonOverlay({
+    required this.revealProgress,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      ignoring: false,
+      child: Stack(
+        children: [
+          _UnifiedTopActionButtonOverlay(
+            revealProgress: revealProgress,
+            onTap: onTap,
+            icon: Icons.favorite_border_rounded,
+            right: AppSpacing.m - 5,
+            buttonKey: const ValueKey('unified-favorite-button'),
+          ),
+        ],
       ),
     );
   }
