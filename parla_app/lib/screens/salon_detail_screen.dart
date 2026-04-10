@@ -72,7 +72,6 @@ const _kAdditionalInfo = [
 ];
 
 const _kDetailDivider = Color(0xFFF0F1F5);
-const _kDetailButtonBorder = Color(0xFFE6E7EC);
 const _kDetailChipLavenderBg = Color(0xFFF2EDFF);
 const _kDetailChipLavenderFg = Color(0xFF6F5CC2);
 const _kDetailChipMintBg = Color(0xFFEAF8EF);
@@ -664,10 +663,8 @@ class _HeroSection extends StatelessWidget {
                   color: Colors.black54,
                   borderRadius: BorderRadius.circular(AppRadius.s)),
               child: Text('${currentPage + 1}/${images.length}',
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700)),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: Colors.white, fontWeight: FontWeight.w700)),
             ),
           ),
         ],
@@ -703,7 +700,7 @@ class _InfoBlock extends StatelessWidget {
           Text(
             salon.name,
             style: tt.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
               color: kTextPrimary,
               letterSpacing: -0.2,
             ),
@@ -718,7 +715,7 @@ class _InfoBlock extends StatelessWidget {
                 _kMockRating.toStringAsFixed(1),
                 style: tt.bodyMedium?.copyWith(
                   color: kTextPrimary,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
               const Icon(Icons.star_rounded, size: 16, color: kStar),
@@ -752,7 +749,7 @@ class _InfoBlock extends StatelessWidget {
                   '${status.title} • ${status.subtitle}',
                   style: tt.bodySmall?.copyWith(
                     color: statusColor,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ),
@@ -874,7 +871,7 @@ class _StickySectionNav extends StatelessWidget {
                                     overflow: TextOverflow.ellipsis,
                                     textAlign: TextAlign.center,
                                     style: tt.headlineSmall?.copyWith(
-                                      fontWeight: FontWeight.w800,
+                                      fontWeight: FontWeight.w700,
                                       fontSize: 21,
                                       height: 1.1,
                                       letterSpacing: -0.5,
@@ -1185,35 +1182,158 @@ class _ServicesSection extends StatefulWidget {
 
 class _ServicesSectionState extends State<_ServicesSection> {
   static const int _initialVisibleCount = 5;
+
+  /// Salonda görünjek tertip; API-den täze açar gelende aşakda goşulýar.
+  static const List<String> _categoryKeyOrder = [
+    'haircut',
+    'color',
+    'beard',
+    'styling',
+    'treatment',
+    'nails',
+    'spa',
+    'brows',
+    'wax',
+    'massage',
+  ];
+
+  static const Map<String, String> _categoryLabels = {
+    'haircut': 'Saç kesim',
+    'color': 'Saç boýag',
+    'beard': 'Sakal',
+    'styling': 'Ustilleme',
+    'treatment': 'Bejeriş',
+    'nails': 'Dyrnak',
+    'spa': 'Spa',
+    'brows': 'Göz we gaş',
+    'wax': 'Depilýasiýa',
+    'massage': 'Massage',
+  };
+
   bool _showAll = false;
+  String _selectedCategoryKey = 'all';
+
+  static List<String> _categoryKeysForSalon(List<Service> services) {
+    final present =
+        services.map((s) => s.categoryKey).whereType<String>().toSet();
+    final ordered = <String>[];
+    for (final k in _categoryKeyOrder) {
+      if (present.contains(k)) ordered.add(k);
+    }
+    final rest = present.where((k) => !ordered.contains(k)).toList()..sort();
+    ordered.addAll(rest);
+    return ordered;
+  }
+
+  static String _labelForCategoryKey(String key) {
+    if (key == 'all') return 'Hemmesi';
+    return _categoryLabels[key] ?? key;
+  }
+
+  @override
+  void didUpdateWidget(covariant _ServicesSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final keys = _categoryKeysForSalon(widget.salon.services);
+    if (_selectedCategoryKey != 'all' &&
+        !keys.contains(_selectedCategoryKey)) {
+      _selectedCategoryKey = 'all';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
     final allServices = widget.salon.services;
-    final display = _showAll
+    final categoryKeysRow = _categoryKeysForSalon(allServices);
+    final filteredServices = _selectedCategoryKey == 'all'
         ? allServices
-        : allServices.take(_initialVisibleCount).toList();
-    final showViewAll = allServices.length > _initialVisibleCount;
+        : allServices
+            .where((s) => s.categoryKey == _selectedCategoryKey)
+            .toList();
+    final selectedCategoryLabel = _labelForCategoryKey(_selectedCategoryKey);
+    final display = _showAll
+        ? filteredServices
+        : filteredServices.take(_initialVisibleCount).toList();
+    final showViewAll = filteredServices.length > _initialVisibleCount;
     final content = <Widget>[
       Text(
         'Hyzmatlar',
         key: const ValueKey('section-title-services'),
         style: tt.titleLarge?.copyWith(
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w600,
           color: kTextPrimary,
           letterSpacing: -0.1,
         ),
       ),
       const SizedBox(height: 18),
+      SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            'all',
+            ...categoryKeysRow,
+          ].map((categoryKey) {
+            final selected = categoryKey == _selectedCategoryKey;
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: TweenAnimationBuilder<double>(
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeOutCubic,
+                tween: Tween<double>(
+                  begin: selected ? 0.98 : 1.0,
+                  end: selected ? 1.0 : 0.98,
+                ),
+                builder: (context, scale, child) {
+                  return Transform.scale(scale: scale, child: child);
+                },
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(999),
+                    onTap: () {
+                      if (_selectedCategoryKey == categoryKey) return;
+                      setState(() {
+                        _selectedCategoryKey = categoryKey;
+                        _showAll = false;
+                      });
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 220),
+                      curve: Curves.easeOutCubic,
+                      height: 38,
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: selected ? Colors.black : Colors.transparent,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        _labelForCategoryKey(categoryKey),
+                        style: tt.labelLarge?.copyWith(
+                          fontWeight: FontWeight.w400,
+                          color:
+                              selected ? Colors.white : kTextSecondary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+      const SizedBox(height: 10),
     ];
 
-    if (allServices.isEmpty) {
+    if (filteredServices.isEmpty) {
       content.add(
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 24),
           child: Text(
-            'Bu bölümde hyzmat ýok',
+            _selectedCategoryKey == 'all'
+                ? 'Bu bölümde hyzmat ýok'
+                : '$selectedCategoryLabel kategoriýasynda hyzmat ýok',
             style: tt.bodyMedium?.copyWith(color: _kDetailMeta),
           ),
         ),
@@ -1238,22 +1358,20 @@ class _ServicesSectionState extends State<_ServicesSection> {
             child: OutlinedButton(
               onPressed: () => setState(() => _showAll = !_showAll),
               style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: _kDetailButtonBorder),
+                side: const BorderSide(color: kPrimary),
                 foregroundColor: kTextPrimary,
                 backgroundColor: kCardBg,
                 shape: const StadiumBorder(),
                 elevation: 0,
-                minimumSize: const Size.fromHeight(46),
+                minimumSize: const Size.fromHeight(42),
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.xl,
-                  vertical: 12,
+                  vertical: 10,
                 ),
-                textStyle: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 15,
-                ),
+                textStyle:
+                    tt.labelMedium?.copyWith(fontWeight: FontWeight.w700),
               ),
-              child: Text(_showAll ? 'Az görkez' : 'Hemmesini görkez'),
+              child: Text(_showAll ? 'Az görkez' : 'Hemmesi'),
             ),
           ),
         ]);
@@ -1276,7 +1394,7 @@ class _ServiceRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 18),
+      padding: const EdgeInsets.symmetric(vertical: 16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1286,8 +1404,8 @@ class _ServiceRow extends StatelessWidget {
               children: [
                 Text(
                   service.name,
-                  style: tt.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
+                  style: tt.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
                     color: kTextPrimary,
                     height: 1.3,
                   ),
@@ -1295,16 +1413,16 @@ class _ServiceRow extends StatelessWidget {
                 const SizedBox(height: 6),
                 Text(
                   '${service.durationMinutes} min',
-                  style: tt.bodySmall?.copyWith(
+                  style: tt.labelSmall?.copyWith(
                     color: _kDetailMeta,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   '${service.price?.toStringAsFixed(0) ?? '?'} TMT',
-                  style: tt.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
+                  style: tt.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
                     color: kTextPrimary,
                   ),
                 ),
@@ -1313,11 +1431,11 @@ class _ServiceRow extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Padding(
-            padding: const EdgeInsets.only(top: 6),
+            padding: const EdgeInsets.only(top: 5),
             child: OutlinedButton(
               onPressed: onBook,
               style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: _kDetailButtonBorder),
+                side: const BorderSide(color: kPrimary),
                 foregroundColor: kTextPrimary,
                 backgroundColor: kCardBg,
                 shape: const StadiumBorder(),
@@ -1325,7 +1443,7 @@ class _ServiceRow extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 textStyle: tt.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w400,
                   color: kTextPrimary,
                 ),
               ),
@@ -1357,7 +1475,7 @@ class _TeamSection extends StatelessWidget {
               'Topar',
               key: const ValueKey('section-title-team'),
               style: tt.titleLarge?.copyWith(
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w600,
                 color: kTextPrimary,
               ),
             ),
@@ -1380,7 +1498,7 @@ class _TeamSection extends StatelessWidget {
                 'Ählisi',
                 style: tt.labelMedium?.copyWith(
                   color: _kDetailMeta,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
@@ -1431,7 +1549,7 @@ class _TeamSection extends StatelessWidget {
                                 child: Text(
                                   name[0],
                                   style: tt.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.w800,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                               ),
@@ -1481,10 +1599,9 @@ class _TeamSection extends StatelessWidget {
                     Text(
                       name,
                       style: tt.labelMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w500,
                         color: kTextPrimary,
                         letterSpacing: 0.2,
-                        fontSize: 12.5,
                       ),
                       textAlign: TextAlign.center,
                       maxLines: 1,
@@ -1495,9 +1612,8 @@ class _TeamSection extends StatelessWidget {
                       role,
                       style: tt.labelSmall?.copyWith(
                         color: _kDetailMeta,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w400,
                         letterSpacing: 0.3,
-                        fontSize: 10.5,
                       ),
                       textAlign: TextAlign.center,
                       maxLines: 1,
@@ -1539,7 +1655,7 @@ class _PortfolioSection extends StatelessWidget {
               'Portfolio',
               key: const ValueKey('section-title-portfolio'),
               style: tt.titleLarge
-                  ?.copyWith(fontWeight: FontWeight.w800, color: kTextPrimary),
+                  ?.copyWith(fontWeight: FontWeight.w600, color: kTextPrimary),
             ),
             const SizedBox(width: 6),
             Padding(
@@ -1548,7 +1664,7 @@ class _PortfolioSection extends StatelessWidget {
                 '$totalCount',
                 style: tt.labelSmall?.copyWith(
                   color: _kDetailMeta,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
             ),
@@ -1596,7 +1712,6 @@ class _PortfolioSection extends StatelessWidget {
                           '+$hiddenCount',
                           style: tt.headlineLarge?.copyWith(
                             color: Colors.white,
-                            fontSize: 24,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -1695,8 +1810,8 @@ class _AboutSectionState extends State<_AboutSection> {
                       size: 22, color: kPrimary),
                   const SizedBox(width: AppSpacing.s),
                   Text('Iş wagty',
-                      style: tt.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.w800)),
+                      style:
+                          tt.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
                 ],
               ),
               const SizedBox(height: AppSpacing.m),
@@ -1745,8 +1860,8 @@ class _AboutSectionState extends State<_AboutSection> {
                       size: 22, color: kSuccess),
                   const SizedBox(width: AppSpacing.s),
                   Text('Goşmaça maglumat',
-                      style: tt.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.w800)),
+                      style:
+                          tt.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
                 ],
               ),
               const SizedBox(height: AppSpacing.m),
@@ -1790,7 +1905,7 @@ class _NearbySalonsSection extends StatelessWidget {
             const Icon(Icons.location_on_rounded, size: 22, color: kPrimary),
             const SizedBox(width: AppSpacing.s),
             Text('Töwerekde salonlar',
-                style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+                style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w500)),
           ],
         ),
         const SizedBox(height: AppSpacing.m),
@@ -1837,8 +1952,8 @@ class _NearbySalonsSection extends StatelessWidget {
                               overflow: TextOverflow.ellipsis),
                           Text(
                               '${(1.1 + i * 0.4).toStringAsFixed(1)} km · mock',
-                              style: tt.bodySmall?.copyWith(
-                                  color: kTextTertiary, fontSize: 11)),
+                              style: tt.labelSmall?.copyWith(
+                                  color: kTextTertiary)),
                         ],
                       ),
                     ),
@@ -1884,7 +1999,7 @@ class _BottomBookBar extends StatelessWidget {
                 Text(
                   '${minPrice.toStringAsFixed(0)} TMT-dan',
                   style: tt.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w500,
                     color: kTextPrimary,
                   ),
                 ),
@@ -2107,7 +2222,7 @@ class _SalonMapSectionState extends State<_SalonMapSection> {
                       Text(salon.name, style: tt.labelLarge),
                       if (salon.address != null)
                         Text(salon.address!,
-                            style: tt.bodyMedium?.copyWith(fontSize: 12),
+                            style: tt.bodyMedium,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis),
                     ])),
@@ -2121,7 +2236,7 @@ class _SalonMapSectionState extends State<_SalonMapSection> {
                       backgroundColor: const Color(0x1F0E7490),
                       padding: const EdgeInsets.symmetric(
                           horizontal: AppSpacing.m, vertical: AppSpacing.s),
-                      textStyle: tt.labelLarge?.copyWith(fontSize: 13)),
+                      textStyle: tt.labelLarge),
                 ),
               ]),
             ),
