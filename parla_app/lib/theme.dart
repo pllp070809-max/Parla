@@ -167,8 +167,8 @@ ThemeData buildParlaTheme() {
       height: 1.22,
     ),
     headlineMedium: GoogleFonts.plusJakartaSans(
-      fontSize: 22,
-      fontWeight: FontWeight.w600,
+      fontSize: 24,
+      fontWeight: FontWeight.w700,
       color: kTextPrimary,
       letterSpacing: -0.1,
       height: 1.24,
@@ -182,21 +182,21 @@ ThemeData buildParlaTheme() {
     ),
     // H3 — Subsection (Roobert, 18-22)
     titleLarge: GoogleFonts.inter(
-      fontSize: 22,
+      fontSize: 20,
       fontWeight: FontWeight.w600,
       color: kTextPrimary,
       height: 1.28,
       letterSpacing: -0.1,
     ),
     titleMedium: GoogleFonts.inter(
-      fontSize: 20,
-      fontWeight: FontWeight.w600,
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
       color: kTextPrimary,
       height: 1.3,
       letterSpacing: -0.05,
     ),
     titleSmall: GoogleFonts.inter(
-      fontSize: 18,
+      fontSize: 14,
       fontWeight: FontWeight.w500,
       color: kTextPrimary,
       height: 1.33,
@@ -209,7 +209,7 @@ ThemeData buildParlaTheme() {
       height: 1.5,
     ),
     bodyMedium: GoogleFonts.inter(
-      fontSize: 15,
+      fontSize: 14,
       fontWeight: FontWeight.w400,
       color: kTextSecondary,
       height: 1.5,
@@ -223,7 +223,7 @@ ThemeData buildParlaTheme() {
     // Buttons / labels
     labelLarge: GoogleFonts.inter(
       fontSize: 16,
-      fontWeight: FontWeight.w600,
+      fontWeight: FontWeight.w700,
       color: kTextPrimary,
       height: 1.25,
       letterSpacing: 0.1,
