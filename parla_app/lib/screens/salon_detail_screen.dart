@@ -172,6 +172,14 @@ String _formatClock(DateTime time) {
   return '$hh:$mm';
 }
 
+TextStyle? _detailSectionTitleStyle(TextTheme tt) {
+  return tt.titleLarge?.copyWith(
+    fontWeight: FontWeight.w600,
+    color: kTextPrimary,
+    letterSpacing: -0.1,
+  );
+}
+
 // ── Helpers ──
 
 Future<LatLng?> _getUserLocation() async {
@@ -500,7 +508,7 @@ class _SalonDetailBodyState extends State<_SalonDetailBody> {
               child: Padding(
                 key: _sectionKeys[2],
                 padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, 0),
+                    AppSpacing.xl, 0, AppSpacing.xl, 0),
                 child: _PortfolioSection(salon: salon, images: images),
               ),
             ),
@@ -1234,8 +1242,7 @@ class _ServicesSectionState extends State<_ServicesSection> {
   void didUpdateWidget(covariant _ServicesSection oldWidget) {
     super.didUpdateWidget(oldWidget);
     final keys = _categoryKeysForSalon(widget.salon.services);
-    if (_selectedCategoryKey != 'all' &&
-        !keys.contains(_selectedCategoryKey)) {
+    if (_selectedCategoryKey != 'all' && !keys.contains(_selectedCategoryKey)) {
       _selectedCategoryKey = 'all';
     }
   }
@@ -1259,11 +1266,7 @@ class _ServicesSectionState extends State<_ServicesSection> {
       Text(
         'Hyzmatlar',
         key: const ValueKey('section-title-services'),
-        style: tt.titleLarge?.copyWith(
-          fontWeight: FontWeight.w600,
-          color: kTextPrimary,
-          letterSpacing: -0.1,
-        ),
+        style: _detailSectionTitleStyle(tt),
       ),
       const SizedBox(height: 18),
       SingleChildScrollView(
@@ -1311,8 +1314,7 @@ class _ServicesSectionState extends State<_ServicesSection> {
                         _labelForCategoryKey(categoryKey),
                         style: tt.labelLarge?.copyWith(
                           fontWeight: FontWeight.w400,
-                          color:
-                              selected ? Colors.white : kTextSecondary,
+                          color: selected ? Colors.white : kTextSecondary,
                         ),
                       ),
                     ),
@@ -1474,10 +1476,7 @@ class _TeamSection extends StatelessWidget {
             Text(
               'Topar',
               key: const ValueKey('section-title-team'),
-              style: tt.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: kTextPrimary,
-              ),
+              style: _detailSectionTitleStyle(tt),
             ),
             const Spacer(),
             TextButton(
@@ -1654,8 +1653,7 @@ class _PortfolioSection extends StatelessWidget {
             Text(
               'Portfolio',
               key: const ValueKey('section-title-portfolio'),
-              style: tt.titleLarge
-                  ?.copyWith(fontWeight: FontWeight.w600, color: kTextPrimary),
+              style: _detailSectionTitleStyle(tt),
             ),
             const SizedBox(width: 6),
             Padding(
@@ -1670,7 +1668,7 @@ class _PortfolioSection extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 18),
         if (images.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 20),
@@ -1760,6 +1758,12 @@ class _AboutSectionState extends State<_AboutSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Text(
+          'Barada',
+          key: const ValueKey('section-title-about'),
+          style: _detailSectionTitleStyle(tt),
+        ),
+        const SizedBox(height: 18),
         // Description card
         Container(
           width: double.infinity,
@@ -1810,8 +1814,7 @@ class _AboutSectionState extends State<_AboutSection> {
                       size: 22, color: kPrimary),
                   const SizedBox(width: AppSpacing.s),
                   Text('Iş wagty',
-                      style:
-                          tt.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
+                      style: _detailSectionTitleStyle(tt)),
                 ],
               ),
               const SizedBox(height: AppSpacing.m),
@@ -1860,8 +1863,7 @@ class _AboutSectionState extends State<_AboutSection> {
                       size: 22, color: kSuccess),
                   const SizedBox(width: AppSpacing.s),
                   Text('Goşmaça maglumat',
-                      style:
-                          tt.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
+                      style: _detailSectionTitleStyle(tt)),
                 ],
               ),
               const SizedBox(height: AppSpacing.m),
@@ -1905,7 +1907,7 @@ class _NearbySalonsSection extends StatelessWidget {
             const Icon(Icons.location_on_rounded, size: 22, color: kPrimary),
             const SizedBox(width: AppSpacing.s),
             Text('Töwerekde salonlar',
-                style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w500)),
+                style: _detailSectionTitleStyle(tt)),
           ],
         ),
         const SizedBox(height: AppSpacing.m),
@@ -1952,8 +1954,8 @@ class _NearbySalonsSection extends StatelessWidget {
                               overflow: TextOverflow.ellipsis),
                           Text(
                               '${(1.1 + i * 0.4).toStringAsFixed(1)} km · mock',
-                              style: tt.labelSmall?.copyWith(
-                                  color: kTextTertiary)),
+                              style: tt.labelSmall
+                                  ?.copyWith(color: kTextTertiary)),
                         ],
                       ),
                     ),
@@ -2183,7 +2185,9 @@ class _SalonMapSectionState extends State<_SalonMapSection> {
                   borderRadius: BorderRadius.circular(AppRadius.s)),
               child: const Icon(Icons.map_rounded, size: 18, color: kPrimary)),
           const SizedBox(width: AppSpacing.s + 2),
-          Expanded(child: Text('Ýerleşýän ýeri', style: tt.titleMedium)),
+          Expanded(
+            child: Text('Ýerleşýän ýeri', style: _detailSectionTitleStyle(tt)),
+          ),
         ]),
         const SizedBox(height: AppSpacing.m),
         Container(
