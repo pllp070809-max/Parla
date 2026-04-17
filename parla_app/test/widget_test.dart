@@ -75,8 +75,7 @@ void main() {
       (WidgetTester tester) async {
     await pumpSalonDetail(tester);
     final mainScroll = mainVerticalScroll();
-    final serviceBookButton =
-        find.widgetWithText(OutlinedButton, 'Bron et').first;
+    final serviceBookButton = find.widgetWithText(OutlinedButton, 'Bron').first;
 
     expect(find.text('Indi Salonlary'), findsWidgets);
     expect(
@@ -158,10 +157,10 @@ void main() {
       equals(0),
     );
     expect(find.byKey(const ValueKey('sticky-salon-title')), findsOneWidget);
-    expect(find.byKey(const ValueKey('sticky-back-button')), findsOneWidget);
-    expect(find.byKey(const ValueKey('sticky-share-button')), findsOneWidget);
+    expect(find.byKey(const ValueKey('unified-back-button')), findsOneWidget);
+    expect(find.byKey(const ValueKey('unified-share-button')), findsOneWidget);
     expect(
-        find.byKey(const ValueKey('sticky-favorite-button')), findsOneWidget);
+        find.byKey(const ValueKey('unified-favorite-button')), findsOneWidget);
     expect(find.byKey(const ValueKey('sticky-tabs-scroll')), findsOneWidget);
     expect(
         find.byKey(const ValueKey('sticky-tab-indicator-0')), findsOneWidget);
@@ -288,5 +287,35 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(SalonGalleryScreen), findsOneWidget);
+  });
+
+  testWidgets('About section expands and keeps detail rows visible',
+      (WidgetTester tester) async {
+    await pumpSalonDetail(tester);
+    final mainScroll = mainVerticalScroll();
+
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('section-title-about')),
+      220,
+      scrollable: mainScroll,
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('about-opening-hours-title')),
+        findsOneWidget);
+    expect(find.byKey(const ValueKey('about-additional-info-title')),
+        findsOneWidget);
+
+    final descriptionFinder = find.byKey(const ValueKey('about-description'));
+    expect(tester.widget<Text>(descriptionFinder).maxLines, equals(3));
+
+    await tester.tap(find.byKey(const ValueKey('about-toggle-button')));
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<Text>(descriptionFinder).maxLines, isNull);
+    expect(find.byKey(const ValueKey('about-opening-hours-title')),
+        findsOneWidget);
+    expect(find.byKey(const ValueKey('about-additional-info-title')),
+        findsOneWidget);
   });
 }

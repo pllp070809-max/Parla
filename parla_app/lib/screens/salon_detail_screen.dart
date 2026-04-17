@@ -5,16 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RenderAbstractViewport;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:latlong2/latlong.dart';
 import '../providers/providers.dart';
 import '../app_radius.dart';
 import '../app_spacing.dart';
 import '../models/salon.dart';
 import '../theme.dart';
 import '../widgets/shared_widgets.dart';
-import '../utils/launch_utils.dart';
 import '../utils/salon_images.dart';
 import 'booking_screen.dart';
 import 'salon_gallery_screen.dart';
@@ -180,29 +176,39 @@ TextStyle? _detailSectionTitleStyle(TextTheme tt) {
   );
 }
 
+TextStyle? _detailRowTitleStyle(TextTheme tt) {
+  return tt.titleMedium?.copyWith(
+    fontWeight: FontWeight.w500,
+    color: kTextPrimary,
+    height: 1.3,
+  );
+}
+
+TextStyle? _detailRowMetaStyle(TextTheme tt) {
+  return tt.labelSmall?.copyWith(
+    color: _kDetailMeta,
+    fontWeight: FontWeight.w400,
+  );
+}
+
+ButtonStyle _detailWideOutlinedButtonStyle(TextTheme tt) {
+  return OutlinedButton.styleFrom(
+    side: const BorderSide(color: kPrimary),
+    foregroundColor: kTextPrimary,
+    backgroundColor: kCardBg,
+    shape: const StadiumBorder(),
+    elevation: 0,
+    minimumSize: const Size.fromHeight(42),
+    padding: const EdgeInsets.symmetric(
+      horizontal: AppSpacing.xl,
+      vertical: 10,
+    ),
+    textStyle: tt.labelMedium?.copyWith(fontWeight: FontWeight.w700),
+  );
+}
+
 // ── Helpers ──
 
-Future<LatLng?> _getUserLocation() async {
-  try {
-    bool enabled = await Geolocator.isLocationServiceEnabled();
-    if (!enabled) return null;
-    LocationPermission perm = await Geolocator.checkPermission();
-    if (perm == LocationPermission.denied) {
-      perm = await Geolocator.requestPermission();
-    }
-    if (perm == LocationPermission.denied ||
-        perm == LocationPermission.deniedForever) {
-      return null;
-    }
-    final pos = await Geolocator.getCurrentPosition(
-      locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.medium, timeLimit: Duration(seconds: 5)),
-    );
-    return LatLng(pos.latitude, pos.longitude);
-  } catch (_) {
-    return null;
-  }
-}
 
 // ═════════════════════════════════════════════
 // Main screen
@@ -524,14 +530,6 @@ class _SalonDetailBodyState extends State<_SalonDetailBody> {
             ),
 
             // ── Map ──
-            if (salon.hasLocation)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, 0),
-                  child: _SalonMapSection(salon: salon),
-                ),
-              ),
 
             // ── Nearby ──
             SliverToBoxAdapter(
@@ -1359,20 +1357,7 @@ class _ServicesSectionState extends State<_ServicesSection> {
             width: double.infinity,
             child: OutlinedButton(
               onPressed: () => setState(() => _showAll = !_showAll),
-              style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: kPrimary),
-                foregroundColor: kTextPrimary,
-                backgroundColor: kCardBg,
-                shape: const StadiumBorder(),
-                elevation: 0,
-                minimumSize: const Size.fromHeight(42),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.xl,
-                  vertical: 10,
-                ),
-                textStyle:
-                    tt.labelMedium?.copyWith(fontWeight: FontWeight.w700),
-              ),
+              style: _detailWideOutlinedButtonStyle(tt),
               child: Text(_showAll ? 'Az görkez' : 'Hemmesi'),
             ),
           ),
@@ -1404,29 +1389,16 @@ class _ServiceRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  service.name,
-                  style: tt.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                    color: kTextPrimary,
-                    height: 1.3,
-                  ),
-                ),
+                Text(service.name, style: _detailRowTitleStyle(tt)),
                 const SizedBox(height: 6),
                 Text(
                   '${service.durationMinutes} min',
-                  style: tt.labelSmall?.copyWith(
-                    color: _kDetailMeta,
-                    fontWeight: FontWeight.w400,
-                  ),
+                  style: _detailRowMetaStyle(tt),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   '${service.price?.toStringAsFixed(0) ?? '?'} TMT',
-                  style: tt.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                    color: kTextPrimary,
-                  ),
+                  style: _detailRowTitleStyle(tt),
                 ),
               ],
             ),
@@ -1441,15 +1413,15 @@ class _ServiceRow extends StatelessWidget {
                 foregroundColor: kTextPrimary,
                 backgroundColor: kCardBg,
                 shape: const StadiumBorder(),
-                minimumSize: const Size(118, 38),
+                minimumSize: const Size(92, 38),
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 textStyle: tt.labelMedium?.copyWith(
                   fontWeight: FontWeight.w400,
                   color: kTextPrimary,
                 ),
               ),
-              child: const Text('Bron et'),
+              child: const Text('Bron'),
             ),
           ),
         ],
@@ -1764,124 +1736,61 @@ class _AboutSectionState extends State<_AboutSection> {
           style: _detailSectionTitleStyle(tt),
         ),
         const SizedBox(height: 18),
-        // Description card
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(AppSpacing.l),
-          decoration: BoxDecoration(
-            color: kCardBg,
-            borderRadius: BorderRadius.circular(AppRadius.m),
-            border: Border.all(color: kStickerOutline),
-            boxShadow: kStickerShadow,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                _kMockDescription,
-                style: tt.bodyMedium?.copyWith(height: 1.55),
-                maxLines: _expanded ? null : 3,
-                overflow: _expanded ? null : TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: AppSpacing.s),
-              GestureDetector(
-                onTap: () => setState(() => _expanded = !_expanded),
-                child: Text(_expanded ? 'Az gör' : 'Doly oka',
-                    style: tt.bodySmall?.copyWith(
-                        color: kPrimary, fontWeight: FontWeight.w700)),
-              ),
-            ],
-          ),
+        _AboutDescriptionFlat(
+          expanded: _expanded,
+          onToggle: () => setState(() => _expanded = !_expanded),
         ),
-        const SizedBox(height: AppSpacing.l),
+        const SizedBox(height: 20),
+        const _AboutOpeningHoursFlat(),
+        const SizedBox(height: 24),
+        const _AboutAdditionalInfoFlat(),
+      ],
+    );
+  }
+}
 
-        // Opening hours
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(AppSpacing.l),
-          decoration: BoxDecoration(
-            color: kCardBg,
-            borderRadius: BorderRadius.circular(AppRadius.m),
-            border: Border.all(color: kStickerOutline),
-            boxShadow: kStickerShadow,
+class _AboutDescriptionFlat extends StatelessWidget {
+  final bool expanded;
+  final VoidCallback onToggle;
+
+  const _AboutDescriptionFlat({
+    required this.expanded,
+    required this.onToggle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          _kMockDescription,
+          key: const ValueKey('about-description'),
+          style: tt.bodyMedium?.copyWith(
+            color: kTextPrimary,
+            height: 1.55,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const Icon(Icons.access_time_rounded,
-                      size: 22, color: kPrimary),
-                  const SizedBox(width: AppSpacing.s),
-                  Text('Iş wagty',
-                      style: _detailSectionTitleStyle(tt)),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.m),
-              ..._kOpeningHours.map((h) => Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.s),
-                    child: Row(
-                      children: [
-                        Container(
-                            width: 8,
-                            height: 8,
-                            decoration: BoxDecoration(
-                                color: kSuccess, shape: BoxShape.circle)),
-                        const SizedBox(width: AppSpacing.s),
-                        SizedBox(
-                            width: 100,
-                            child: Text(h['day'] as String,
-                                style: tt.bodyMedium
-                                    ?.copyWith(color: kTextPrimary))),
-                        Text(h['hours'] as String,
-                            style:
-                                tt.bodyMedium?.copyWith(color: kTextSecondary)),
-                      ],
-                    ),
-                  )),
-            ],
-          ),
+          maxLines: expanded ? null : 3,
+          overflow: expanded ? null : TextOverflow.ellipsis,
         ),
-        const SizedBox(height: AppSpacing.l),
-
-        // Additional info
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(AppSpacing.l),
-          decoration: BoxDecoration(
-            color: kCardBg,
-            borderRadius: BorderRadius.circular(AppRadius.m),
-            border: Border.all(color: kStickerOutline),
-            boxShadow: kStickerShadow,
+        const SizedBox(height: 8),
+        TextButton(
+          key: const ValueKey('about-toggle-button'),
+          onPressed: onToggle,
+          style: TextButton.styleFrom(
+            foregroundColor: kPrimary,
+            padding: EdgeInsets.zero,
+            minimumSize: Size.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            alignment: Alignment.centerLeft,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const Icon(Icons.check_circle_rounded,
-                      size: 22, color: kSuccess),
-                  const SizedBox(width: AppSpacing.s),
-                  Text('Goşmaça maglumat',
-                      style: _detailSectionTitleStyle(tt)),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.m),
-              ..._kAdditionalInfo.map((info) => Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.s),
-                    child: Row(
-                      children: [
-                        Icon(info['icon'] as IconData,
-                            size: 20, color: kTextSecondary),
-                        const SizedBox(width: AppSpacing.m),
-                        Expanded(
-                            child: Text(info['label'] as String,
-                                style: tt.bodyMedium
-                                    ?.copyWith(color: kTextPrimary))),
-                      ],
-                    ),
-                  )),
-            ],
+          child: Text(
+            expanded ? 'Az görkez' : 'Doly oka',
+            style: tt.bodyMedium?.copyWith(
+              color: kPrimary,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
       ],
@@ -1889,9 +1798,112 @@ class _AboutSectionState extends State<_AboutSection> {
   }
 }
 
-// ═════════════════════════════════════════════
-// Nearby salons
-// ═════════════════════════════════════════════
+class _AboutOpeningHoursFlat extends StatelessWidget {
+  const _AboutOpeningHoursFlat();
+
+  @override
+  Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    final todayIndex = DateTime.now().weekday - 1;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Iş wagty',
+          key: const ValueKey('about-opening-hours-title'),
+          style: _detailSectionTitleStyle(tt),
+        ),
+        const SizedBox(height: 16),
+        ..._kOpeningHours.asMap().entries.map((entry) {
+          final index = entry.key;
+          final hours = entry.value;
+          final isToday = index == todayIndex;
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: index == _kOpeningHours.length - 1 ? 0 : 12,
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 10,
+                  height: 10,
+                  decoration: const BoxDecoration(
+                    color: kSuccess,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(
+                    hours['day'] as String,
+                    style: tt.bodyMedium?.copyWith(
+                      color: kTextPrimary,
+                      fontWeight: isToday ? FontWeight.w600 : FontWeight.w400,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  hours['hours'] as String,
+                  style: tt.bodyMedium?.copyWith(
+                    color: kTextPrimary,
+                    fontWeight: isToday ? FontWeight.w600 : FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+      ],
+    );
+  }
+}
+
+class _AboutAdditionalInfoFlat extends StatelessWidget {
+  const _AboutAdditionalInfoFlat();
+
+  @override
+  Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Goşmaça maglumat',
+          key: const ValueKey('about-additional-info-title'),
+          style: _detailSectionTitleStyle(tt),
+        ),
+        const SizedBox(height: 16),
+        ..._kAdditionalInfo.asMap().entries.map((entry) {
+          final index = entry.key;
+          final info = entry.value;
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: index == _kAdditionalInfo.length - 1 ? 0 : 14,
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  info['icon'] as IconData,
+                  size: 20,
+                  color: kTextPrimary,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    info['label'] as String,
+                    style: tt.bodyMedium?.copyWith(color: kTextPrimary),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+      ],
+    );
+  }
+}
+
 class _NearbySalonsSection extends StatelessWidget {
   final Salon currentSalon;
   const _NearbySalonsSection({required this.currentSalon});
@@ -1906,8 +1918,7 @@ class _NearbySalonsSection extends StatelessWidget {
           children: [
             const Icon(Icons.location_on_rounded, size: 22, color: kPrimary),
             const SizedBox(width: AppSpacing.s),
-            Text('Töwerekde salonlar',
-                style: _detailSectionTitleStyle(tt)),
+            Text('Töwerekde salonlar', style: _detailSectionTitleStyle(tt)),
           ],
         ),
         const SizedBox(height: AppSpacing.m),
@@ -2015,13 +2026,13 @@ class _BottomBookBar extends StatelessWidget {
           FilledButton.icon(
             onPressed: onBook,
             icon: const Icon(Icons.calendar_month_rounded, size: 18),
-            label: const Text('Bron et'),
+            label: const Text('Bron'),
             style: FilledButton.styleFrom(
               backgroundColor: _kDetailButtonBg,
               foregroundColor: Colors.white,
               shape: const StadiumBorder(),
               padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.xl, vertical: AppSpacing.m),
+                  horizontal: 14, vertical: AppSpacing.m),
             ),
           ),
         ],
@@ -2059,223 +2070,4 @@ class _InfoBadge extends StatelessWidget {
       ),
     );
   }
-}
-
-// ═════════════════════════════════════════════
-// Map section (kept from previous)
-// ═════════════════════════════════════════════
-List<Widget> _buildMapLayers(LatLng salonPoint, {LatLng? userLocation}) {
-  return [
-    TileLayer(
-      urlTemplate:
-          'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-      subdomains: const ['a', 'b', 'c', 'd'],
-      userAgentPackageName: 'com.parla.app',
-      maxZoom: 19,
-    ),
-    CircleLayer(circles: [
-      CircleMarker(
-          point: salonPoint,
-          radius: 48,
-          color: kPrimary.withValues(alpha: 0.08),
-          borderColor: kPrimary.withValues(alpha: 0.2),
-          borderStrokeWidth: 1.5),
-    ]),
-    if (userLocation != null) ...[
-      MarkerLayer(markers: [
-        Marker(
-            point: userLocation,
-            width: 28,
-            height: 28,
-            child: Container(
-              decoration: BoxDecoration(
-                  color: const Color(0xFF4285F4),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 3),
-                  boxShadow: [
-                    BoxShadow(
-                        color: const Color(0xFF4285F4).withValues(alpha: 0.4),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2))
-                  ]),
-            )),
-      ]),
-      CircleLayer(circles: [
-        CircleMarker(
-            point: userLocation,
-            radius: 24,
-            color: const Color(0xFF4285F4).withValues(alpha: 0.08),
-            borderColor: const Color(0xFF4285F4).withValues(alpha: 0.15),
-            borderStrokeWidth: 1),
-      ]),
-    ],
-    MarkerLayer(markers: [
-      Marker(
-          point: salonPoint,
-          width: 48,
-          height: 56,
-          alignment: Alignment.topCenter,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [Color(0xFF00BCD4), kPrimary]),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                          color: kPrimary.withValues(alpha: 0.4),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4))
-                    ],
-                    border: Border.all(color: Colors.white, width: 3),
-                  ),
-                  child: const Icon(Icons.content_cut_rounded,
-                      color: Colors.white, size: 18)),
-              CustomPaint(
-                  size: const Size(14, 8),
-                  painter: _TrianglePainter(color: kPrimary)),
-            ],
-          )),
-    ]),
-  ];
-}
-
-class _SalonMapSection extends StatefulWidget {
-  final Salon salon;
-  const _SalonMapSection({required this.salon});
-  @override
-  State<_SalonMapSection> createState() => _SalonMapSectionState();
-}
-
-class _SalonMapSectionState extends State<_SalonMapSection> {
-  LatLng? _userLoc;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadUserLoc();
-  }
-
-  Future<void> _loadUserLoc() async {
-    final loc = await _getUserLocation();
-    if (mounted && loc != null) setState(() => _userLoc = loc);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final tt = Theme.of(context).textTheme;
-    final salon = widget.salon;
-    final point = LatLng(salon.latitude!, salon.longitude!);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(children: [
-          Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                  color: kPrimary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(AppRadius.s)),
-              child: const Icon(Icons.map_rounded, size: 18, color: kPrimary)),
-          const SizedBox(width: AppSpacing.s + 2),
-          Expanded(
-            child: Text('Ýerleşýän ýeri', style: _detailSectionTitleStyle(tt)),
-          ),
-        ]),
-        const SizedBox(height: AppSpacing.m),
-        Container(
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AppRadius.m),
-              boxShadow: kStickerShadow,
-              border: Border.all(color: kStickerOutline)),
-          clipBehavior: Clip.antiAlias,
-          child: Column(children: [
-            SizedBox(
-                height: 180,
-                child: AbsorbPointer(
-                    child: FlutterMap(
-                  options: MapOptions(initialCenter: point, initialZoom: 16),
-                  children: _buildMapLayers(point, userLocation: _userLoc),
-                ))),
-            Container(
-              width: double.infinity,
-              color: kCardBg,
-              padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.l, vertical: AppSpacing.m),
-              child: Row(children: [
-                Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                        color: kPrimary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(AppRadius.s)),
-                    child: const Icon(Icons.location_on_rounded,
-                        size: 18, color: kPrimary)),
-                const SizedBox(width: AppSpacing.m),
-                Expanded(
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                      Text(salon.name, style: tt.labelLarge),
-                      if (salon.address != null)
-                        Text(salon.address!,
-                            style: tt.bodyMedium,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis),
-                    ])),
-                const SizedBox(width: AppSpacing.s),
-                FilledButton.tonalIcon(
-                  onPressed: () => openMapsDirection(salon),
-                  icon: const Icon(Icons.navigation_rounded, size: 18),
-                  label: const Text('Ugur'),
-                  style: FilledButton.styleFrom(
-                      foregroundColor: const Color(0xFF0E7490),
-                      backgroundColor: const Color(0x1F0E7490),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.m, vertical: AppSpacing.s),
-                      textStyle: tt.labelLarge),
-                ),
-              ]),
-            ),
-          ]),
-        ),
-      ],
-    );
-  }
-}
-
-// ignore: unused_element
-String _distanceText(LatLng a, LatLng b) {
-  const d = Distance();
-  final meters = d.as(LengthUnit.Meter, a, b);
-  if (meters < 1000) return '${meters.round()} m uzaklykda';
-  return '${(meters / 1000).toStringAsFixed(1)} km uzaklykda';
-}
-
-class _TrianglePainter extends CustomPainter {
-  final Color color;
-  _TrianglePainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    canvas.drawPath(
-        ui.Path()
-          ..moveTo(0, 0)
-          ..lineTo(size.width, 0)
-          ..lineTo(size.width / 2, size.height)
-          ..close(),
-        Paint()
-          ..color = color
-          ..style = PaintingStyle.fill);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
