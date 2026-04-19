@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RenderAbstractViewport;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../app_text_styles.dart';
 import '../providers/providers.dart';
 import '../app_radius.dart';
 import '../app_spacing.dart';
@@ -173,6 +174,15 @@ TextStyle? _detailSectionTitleStyle(TextTheme tt) {
     fontWeight: FontWeight.w600,
     color: kTextPrimary,
     letterSpacing: -0.1,
+  );
+}
+
+TextStyle? _detailSubsectionTitleStyle(TextTheme tt) {
+  return tt.titleMedium?.copyWith(
+    fontWeight: FontWeight.w500,
+    color: kTextPrimary,
+    letterSpacing: -0.05,
+    height: 1.3,
   );
 }
 
@@ -1811,7 +1821,7 @@ class _AboutOpeningHoursFlat extends StatelessWidget {
         Text(
           'Iş wagty',
           key: const ValueKey('about-opening-hours-title'),
-          style: _detailSectionTitleStyle(tt),
+          style: _detailSubsectionTitleStyle(tt),
         ),
         const SizedBox(height: 16),
         ..._kOpeningHours.asMap().entries.map((entry) {
@@ -1871,7 +1881,7 @@ class _AboutAdditionalInfoFlat extends StatelessWidget {
         Text(
           'Goşmaça maglumat',
           key: const ValueKey('about-additional-info-title'),
-          style: _detailSectionTitleStyle(tt),
+          style: _detailSubsectionTitleStyle(tt),
         ),
         const SizedBox(height: 16),
         ..._kAdditionalInfo.asMap().entries.map((entry) {
@@ -1911,17 +1921,21 @@ class _NearbySalonsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
+    final images = portfolioImages(currentSalon);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            const Icon(Icons.location_on_rounded, size: 22, color: kPrimary),
-            const SizedBox(width: AppSpacing.s),
-            Text('Töwerekde salonlar', style: _detailSectionTitleStyle(tt)),
+            const Icon(Icons.location_on_rounded, size: 20, color: kTextPrimary),
+            const SizedBox(width: 12),
+            Text(
+              'Töwerekde salonlar',
+              style: _detailSubsectionTitleStyle(tt),
+            ),
           ],
         ),
-        const SizedBox(height: AppSpacing.m),
+        const SizedBox(height: 14),
         SizedBox(
           height: 140,
           child: ListView.separated(
@@ -1929,54 +1943,111 @@ class _NearbySalonsSection extends StatelessWidget {
             itemCount: 2,
             separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.m),
             itemBuilder: (_, i) {
-              final images = portfolioImages(currentSalon);
               final imgIdx = (i + 1) % images.length;
-              return Container(
-                width: 170,
-                decoration: BoxDecoration(
-                  color: kCardBg,
-                  borderRadius: BorderRadius.circular(AppRadius.m),
-                  border: Border.all(color: kStickerOutline),
-                  boxShadow: kStickerShadow,
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Image.asset(
-                        images[imgIdx],
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                            color: kSurfaceBg,
-                            child: const Icon(Icons.storefront_rounded)),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(AppSpacing.s),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Ýakyndaky salon ${i + 1}',
-                              style: tt.labelSmall
-                                  ?.copyWith(fontWeight: FontWeight.w700),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis),
-                          Text(
-                              '${(1.1 + i * 0.4).toStringAsFixed(1)} km · mock',
-                              style: tt.labelSmall
-                                  ?.copyWith(color: kTextTertiary)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+              return _NearbySalonCard(
+                imagePath: images[imgIdx],
+                title: 'Ýakyndaky salon ${i + 1}',
+                distance: '${(1.1 + i * 0.4).toStringAsFixed(1)} km · mock',
               );
             },
           ),
         ),
       ],
+    );
+  }
+}
+
+class _NearbySalonCard extends StatelessWidget {
+  final String imagePath;
+  final String title;
+  final String distance;
+
+  const _NearbySalonCard({
+    required this.imagePath,
+    required this.title,
+    required this.distance,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final metaStyle = AppTextStyles.cardMeta.copyWith(
+      fontSize: 11.5,
+      color: kTextSecondary,
+    );
+    final radius = BorderRadius.circular(AppRadius.m);
+    return ClipRRect(
+      borderRadius: radius,
+      child: Material(
+        color: kCardBg,
+        child: SizedBox(
+      width: 170,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Image.asset(
+                  imagePath,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    color: kSurfaceBg,
+                    alignment: Alignment.center,
+                    child: const Icon(
+                      Icons.storefront_rounded,
+                      color: kTextSecondary,
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.s,
+                  10,
+                  AppSpacing.s,
+                  AppSpacing.s,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: AppTextStyles.cardTitle.copyWith(fontSize: 14),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(Icons.star_rounded, size: 15, color: kStar),
+                        const SizedBox(width: 4),
+                        Text(
+                          _kMockRating.toStringAsFixed(1),
+                          style: metaStyle.copyWith(
+                            color: kTextPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          ' ($_kMockReviewCount)',
+                          style: metaStyle,
+                        ),
+                        Expanded(
+                          child: Text(
+                            ' • $distance',
+                            style: metaStyle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
