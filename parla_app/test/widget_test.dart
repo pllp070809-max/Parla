@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:parla_app/screens/salon_detail_screen.dart';
@@ -14,13 +15,16 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
-  Future<void> pumpSalonDetail(WidgetTester tester) async {
+  Future<void> pumpSalonDetail(
+    WidgetTester tester, {
+    Future<void> Function(BuildContext context, String text)? shareLauncher,
+  }) async {
     await tester.pumpWidget(
       ProviderScope(
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
           theme: buildParlaTheme(),
-          home: const SalonDetailScreen(salonId: 1),
+          home: SalonDetailScreen(salonId: 1, shareLauncher: shareLauncher),
         ),
       ),
     );
@@ -71,6 +75,15 @@ void main() {
         .opacity;
   }
 
+  Icon favouriteButtonIcon(WidgetTester tester) {
+    return tester.widget<Icon>(
+      find.descendant(
+        of: find.byKey(const ValueKey('unified-favorite-button')),
+        matching: find.byType(Icon),
+      ),
+    );
+  }
+
   testWidgets('Salon detail renders services and opens booking flow',
       (WidgetTester tester) async {
     await pumpSalonDetail(tester);
@@ -80,7 +93,7 @@ void main() {
     expect(find.text('Indi Salonlary'), findsWidgets);
     expect(
         find.byKey(const ValueKey('section-title-services')), findsOneWidget);
-    expect(find.text('Aýal saç kesimi'), findsOneWidget);
+    expect(find.text('AР“Р…al saР“В§ kesimi'), findsOneWidget);
     expect(serviceBookButton, findsOneWidget);
 
     await tester.scrollUntilVisible(serviceBookButton, 160,
@@ -91,9 +104,70 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 900));
 
-    expect(find.text('Hyzmat saylaň'), findsOneWidget);
+    expect(find.text('Hyzmat saylaР•в‚¬'), findsOneWidget);
     expect(find.text('Dowam et'), findsOneWidget);
   });
+
+  testWidgets('Bottom booking bar shows only service count',
+      (WidgetTester tester) async {
+    await pumpSalonDetail(tester);
+
+    expect(
+      find.byKey(const ValueKey('bottom-book-bar-service-count')),
+      findsOneWidget,
+    );
+    expect(find.text('27 hyzmat elР“Р…eter'), findsOneWidget);
+    expect(find.textContaining('TMT-dan'), findsNothing);
+  });
+  testWidgets('Services view-all button toggles expanded list',
+      (WidgetTester tester) async {
+    await pumpSalonDetail(tester);
+    final mainScroll = mainVerticalScroll();
+
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('services-view-all-button')),
+      120,
+      scrollable: mainScroll,
+    );
+    await tester.pumpAndSettle();
+
+    final collapsedBronButtons =
+        find.widgetWithText(OutlinedButton, 'Bron').evaluate().length;
+    expect(
+      find.byKey(const ValueKey('services-view-all-label-collapsed')),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const ValueKey('services-view-all-button')));
+    await tester.pump();
+    expect(find.byKey(const ValueKey('services-view-all-label-expanded')),
+        findsOneWidget);
+    await tester.pumpAndSettle();
+
+    final expandedBronButtons =
+        find.widgetWithText(OutlinedButton, 'Bron').evaluate().length;
+    expect(expandedBronButtons, greaterThan(collapsedBronButtons));
+    expect(
+      find.byKey(const ValueKey('services-view-all-label-expanded')),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const ValueKey('services-view-all-button')));
+    await tester.pump();
+    expect(find.byKey(const ValueKey('services-view-all-label-collapsed')),
+        findsOneWidget);
+    await tester.pumpAndSettle();
+
+    expect(
+      find.widgetWithText(OutlinedButton, 'Bron').evaluate().length,
+      equals(collapsedBronButtons),
+    );
+    expect(
+      find.byKey(const ValueKey('services-view-all-label-collapsed')),
+      findsOneWidget,
+    );
+  });
+
 
   testWidgets('Sticky section navigator appears after scroll',
       (WidgetTester tester) async {
@@ -287,6 +361,63 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(SalonGalleryScreen), findsOneWidget);
+  });
+
+  testWidgets('Hero image tap opens gallery at current image',
+      (WidgetTester tester) async {
+    await pumpSalonDetail(tester);
+
+    await tester.drag(
+      find.byKey(const ValueKey('hero-image-tap-target')),
+      const Offset(-400, 0),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('hero-image-tap-target')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(SalonGalleryScreen), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (widget) => widget is Text && (widget.data?.startsWith('2 / ') ?? false),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('Favorite button toggles and persists across rebuilds',
+      (WidgetTester tester) async {
+    await pumpSalonDetail(tester);
+
+    expect(favouriteButtonIcon(tester).icon, Icons.favorite_border_rounded);
+
+    await tester.tap(find.byKey(const ValueKey('unified-favorite-button')));
+    await tester.pumpAndSettle();
+
+    expect(favouriteButtonIcon(tester).icon, Icons.favorite_rounded);
+
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getString('favourite_salon_ids'), contains('1'));
+
+    await pumpSalonDetail(tester);
+
+    expect(favouriteButtonIcon(tester).icon, Icons.favorite_rounded);
+  });
+
+  testWidgets('Share button falls back to clipboard when share fails',
+      (WidgetTester tester) async {
+    Future<void> failingShare(BuildContext context, String text) async {
+      throw Exception('share failed');
+    }
+
+    await pumpSalonDetail(tester, shareLauncher: failingShare);
+
+    await tester.tap(find.byKey(const ValueKey('unified-share-button')));
+    await tester.pumpAndSettle();
+
+    final clipboardData = await Clipboard.getData('text/plain');
+    expect(clipboardData?.text, contains('Indi Salonlary'));
+    expect(find.text('Salon maglumatlary gР“В¶Р“В§Р“Сrildi'), findsOneWidget);
   });
 
   testWidgets('About section expands and keeps detail rows visible',

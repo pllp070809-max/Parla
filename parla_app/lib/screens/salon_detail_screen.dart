@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RenderAbstractViewport;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 import '../app_text_styles.dart';
 import '../providers/providers.dart';
 import '../app_radius.dart';
@@ -219,15 +220,46 @@ ButtonStyle _detailWideOutlinedButtonStyle(TextTheme tt) {
 
 // ── Helpers ──
 
-
 // ═════════════════════════════════════════════
 // Main screen
 // ═════════════════════════════════════════════
 class SalonDetailScreen extends ConsumerStatefulWidget {
   final int salonId;
-  const SalonDetailScreen({super.key, required this.salonId});
+  final Future<void> Function(BuildContext context, String text)? shareLauncher;
+
+  const SalonDetailScreen({
+    super.key,
+    required this.salonId,
+    this.shareLauncher,
+  });
   @override
   ConsumerState<SalonDetailScreen> createState() => _SalonDetailScreenState();
+}
+
+Future<void> _defaultSalonShareLauncher(
+  BuildContext context,
+  String text,
+) async {
+  final box = context.findRenderObject() as RenderBox?;
+  await SharePlus.instance.share(
+    ShareParams(
+      text: text,
+      title: 'Parla',
+      subject: 'Parla',
+      sharePositionOrigin:
+          box == null ? null : box.localToGlobal(Offset.zero) & box.size,
+    ),
+  );
+}
+
+String _buildSalonShareText(Salon salon) {
+  final lines = <String>[salon.name];
+  final address = salon.address?.trim();
+  if (address != null && address.isNotEmpty) {
+    lines.add(address);
+  }
+  lines.add('Parla arkaly bu salon bilen tanyş boluň.');
+  return lines.join('\n');
 }
 
 class _SalonDetailScreenState extends ConsumerState<SalonDetailScreen> {
@@ -262,7 +294,10 @@ class _SalonDetailScreenState extends ConsumerState<SalonDetailScreen> {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             ref.read(recentViewedSalonIdsProvider.notifier).add(salon.id);
           });
-          return _SalonDetailBody(salon: salon);
+          return _SalonDetailBody(
+            salon: salon,
+            shareLauncher: widget.shareLauncher ?? _defaultSalonShareLauncher,
+          );
         },
       ),
     );
@@ -272,11 +307,16 @@ class _SalonDetailScreenState extends ConsumerState<SalonDetailScreen> {
 // ═════════════════════════════════════════════
 // Body — chip bar + scrollable sections
 // ═════════════════════════════════════════════
-class _SalonDetailBody extends StatefulWidget {
+class _SalonDetailBody extends ConsumerStatefulWidget {
   final Salon salon;
-  const _SalonDetailBody({required this.salon});
+  final Future<void> Function(BuildContext context, String text) shareLauncher;
+
+  const _SalonDetailBody({
+    required this.salon,
+    required this.shareLauncher,
+  });
   @override
-  State<_SalonDetailBody> createState() => _SalonDetailBodyState();
+  ConsumerState<_SalonDetailBody> createState() => _SalonDetailBodyState();
 }
 
 @immutable
@@ -342,7 +382,7 @@ class _StickyNavController extends ValueNotifier<_StickyNavState> {
   }
 }
 
-class _SalonDetailBodyState extends State<_SalonDetailBody> {
+class _SalonDetailBodyState extends ConsumerState<_SalonDetailBody> {
   final _scrollCtrl = ScrollController();
   final _stickyNavController = _StickyNavController();
   final _tabs = const ['Hyzmatlar', 'Topar', 'Portfolio', 'Barada'];
@@ -461,15 +501,43 @@ class _SalonDetailBodyState extends State<_SalonDetailBody> {
         )));
   }
 
+  void _openGallery() {
+    Navigator.push(
+      context,
+      fadeSlideRoute(
+        SalonGalleryScreen(
+          salon: widget.salon,
+          initialIndex: _heroPage,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _shareSalon(BuildContext buttonContext) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final shareText = _buildSalonShareText(widget.salon);
+    try {
+      await widget.shareLauncher(buttonContext, shareText);
+    } catch (_) {
+      await Clipboard.setData(ClipboardData(text: shareText));
+      if (!mounted) return;
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(content: Text('Salon maglumatlary göçürildi')),
+        );
+    }
+  }
+
+  void _toggleFavourite(BuildContext _) {
+    ref.read(favouriteSalonsProvider.notifier).toggle(widget.salon.id);
+  }
+
   @override
   Widget build(BuildContext context) {
     final salon = widget.salon;
     final images = portfolioImages(salon);
-    final minPrice = salon.services.isNotEmpty
-        ? salon.services
-            .map((s) => s.price ?? 0)
-            .reduce((a, b) => a < b ? a : b)
-        : 0;
+    final isFavourite = ref.watch(favouriteSalonsProvider).contains(salon.id);
 
     return Stack(
       children: [
@@ -483,6 +551,7 @@ class _SalonDetailBodyState extends State<_SalonDetailBody> {
               salon: salon,
               onPageChanged: (p) => setState(() => _heroPage = p),
               currentPage: _heroPage,
+              onTap: _openGallery,
             )),
 
             // ── Info block ──
@@ -499,9 +568,10 @@ class _SalonDetailBodyState extends State<_SalonDetailBody> {
                   0,
                 ),
                 child: _ServicesSection(
-                    salon: salon,
-                    onBook: (svc) =>
-                        _openBooking(preselectedServiceId: svc.id)),
+                  salon: salon,
+                  onBook: (svc) =>
+                      _openBooking(preselectedServiceId: svc.id),
+                ),
               ),
             ),
 
@@ -587,15 +657,16 @@ class _SalonDetailBodyState extends State<_SalonDetailBody> {
                 children: [
                   _UnifiedBackButtonOverlay(
                     revealProgress: stickyNavState.revealProgress,
-                    onTap: () => Navigator.pop(context),
+                    onTap: (_) => Navigator.pop(context),
                   ),
                   _UnifiedShareButtonOverlay(
                     revealProgress: stickyNavState.revealProgress,
-                    onTap: () {},
+                    onTap: _shareSalon,
                   ),
                   _UnifiedFavoriteButtonOverlay(
                     revealProgress: stickyNavState.revealProgress,
-                    onTap: () {},
+                    onTap: _toggleFavourite,
+                    isFavourite: isFavourite,
                   ),
                 ],
               );
@@ -609,8 +680,7 @@ class _SalonDetailBodyState extends State<_SalonDetailBody> {
           right: 0,
           bottom: 0,
           child: _BottomBookBar(
-            minPrice: minPrice.toDouble(),
-            salonName: salon.name,
+            serviceCount: salon.services.length,
             onBook: () => _openBooking(),
           ),
         ),
@@ -627,12 +697,14 @@ class _HeroSection extends StatelessWidget {
   final Salon salon;
   final ValueChanged<int> onPageChanged;
   final int currentPage;
+  final VoidCallback onTap;
 
   const _HeroSection(
       {required this.images,
       required this.salon,
       required this.onPageChanged,
-      required this.currentPage});
+      required this.currentPage,
+      required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -641,17 +713,22 @@ class _HeroSection extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          PageView.builder(
-            itemCount: images.length,
-            onPageChanged: onPageChanged,
-            itemBuilder: (_, i) => Image.asset(
-              images[i],
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                  color: kPrimary.withValues(alpha: 0.12),
-                  child: const Center(
-                      child: Icon(Icons.storefront_rounded,
-                          size: 72, color: kPrimary))),
+          GestureDetector(
+            key: const ValueKey('hero-image-tap-target'),
+            behavior: HitTestBehavior.opaque,
+            onTap: onTap,
+            child: PageView.builder(
+              itemCount: images.length,
+              onPageChanged: onPageChanged,
+              itemBuilder: (_, i) => Image.asset(
+                images[i],
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                    color: kPrimary.withValues(alpha: 0.12),
+                    child: const Center(
+                        child: Icon(Icons.storefront_rounded,
+                            size: 72, color: kPrimary))),
+              ),
             ),
           ),
 
@@ -1027,8 +1104,9 @@ class _StickySectionNav extends StatelessWidget {
 
 class _UnifiedTopActionButtonOverlay extends StatelessWidget {
   final double revealProgress;
-  final VoidCallback onTap;
+  final ValueChanged<BuildContext> onTap;
   final IconData icon;
+  final Color iconColor;
   final double? left;
   final double? right;
   final Key? buttonKey;
@@ -1038,6 +1116,7 @@ class _UnifiedTopActionButtonOverlay extends StatelessWidget {
     required this.revealProgress,
     required this.onTap,
     required this.icon,
+    this.iconColor = kTextPrimary,
     this.left,
     this.right,
   }) : assert((left == null) != (right == null));
@@ -1081,15 +1160,17 @@ class _UnifiedTopActionButtonOverlay extends StatelessWidget {
                     ]
                   : null,
             ),
-            child: InkWell(
-              key: buttonKey,
-              customBorder: const CircleBorder(),
-              onTap: onTap,
-              child: Center(
-                child: Icon(
-                  icon,
-                  color: kTextPrimary,
-                  size: 18,
+            child: Builder(
+              builder: (buttonContext) => InkWell(
+                key: buttonKey,
+                customBorder: const CircleBorder(),
+                onTap: () => onTap(buttonContext),
+                child: Center(
+                  child: Icon(
+                    icon,
+                    color: iconColor,
+                    size: 18,
+                  ),
                 ),
               ),
             ),
@@ -1102,7 +1183,7 @@ class _UnifiedTopActionButtonOverlay extends StatelessWidget {
 
 class _UnifiedBackButtonOverlay extends StatelessWidget {
   final double revealProgress;
-  final VoidCallback onTap;
+  final ValueChanged<BuildContext> onTap;
 
   const _UnifiedBackButtonOverlay({
     required this.revealProgress,
@@ -1130,7 +1211,7 @@ class _UnifiedBackButtonOverlay extends StatelessWidget {
 
 class _UnifiedShareButtonOverlay extends StatelessWidget {
   final double revealProgress;
-  final VoidCallback onTap;
+  final ValueChanged<BuildContext> onTap;
 
   const _UnifiedShareButtonOverlay({
     required this.revealProgress,
@@ -1158,11 +1239,13 @@ class _UnifiedShareButtonOverlay extends StatelessWidget {
 
 class _UnifiedFavoriteButtonOverlay extends StatelessWidget {
   final double revealProgress;
-  final VoidCallback onTap;
+  final ValueChanged<BuildContext> onTap;
+  final bool isFavourite;
 
   const _UnifiedFavoriteButtonOverlay({
     required this.revealProgress,
     required this.onTap,
+    required this.isFavourite,
   });
 
   @override
@@ -1174,7 +1257,10 @@ class _UnifiedFavoriteButtonOverlay extends StatelessWidget {
           _UnifiedTopActionButtonOverlay(
             revealProgress: revealProgress,
             onTap: onTap,
-            icon: Icons.favorite_border_rounded,
+            icon: isFavourite
+                ? Icons.favorite_rounded
+                : Icons.favorite_border_rounded,
+            iconColor: isFavourite ? kError : kTextPrimary,
             right: AppSpacing.m - 5,
             buttonKey: const ValueKey('unified-favorite-button'),
           ),
@@ -1198,8 +1284,9 @@ class _ServicesSection extends StatefulWidget {
 
 class _ServicesSectionState extends State<_ServicesSection> {
   static const int _initialVisibleCount = 5;
+  static const Duration _expandAnimationDuration = Duration(milliseconds: 1920);
 
-  /// Salonda görünjek tertip; API-den täze açar gelende aşakda goşulýar.
+  /// Salonda grnjek tertip; API-den tze aar gelende aakda goular.
   static const List<String> _categoryKeyOrder = [
     'haircut',
     'color',
@@ -1214,15 +1301,15 @@ class _ServicesSectionState extends State<_ServicesSection> {
   ];
 
   static const Map<String, String> _categoryLabels = {
-    'haircut': 'Saç kesim',
-    'color': 'Saç boýag',
+    'haircut': 'Sa kesim',
+    'color': 'Sa boag',
     'beard': 'Sakal',
     'styling': 'Ustilleme',
-    'treatment': 'Bejeriş',
+    'treatment': 'Bejeri',
     'nails': 'Dyrnak',
     'spa': 'Spa',
-    'brows': 'Göz we gaş',
-    'wax': 'Depilýasiýa',
+    'brows': 'Gz we ga',
+    'wax': 'Depilasia',
     'massage': 'Massage',
   };
 
@@ -1266,9 +1353,8 @@ class _ServicesSectionState extends State<_ServicesSection> {
             .where((s) => s.categoryKey == _selectedCategoryKey)
             .toList();
     final selectedCategoryLabel = _labelForCategoryKey(_selectedCategoryKey);
-    final display = _showAll
-        ? filteredServices
-        : filteredServices.take(_initialVisibleCount).toList();
+    final baseServices = filteredServices.take(_initialVisibleCount).toList();
+    final extraServices = filteredServices.skip(_initialVisibleCount).toList();
     final showViewAll = filteredServices.length > _initialVisibleCount;
     final content = <Widget>[
       Text(
@@ -1349,26 +1435,47 @@ class _ServicesSectionState extends State<_ServicesSection> {
         ),
       );
     } else {
-      for (int i = 0; i < display.length; i++) {
-        final svc = display[i];
+      content.addAll(
+        _buildServiceRows(
+          services: baseServices,
+          showLeadingDivider: false,
+        ),
+      );
+      if (showViewAll) {
         content.add(
-          Column(
-            children: [
-              if (i > 0) const Divider(height: 1, color: _kDetailDivider),
-              _ServiceRow(service: svc, onBook: () => widget.onBook(svc)),
-            ],
+          ClipRect(
+            child: AnimatedSize(
+              duration: _expandAnimationDuration,
+              curve: Curves.easeOutCubic,
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: _showAll
+                    ? const BoxConstraints()
+                    : const BoxConstraints(maxHeight: 0),
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  heightFactor: _showAll ? 1 : 0,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: _buildServiceRows(
+                      services: extraServices,
+                      showLeadingDivider: baseServices.isNotEmpty,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
         );
-      }
-      if (showViewAll) {
         content.addAll([
           const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,
             child: OutlinedButton(
+              key: const ValueKey('services-view-all-button'),
               onPressed: () => setState(() => _showAll = !_showAll),
               style: _detailWideOutlinedButtonStyle(tt),
-              child: Text(_showAll ? 'Az görkez' : 'Hemmesi'),
+              child: _buildViewAllLabel(),
             ),
           ),
         ]);
@@ -1378,6 +1485,38 @@ class _ServicesSectionState extends State<_ServicesSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: content,
+    );
+  }
+
+  List<Widget> _buildServiceRows({
+    required List<Service> services,
+    required bool showLeadingDivider,
+  }) {
+    final rows = <Widget>[];
+    for (int i = 0; i < services.length; i++) {
+      final svc = services[i];
+      rows.add(
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (showLeadingDivider || i > 0)
+              const Divider(height: 1, color: _kDetailDivider),
+            _ServiceRow(service: svc, onBook: () => widget.onBook(svc)),
+          ],
+        ),
+      );
+    }
+    return rows;
+  }
+
+  Widget _buildViewAllLabel() {
+    return Text(
+      _showAll ? 'Az görkez' : 'Hemmesi',
+      key: ValueKey(
+        _showAll
+            ? 'services-view-all-label-expanded'
+            : 'services-view-all-label-collapsed',
+      ),
     );
   }
 }
@@ -1650,7 +1789,7 @@ class _PortfolioSection extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 18),
+        const SizedBox(height: 8),
         if (images.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 20),
@@ -1745,7 +1884,7 @@ class _AboutSectionState extends State<_AboutSection> {
           key: const ValueKey('section-title-about'),
           style: _detailSectionTitleStyle(tt),
         ),
-        const SizedBox(height: 18),
+        const SizedBox(height: 4),
         _AboutDescriptionFlat(
           expanded: _expanded,
           onToggle: () => setState(() => _expanded = !_expanded),
@@ -1771,25 +1910,34 @@ class _AboutDescriptionFlat extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
+    final toggleLabelStyle = tt.labelMedium?.copyWith(
+      color: _kDetailMeta,
+      fontWeight: FontWeight.w500,
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          _kMockDescription,
-          key: const ValueKey('about-description'),
-          style: tt.bodyMedium?.copyWith(
-            color: kTextPrimary,
-            height: 1.55,
+        AnimatedSize(
+          duration: const Duration(milliseconds: 240),
+          curve: Curves.easeOutCubic,
+          alignment: Alignment.topCenter,
+          child: Text(
+            _kMockDescription,
+            key: const ValueKey('about-description'),
+            style: tt.bodyMedium?.copyWith(
+              color: kTextPrimary,
+              height: 1.55,
+            ),
+            maxLines: expanded ? null : 3,
+            overflow: expanded ? null : TextOverflow.ellipsis,
           ),
-          maxLines: expanded ? null : 3,
-          overflow: expanded ? null : TextOverflow.ellipsis,
         ),
         const SizedBox(height: 8),
         TextButton(
           key: const ValueKey('about-toggle-button'),
           onPressed: onToggle,
           style: TextButton.styleFrom(
-            foregroundColor: kPrimary,
+            foregroundColor: _kDetailMeta,
             padding: EdgeInsets.zero,
             minimumSize: Size.zero,
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -1797,10 +1945,7 @@ class _AboutDescriptionFlat extends StatelessWidget {
           ),
           child: Text(
             expanded ? 'Az görkez' : 'Doly oka',
-            style: tt.bodyMedium?.copyWith(
-              color: kPrimary,
-              fontWeight: FontWeight.w500,
-            ),
+            style: toggleLabelStyle,
           ),
         ),
       ],
@@ -1927,7 +2072,8 @@ class _NearbySalonsSection extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Icon(Icons.location_on_rounded, size: 20, color: kTextPrimary),
+            const Icon(Icons.location_on_rounded,
+                size: 20, color: kTextPrimary),
             const SizedBox(width: 12),
             Text(
               'Töwerekde salonlar',
@@ -1980,7 +2126,7 @@ class _NearbySalonCard extends StatelessWidget {
       child: Material(
         color: kCardBg,
         child: SizedBox(
-      width: 170,
+          width: 170,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -2056,15 +2202,20 @@ class _NearbySalonCard extends StatelessWidget {
 // Bottom book bar
 // ═════════════════════════════════════════════
 class _BottomBookBar extends StatelessWidget {
-  final double minPrice;
-  final String salonName;
+  final int serviceCount;
   final VoidCallback onBook;
-  const _BottomBookBar(
-      {required this.minPrice, required this.salonName, required this.onBook});
+  const _BottomBookBar({required this.serviceCount, required this.onBook});
 
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
+    final compactTitleStyle = tt.headlineMedium?.copyWith(
+      fontSize: tt.bodySmall?.fontSize,
+      fontWeight: FontWeight.w200,
+      color: _kDetailMeta,
+      letterSpacing: -0.2,
+      height: tt.bodySmall?.height,
+    );
     return Container(
       decoration: BoxDecoration(
         color: kCardBg,
@@ -2081,29 +2232,26 @@ class _BottomBookBar extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  '${minPrice.toStringAsFixed(0)} TMT-dan',
-                  style: tt.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                    color: kTextPrimary,
-                  ),
-                ),
-                Text(
-                  salonName,
-                  style: tt.bodySmall?.copyWith(color: _kDetailMeta),
+                  '$serviceCount hyzmat elýeter',
+                  key: const ValueKey('bottom-book-bar-service-count'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: compactTitleStyle,
                 ),
               ],
             ),
           ),
           FilledButton.icon(
             onPressed: onBook,
-            icon: const Icon(Icons.calendar_month_rounded, size: 18),
+            icon: const Icon(Icons.calendar_month_rounded, size: 20),
             label: const Text('Bron'),
             style: FilledButton.styleFrom(
               backgroundColor: _kDetailButtonBg,
               foregroundColor: Colors.white,
               shape: const StadiumBorder(),
+              minimumSize: const Size(45, 52),
               padding: const EdgeInsets.symmetric(
-                  horizontal: 14, vertical: AppSpacing.m),
+                  horizontal: 18, vertical: AppSpacing.xl),
             ),
           ),
         ],
