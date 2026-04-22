@@ -43,14 +43,29 @@ class ApiService {
     required int salonId,
     required String date,
     required int serviceId,
+    List<int>? serviceIds,
+    int? totalDurationMinutes,
   }) async {
     if (kUseMockApi) {
       await Future.delayed(const Duration(milliseconds: 240));
-      return _mockSlotsForDate(salonId: salonId, date: date, serviceId: serviceId);
+      return _mockSlotsForDate(
+        salonId: salonId,
+        date: date,
+        serviceId: serviceId,
+        serviceIds: serviceIds,
+        totalDurationMinutes: totalDurationMinutes,
+      );
     }
 
     final uri = Uri.parse('$apiBaseUrl/salons/$salonId/slots').replace(
-      queryParameters: {'date': date, 'service_id': serviceId.toString()},
+      queryParameters: {
+        'date': date,
+        'service_id': serviceId.toString(),
+        if (serviceIds != null && serviceIds.isNotEmpty)
+          'service_ids': serviceIds.join(','),
+        if (totalDurationMinutes != null)
+          'total_duration_minutes': totalDurationMinutes.toString(),
+      },
     );
     final res = await http.get(uri);
     _check(res);
@@ -61,18 +76,24 @@ class ApiService {
   Future<Booking> createBooking({
     required int salonId,
     required int serviceId,
+    List<int>? serviceIds,
     required String guestName,
     required String guestPhone,
     required String slotAt,
+    int? totalDurationMinutes,
+    double? totalPrice,
   }) async {
     if (kUseMockApi) {
       await Future.delayed(const Duration(milliseconds: 320));
       return _mockCreateBooking(
         salonId: salonId,
         serviceId: serviceId,
+        serviceIds: serviceIds,
         guestName: guestName,
         guestPhone: guestPhone,
         slotAt: slotAt,
+        totalDurationMinutes: totalDurationMinutes,
+        totalPrice: totalPrice,
       );
     }
 
@@ -82,9 +103,14 @@ class ApiService {
       body: jsonEncode({
         'salon_id': salonId,
         'service_id': serviceId,
+        if (serviceIds != null && serviceIds.isNotEmpty)
+          'service_ids': serviceIds,
         'guest_name': guestName,
         'guest_phone': guestPhone,
         'slot_at': slotAt,
+        if (totalDurationMinutes != null)
+          'total_duration_minutes': totalDurationMinutes,
+        if (totalPrice != null) 'total_price': totalPrice,
       }),
     );
     _check(res);
@@ -126,12 +152,16 @@ class ApiService {
         id: bookings[idx].id,
         salonId: bookings[idx].salonId,
         serviceId: bookings[idx].serviceId,
+        serviceIds: bookings[idx].serviceIds,
         guestName: bookings[idx].guestName,
         guestPhone: bookings[idx].guestPhone,
         slotAt: bookings[idx].slotAt,
         status: 'cancelled',
         salonName: bookings[idx].salonName,
         serviceName: bookings[idx].serviceName,
+        serviceNames: bookings[idx].serviceNames,
+        totalDurationMinutes: bookings[idx].totalDurationMinutes,
+        totalPrice: bookings[idx].totalPrice,
       );
 
       bookings[idx] = updated;
@@ -171,25 +201,42 @@ class ApiService {
   Future<Booking> _mockCreateBooking({
     required int salonId,
     required int serviceId,
+    List<int>? serviceIds,
     required String guestName,
     required String guestPhone,
     required String slotAt,
+    int? totalDurationMinutes,
+    double? totalPrice,
   }) async {
     final salon = mockSalonById(salonId);
-    final service = salon.services.firstWhere((s) => s.id == serviceId, orElse: () => const Service(id: -1, name: '', durationMinutes: 0));
-    if (service.id == -1) {
+    final selectedServices = _resolveSelectedServices(
+      salon: salon,
+      primaryServiceId: serviceId,
+      serviceIds: serviceIds,
+    );
+    if (selectedServices.isEmpty) {
       throw ApiException(400, 'Hyzmat tapylmady');
     }
 
     // slotAt häzirki UI-dan `DateTime.toIso8601String()` ýaly gelýär.
     final slot = DateTime.parse(slotAt);
+    final resolvedDuration = totalDurationMinutes ??
+        selectedServices.fold<int>(
+          0,
+          (sum, service) => sum + service.durationMinutes,
+        );
+    final slotEnd = slot.add(Duration(minutes: resolvedDuration));
 
     final bookings = await _mockLoadBookings();
     final hasConflict = bookings.any((b) =>
         b.status == 'confirmed' &&
         b.salonId == salonId &&
-        b.serviceId == serviceId &&
-        b.slotAt == slot);
+        _rangesOverlap(
+          startA: slot,
+          endA: slotEnd,
+          startB: b.slotAt,
+          endB: b.slotAt.add(Duration(minutes: _bookingDurationMinutes(b))),
+        ));
 
     if (hasConflict) {
       throw ApiException(409, 'Wagt eýýäm bronlandy');
@@ -200,12 +247,20 @@ class ApiService {
       id: id,
       salonId: salonId,
       serviceId: serviceId,
+      serviceIds: selectedServices.map((service) => service.id).toList(),
       guestName: guestName,
       guestPhone: guestPhone,
       slotAt: slot,
       status: 'confirmed',
       salonName: salon.name,
-      serviceName: service.name,
+      serviceName: selectedServices.first.name,
+      serviceNames: selectedServices.map((service) => service.name).toList(),
+      totalDurationMinutes: resolvedDuration,
+      totalPrice: totalPrice ??
+          selectedServices.fold<double>(
+            0,
+            (sum, service) => sum + (service.price ?? 0),
+          ),
     );
 
     bookings.add(booking);
@@ -217,11 +272,26 @@ class ApiService {
     required int salonId,
     required String date,
     required int serviceId,
+    List<int>? serviceIds,
+    int? totalDurationMinutes,
   }) async {
     final day = DateTime.parse(date); // yyyy-MM-dd
     final bookings = await _mockLoadBookings();
-
-    final confirmed = bookings.where((b) => b.status == 'confirmed' && b.salonId == salonId && b.serviceId == serviceId);
+    final salon = mockSalonById(salonId);
+    final selectedServices = _resolveSelectedServices(
+      salon: salon,
+      primaryServiceId: serviceId,
+      serviceIds: serviceIds,
+    );
+    if (selectedServices.isEmpty) return [];
+    final resolvedDuration = totalDurationMinutes ??
+        selectedServices.fold<int>(
+          0,
+          (sum, service) => sum + service.durationMinutes,
+        );
+    final confirmed = bookings.where(
+      (booking) => booking.status == 'confirmed' && booking.salonId == salonId,
+    );
 
     final out = <String>[];
     for (int h = 9; h <= 17; h++) {
@@ -229,13 +299,80 @@ class ApiService {
         // 17:30 bolmaz ýaly
         if (h == 17 && m == 30) continue;
         final dt = DateTime(day.year, day.month, day.day, h, m);
+        final end = dt.add(Duration(minutes: resolvedDuration));
+        if (end.day != dt.day || end.hour > 18 || (end.hour == 18 && end.minute > 0)) {
+          continue;
+        }
         final slotStr = dt.toIso8601String();
-        final taken = confirmed.any((b) => b.slotAt == dt);
+        final taken = confirmed.any(
+          (booking) => _rangesOverlap(
+            startA: dt,
+            endA: end,
+            startB: booking.slotAt,
+            endB: booking.slotAt.add(
+              Duration(minutes: _bookingDurationMinutes(booking)),
+            ),
+          ),
+        );
         if (!taken) out.add(slotStr);
       }
     }
 
     return out;
+  }
+
+  List<Service> _resolveSelectedServices({
+    required Salon salon,
+    required int primaryServiceId,
+    List<int>? serviceIds,
+  }) {
+    final resolvedIds = <int>[
+      ...?serviceIds,
+      if (serviceIds == null || serviceIds.isEmpty) primaryServiceId,
+    ];
+    final uniqueIds = <int>[];
+    for (final id in resolvedIds) {
+      if (!uniqueIds.contains(id)) uniqueIds.add(id);
+    }
+    final selectedServices = <Service>[];
+    for (final id in uniqueIds) {
+      final match = _findSalonService(salon, id);
+      if (match != null) selectedServices.add(match);
+    }
+    return selectedServices;
+  }
+
+  Service? _findSalonService(Salon salon, int id) {
+    for (final service in salon.services) {
+      if (service.id == id) return service;
+    }
+    return null;
+  }
+
+  int _bookingDurationMinutes(Booking booking) {
+    if (booking.totalDurationMinutes != null && booking.totalDurationMinutes! > 0) {
+      return booking.totalDurationMinutes!;
+    }
+    final salon = mockSalonById(booking.salonId);
+    final selectedServices = _resolveSelectedServices(
+      salon: salon,
+      primaryServiceId: booking.serviceId,
+      serviceIds: booking.serviceIds,
+    );
+    if (selectedServices.isEmpty) return 30;
+    return selectedServices.fold<int>(
+      0,
+      (sum, service) => sum + service.durationMinutes,
+    );
+  }
+
+  bool _rangesOverlap({
+    required DateTime startA,
+    required DateTime endA,
+    required DateTime startB,
+    required DateTime endB,
+  }) {
+    return startA.isBefore(endB) && endA.isAfter(startB);
   }
 
   void _check(http.Response res) {

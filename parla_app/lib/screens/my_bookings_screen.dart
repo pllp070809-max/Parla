@@ -191,7 +191,7 @@ class _BookingTile extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
     final dateStr = DateFormat('dd MMM yyyy, HH:mm').format(booking.slotAt);
     final salonLabel = booking.salonName ?? 'Salon #${booking.salonId}';
-    final serviceLabel = booking.serviceName ?? 'Hyzmat #${booking.serviceId}';
+    final serviceLabel = booking.serviceSummary(maxNames: 2);
     final canCancel = !isPast && booking.status == 'confirmed' && onCancel != null;
 
     return Opacity(

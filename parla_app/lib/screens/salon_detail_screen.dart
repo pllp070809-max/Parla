@@ -12,6 +12,8 @@ import '../app_radius.dart';
 import '../app_spacing.dart';
 import '../models/salon.dart';
 import '../theme.dart';
+import '../widgets/bottom_action_bar.dart';
+import '../widgets/service_catalog_section.dart';
 import '../widgets/shared_widgets.dart';
 import '../utils/salon_images.dart';
 import 'booking_screen.dart';
@@ -569,8 +571,7 @@ class _SalonDetailBodyState extends ConsumerState<_SalonDetailBody> {
                 ),
                 child: _ServicesSection(
                   salon: salon,
-                  onBook: (svc) =>
-                      _openBooking(preselectedServiceId: svc.id),
+                  onBook: (svc) => _openBooking(preselectedServiceId: svc.id),
                 ),
               ),
             ),
@@ -1273,311 +1274,23 @@ class _UnifiedFavoriteButtonOverlay extends StatelessWidget {
 // ═════════════════════════════════════════════
 // Services section
 // ═════════════════════════════════════════════
-class _ServicesSection extends StatefulWidget {
+class _ServicesSection extends StatelessWidget {
   final Salon salon;
   final ValueChanged<Service> onBook;
   const _ServicesSection({required this.salon, required this.onBook});
 
   @override
-  State<_ServicesSection> createState() => _ServicesSectionState();
-}
-
-class _ServicesSectionState extends State<_ServicesSection> {
-  static const int _initialVisibleCount = 5;
-  static const Duration _expandAnimationDuration = Duration(milliseconds: 1920);
-
-  /// Salonda grnjek tertip; API-den tze aar gelende aakda goular.
-  static const List<String> _categoryKeyOrder = [
-    'haircut',
-    'color',
-    'beard',
-    'styling',
-    'treatment',
-    'nails',
-    'spa',
-    'brows',
-    'wax',
-    'massage',
-  ];
-
-  static const Map<String, String> _categoryLabels = {
-    'haircut': 'Sa kesim',
-    'color': 'Sa boag',
-    'beard': 'Sakal',
-    'styling': 'Ustilleme',
-    'treatment': 'Bejeri',
-    'nails': 'Dyrnak',
-    'spa': 'Spa',
-    'brows': 'Gz we ga',
-    'wax': 'Depilasia',
-    'massage': 'Massage',
-  };
-
-  bool _showAll = false;
-  String _selectedCategoryKey = 'all';
-
-  static List<String> _categoryKeysForSalon(List<Service> services) {
-    final present =
-        services.map((s) => s.categoryKey).whereType<String>().toSet();
-    final ordered = <String>[];
-    for (final k in _categoryKeyOrder) {
-      if (present.contains(k)) ordered.add(k);
-    }
-    final rest = present.where((k) => !ordered.contains(k)).toList()..sort();
-    ordered.addAll(rest);
-    return ordered;
-  }
-
-  static String _labelForCategoryKey(String key) {
-    if (key == 'all') return 'Hemmesi';
-    return _categoryLabels[key] ?? key;
-  }
-
-  @override
-  void didUpdateWidget(covariant _ServicesSection oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    final keys = _categoryKeysForSalon(widget.salon.services);
-    if (_selectedCategoryKey != 'all' && !keys.contains(_selectedCategoryKey)) {
-      _selectedCategoryKey = 'all';
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final tt = Theme.of(context).textTheme;
-    final allServices = widget.salon.services;
-    final categoryKeysRow = _categoryKeysForSalon(allServices);
-    final filteredServices = _selectedCategoryKey == 'all'
-        ? allServices
-        : allServices
-            .where((s) => s.categoryKey == _selectedCategoryKey)
-            .toList();
-    final selectedCategoryLabel = _labelForCategoryKey(_selectedCategoryKey);
-    final baseServices = filteredServices.take(_initialVisibleCount).toList();
-    final extraServices = filteredServices.skip(_initialVisibleCount).toList();
-    final showViewAll = filteredServices.length > _initialVisibleCount;
-    final content = <Widget>[
-      Text(
-        'Hyzmatlar',
-        key: const ValueKey('section-title-services'),
-        style: _detailSectionTitleStyle(tt),
-      ),
-      const SizedBox(height: 18),
-      SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            'all',
-            ...categoryKeysRow,
-          ].map((categoryKey) {
-            final selected = categoryKey == _selectedCategoryKey;
-            return Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: TweenAnimationBuilder<double>(
-                duration: const Duration(milliseconds: 220),
-                curve: Curves.easeOutCubic,
-                tween: Tween<double>(
-                  begin: selected ? 0.98 : 1.0,
-                  end: selected ? 1.0 : 0.98,
-                ),
-                builder: (context, scale, child) {
-                  return Transform.scale(scale: scale, child: child);
-                },
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(999),
-                    onTap: () {
-                      if (_selectedCategoryKey == categoryKey) return;
-                      setState(() {
-                        _selectedCategoryKey = categoryKey;
-                        _showAll = false;
-                      });
-                    },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 220),
-                      curve: Curves.easeOutCubic,
-                      height: 38,
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      decoration: BoxDecoration(
-                        color: selected ? Colors.black : Colors.transparent,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        _labelForCategoryKey(categoryKey),
-                        style: tt.labelLarge?.copyWith(
-                          fontWeight: FontWeight.w400,
-                          color: selected ? Colors.white : kTextSecondary,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
-        ),
-      ),
-      const SizedBox(height: 10),
-    ];
-
-    if (filteredServices.isEmpty) {
-      content.add(
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 24),
-          child: Text(
-            _selectedCategoryKey == 'all'
-                ? 'Bu bölümde hyzmat ýok'
-                : '$selectedCategoryLabel kategoriýasynda hyzmat ýok',
-            style: tt.bodyMedium?.copyWith(color: _kDetailMeta),
-          ),
-        ),
-      );
-    } else {
-      content.addAll(
-        _buildServiceRows(
-          services: baseServices,
-          showLeadingDivider: false,
-        ),
-      );
-      if (showViewAll) {
-        content.add(
-          ClipRect(
-            child: AnimatedSize(
-              duration: _expandAnimationDuration,
-              curve: Curves.easeOutCubic,
-              alignment: Alignment.topCenter,
-              child: ConstrainedBox(
-                constraints: _showAll
-                    ? const BoxConstraints()
-                    : const BoxConstraints(maxHeight: 0),
-                child: Align(
-                  alignment: Alignment.topCenter,
-                  heightFactor: _showAll ? 1 : 0,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: _buildServiceRows(
-                      services: extraServices,
-                      showLeadingDivider: baseServices.isNotEmpty,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-        content.addAll([
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton(
-              key: const ValueKey('services-view-all-button'),
-              onPressed: () => setState(() => _showAll = !_showAll),
-              style: _detailWideOutlinedButtonStyle(tt),
-              child: _buildViewAllLabel(),
-            ),
-          ),
-        ]);
-      }
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: content,
-    );
-  }
-
-  List<Widget> _buildServiceRows({
-    required List<Service> services,
-    required bool showLeadingDivider,
-  }) {
-    final rows = <Widget>[];
-    for (int i = 0; i < services.length; i++) {
-      final svc = services[i];
-      rows.add(
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (showLeadingDivider || i > 0)
-              const Divider(height: 1, color: _kDetailDivider),
-            _ServiceRow(service: svc, onBook: () => widget.onBook(svc)),
-          ],
-        ),
-      );
-    }
-    return rows;
-  }
-
-  Widget _buildViewAllLabel() {
-    return Text(
-      _showAll ? 'Az görkez' : 'Hemmesi',
-      key: ValueKey(
-        _showAll
-            ? 'services-view-all-label-expanded'
-            : 'services-view-all-label-collapsed',
-      ),
+    return ServiceCatalogSection(
+      services: salon.services,
+      actionMode: ServiceCatalogActionMode.book,
+      onAction: onBook,
+      showTitle: true,
+      showViewAllButton: true,
     );
   }
 }
 
-class _ServiceRow extends StatelessWidget {
-  final Service service;
-  final VoidCallback onBook;
-  const _ServiceRow({required this.service, required this.onBook});
-
-  @override
-  Widget build(BuildContext context) {
-    final tt = Theme.of(context).textTheme;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(service.name, style: _detailRowTitleStyle(tt)),
-                const SizedBox(height: 6),
-                Text(
-                  '${service.durationMinutes} min',
-                  style: _detailRowMetaStyle(tt),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  '${service.price?.toStringAsFixed(0) ?? '?'} TMT',
-                  style: _detailRowTitleStyle(tt),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          Padding(
-            padding: const EdgeInsets.only(top: 5),
-            child: OutlinedButton(
-              onPressed: onBook,
-              style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: kPrimary),
-                foregroundColor: kTextPrimary,
-                backgroundColor: kCardBg,
-                shape: const StadiumBorder(),
-                minimumSize: const Size(92, 38),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                textStyle: tt.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w400,
-                  color: kTextPrimary,
-                ),
-              ),
-              child: const Text('Bron'),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 // ═════════════════════════════════════════════
 // Team section
@@ -2208,54 +1921,11 @@ class _BottomBookBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tt = Theme.of(context).textTheme;
-    final compactTitleStyle = tt.headlineMedium?.copyWith(
-      fontSize: tt.bodySmall?.fontSize,
-      fontWeight: FontWeight.w200,
-      color: _kDetailMeta,
-      letterSpacing: -0.2,
-      height: tt.bodySmall?.height,
-    );
-    return Container(
-      decoration: BoxDecoration(
-        color: kCardBg,
-        border: const Border(top: BorderSide(color: _kDetailDivider)),
-        boxShadow: kShadowUpMd,
-      ),
-      padding: EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.m, AppSpacing.xl,
-          MediaQuery.of(context).padding.bottom + AppSpacing.m),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '$serviceCount hyzmat elýeter',
-                  key: const ValueKey('bottom-book-bar-service-count'),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: compactTitleStyle,
-                ),
-              ],
-            ),
-          ),
-          FilledButton.icon(
-            onPressed: onBook,
-            icon: const Icon(Icons.calendar_month_rounded, size: 20),
-            label: const Text('Bron'),
-            style: FilledButton.styleFrom(
-              backgroundColor: _kDetailButtonBg,
-              foregroundColor: Colors.white,
-              shape: const StadiumBorder(),
-              minimumSize: const Size(45, 52),
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 18, vertical: AppSpacing.xl),
-            ),
-          ),
-        ],
-      ),
+    return BottomActionBar(
+      infoLabel: '$serviceCount hyzmat elýeter',
+      infoKey: const ValueKey('bottom-book-bar-service-count'),
+      buttonLabel: 'Bron',
+      onPressed: onBook,
     );
   }
 }

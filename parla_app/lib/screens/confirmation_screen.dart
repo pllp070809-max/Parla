@@ -7,13 +7,11 @@ import '../theme.dart';
 class ConfirmationScreen extends StatefulWidget {
   final Booking booking;
   final String salonName;
-  final String serviceName;
 
   const ConfirmationScreen({
     super.key,
     required this.booking,
     required this.salonName,
-    required this.serviceName,
   });
 
   @override
@@ -41,6 +39,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> with SingleTick
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
     final dateStr = DateFormat('dd MMMM yyyy, HH:mm').format(widget.booking.slotAt);
+    final serviceLabel = widget.booking.serviceSummary(maxNames: 3);
 
     return Scaffold(
       body: SafeArea(
@@ -75,7 +74,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> with SingleTick
               const SizedBox(height: AppSpacing.xxl),
 
               _InfoRow(label: 'Salon', value: widget.salonName),
-              _InfoRow(label: 'Hyzmat', value: widget.serviceName),
+              _InfoRow(label: 'Hyzmat', value: serviceLabel),
               _InfoRow(label: 'Wagt', value: dateStr),
               _InfoRow(label: 'Müşderi', value: widget.booking.guestName),
               _InfoRow(label: 'Telefon', value: widget.booking.guestPhone),

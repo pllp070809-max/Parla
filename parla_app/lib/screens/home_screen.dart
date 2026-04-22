@@ -284,8 +284,8 @@ class HomeScreen extends ConsumerWidget {
                             const SizedBox(height: 2),
                             Text(b.salonName ?? 'Salon #${b.salonId}',
                                 style: AppTextStyles.cardTitle),
-                            if (b.serviceName != null)
-                              Text(b.serviceName!,
+                            if (b.resolvedServiceNames.isNotEmpty)
+                              Text(b.serviceSummary(maxNames: 2),
                                   style: AppTextStyles.cardMeta
                                       .copyWith(color: kTextSecondary)),
                             const SizedBox(height: 2),
