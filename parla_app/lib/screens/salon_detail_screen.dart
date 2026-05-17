@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 import '../app_colors.dart';
-import '../app_text_styles.dart';
 import '../providers/providers.dart';
 import '../app_radius.dart';
 import '../app_spacing.dart';
@@ -1829,10 +1828,8 @@ class _NearbySalonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final metaStyle = AppTextStyles.cardMeta.copyWith(
-      fontSize: 11.5,
-      color: kTextSecondary,
-    );
+    final tt = Theme.of(context).textTheme;
+    final metaStyle = tt.bodyMedium!.copyWith(fontSize: 11.5);
     final radius = BorderRadius.circular(AppRadius.m);
     return ClipRRect(
       borderRadius: radius,
@@ -1870,7 +1867,7 @@ class _NearbySalonCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: AppTextStyles.cardTitle.copyWith(fontSize: 14),
+                      style: tt.titleMedium!.copyWith(fontWeight: FontWeight.w600, fontSize: 14),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),

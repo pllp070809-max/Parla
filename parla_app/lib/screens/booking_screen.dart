@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/providers.dart';
 import '../models/salon.dart';
 import '../services/api_service.dart';
+import '../app_colors.dart';
 import '../app_radius.dart';
 import '../app_spacing.dart';
 import '../theme.dart';

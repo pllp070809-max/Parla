@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../app_colors.dart';
 
-import '../app_text_styles.dart';
 import '../app_spacing.dart';
 import '../theme.dart';
 
@@ -39,10 +38,8 @@ class BottomActionBar extends StatelessWidget {
       letterSpacing: -0.2,
       height: tt.bodySmall?.height,
     );
-    final premiumPriceStyle = AppTextStyles.sectionTitle.copyWith(
-      fontSize: tt.titleLarge?.fontSize,
+    final premiumPriceStyle = tt.titleLarge!.copyWith(
       fontWeight: FontWeight.w700,
-      color: kTextPrimary,
       letterSpacing: -0.1,
       height: 1.2,
     );

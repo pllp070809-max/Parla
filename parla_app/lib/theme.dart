@@ -38,7 +38,7 @@ List<BoxShadow> get kShadowPill    => AppColors.kShadowPill;
 List<BoxShadow> get kShadowLg      => AppColors.kShadowLg;
 List<BoxShadow> get kStickerShadow => AppColors.kStickerShadow;
 
-const Color _buttonPrimaryColor = AppColors.kPrimary;
+
 
 BoxDecoration kStickerCardDecoration({double radius = AppRadius.m}) => BoxDecoration(
       color: kCardBg,
@@ -95,10 +95,10 @@ ThemeData buildParlaTheme() {
       color: kTextPrimary,
     ),
     displaySmall: GoogleFonts.plusJakartaSans(
-      fontSize: 26,
+      fontSize: 28,
       fontWeight: FontWeight.w700,
-      height: 1.16,
-      letterSpacing: -0.2,
+      height: 1.2,
+      letterSpacing: -0.5,
       color: kTextPrimary,
     ),
     // H2 — Section title (Tartuffo, 24-28)
@@ -155,7 +155,7 @@ ThemeData buildParlaTheme() {
       fontSize: 14,
       fontWeight: FontWeight.w400,
       color: kTextSecondary,
-      height: 1.5,
+      height: 1.4,
     ),
     bodySmall: GoogleFonts.inter(
       fontSize: 14,
@@ -243,8 +243,8 @@ ThemeData buildParlaTheme() {
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: _buttonPrimaryColor,
-        foregroundColor: Colors.white,
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
         elevation: 0,
         minimumSize: const Size(double.infinity, 52),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.m)),
@@ -253,8 +253,8 @@ ThemeData buildParlaTheme() {
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
-        backgroundColor: _buttonPrimaryColor,
-        foregroundColor: Colors.white,
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.m)),
         textStyle: textTheme.labelLarge,
       ),
@@ -269,7 +269,7 @@ ThemeData buildParlaTheme() {
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
-        foregroundColor: _buttonPrimaryColor,
+        foregroundColor: colorScheme.primary,
         textStyle: textTheme.labelMedium,
       ),
     ),
@@ -300,7 +300,7 @@ ThemeData buildParlaTheme() {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppRadius.m),
-        borderSide: const BorderSide(color: kPrimary, width: 2),
+        borderSide: BorderSide(color: colorScheme.primary, width: 2),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppRadius.m),

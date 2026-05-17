@@ -7,7 +7,6 @@ import '../models/salon.dart';
 import '../app_radius.dart';
 import '../app_sizes.dart';
 import '../app_spacing.dart';
-import '../app_text_styles.dart';
 import '../app_colors.dart';
 import '../theme.dart';
 import '../utils/salon_images.dart';
@@ -39,6 +38,7 @@ class HomeScreen extends ConsumerWidget {
     const homeSectionGap = AppSizes.sectionGap;
     final salons = ref.watch(_featuredProvider);
     final cardW = AppSizes.cardWidth;
+    final tt = Theme.of(context).textTheme;
 
     return Scaffold(
       backgroundColor: kScaffoldBg,
@@ -64,7 +64,7 @@ class HomeScreen extends ConsumerWidget {
                             Expanded(
                               child: Text(
                                 'Siz üçin',
-                                style: AppTextStyles.headerTitle,
+                                style: tt.displaySmall,
                               ),
                             ),
                             IconButton(
@@ -186,7 +186,7 @@ class HomeScreen extends ConsumerWidget {
                   ),
                   child: Text(
                     'Esasy kategoriýalar',
-                    style: AppTextStyles.sectionTitle,
+                    style: tt.titleLarge,
                   ),
                 ),
               ),
@@ -231,6 +231,7 @@ class HomeScreen extends ConsumerWidget {
   }
 
   Widget _upcomingBookingStrip(WidgetRef ref, BuildContext context) {
+    final tt = Theme.of(context).textTheme;
     final phone = ref.watch(userPhoneProvider);
     if (phone == null || phone.isEmpty) {
       return const SliverToBoxAdapter(child: SizedBox.shrink());
@@ -279,21 +280,19 @@ class HomeScreen extends ConsumerWidget {
                           children: [
                             Text(
                               'Siziň geljekki bronyňyz',
-                              style: AppTextStyles.cardMeta
-                                  .copyWith(color: kTextSecondary),
+                              style: tt.bodyMedium,
                             ),
                             const SizedBox(height: 2),
                             Text(b.salonName ?? 'Salon #${b.salonId}',
-                                style: AppTextStyles.cardTitle),
+                                style: tt.titleMedium!.copyWith(fontWeight: FontWeight.w600)),
                             if (b.resolvedServiceNames.isNotEmpty)
                               Text(b.serviceSummary(maxNames: 2),
-                                  style: AppTextStyles.cardMeta
-                                      .copyWith(color: kTextSecondary)),
+                                  style: tt.bodyMedium),
                             const SizedBox(height: 2),
                             Text(
                               dateStr,
-                              style: AppTextStyles.cardMeta.copyWith(
-                                  color: AppColors.kPrimary, fontWeight: FontWeight.w600),
+                              style: tt.bodyMedium!.copyWith(
+                                  color: kPrimary, fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),
@@ -312,6 +311,7 @@ class HomeScreen extends ConsumerWidget {
 
   Widget _recentlyViewedRow(AsyncValue<List<Salon>> salons, WidgetRef ref,
       BuildContext context, double cardW) {
+    final tt = Theme.of(context).textTheme;
     final recentIds = ref.watch(recentViewedSalonIdsProvider);
     if (recentIds.isEmpty) {
       return const SliverToBoxAdapter(child: SizedBox.shrink());
@@ -339,7 +339,7 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 child: Text(
                   'Soňky görülen salonlar',
-                  style: AppTextStyles.sectionTitle,
+                  style: tt.titleLarge,
                 ),
               ),
               SizedBox(
@@ -389,7 +389,7 @@ class HomeScreen extends ConsumerWidget {
       children: [
         Text(
           title,
-          style: AppTextStyles.sectionTitle,
+          style: Theme.of(context).textTheme.titleLarge,
         ),
         GestureDetector(
           onTap: () {
@@ -397,7 +397,7 @@ class HomeScreen extends ConsumerWidget {
           },
           child: Text(
             'Ählisi',
-            style: AppTextStyles.sectionLink,
+            style: Theme.of(context).textTheme.titleSmall!.copyWith(color: kPrimary),
           ),
         ),
       ],
@@ -541,6 +541,7 @@ class _CategoryCircle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
     return Semantics(
       label: label,
       button: true,
@@ -586,7 +587,7 @@ class _CategoryCircle extends StatelessWidget {
             width: 104,
             child: Text(
               label,
-              style: AppTextStyles.categoryLabel,
+              style: tt.titleSmall,
               textAlign: TextAlign.center,
               maxLines: 1,
               softWrap: false,
@@ -627,6 +628,7 @@ class _VenueCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
     final radius = BorderRadius.circular(AppRadius.m);
     return Semantics(
       label:
@@ -695,7 +697,7 @@ class _VenueCard extends StatelessWidget {
                     children: [
                       Text(
                         salon.name,
-                        style: AppTextStyles.cardTitle,
+                        style: tt.titleMedium!.copyWith(fontWeight: FontWeight.w600),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -709,19 +711,17 @@ class _VenueCard extends StatelessWidget {
                             const SizedBox(width: 4),
                             Text(
                               _rating.toStringAsFixed(1),
-                              style: AppTextStyles.cardMeta.copyWith(
+                              style: tt.bodyMedium!.copyWith(
                                   color: kTextPrimary,
                                   fontWeight: FontWeight.w600),
                             ),
                             Text(
                               ' ($_reviews)',
-                              style: AppTextStyles.cardMeta
-                                  .copyWith(color: kTextSecondary),
+                              style: tt.bodyMedium,
                             ),
                             Text(
                               ' • ~$_distanceKm',
-                              style: AppTextStyles.cardMeta
-                                  .copyWith(color: kTextSecondary),
+                              style: tt.bodyMedium,
                             ),
                           ],
                         ),
@@ -730,8 +730,7 @@ class _VenueCard extends StatelessWidget {
                         const SizedBox(height: 2),
                         Text(
                           salon.address!,
-                          style: AppTextStyles.cardMeta
-                              .copyWith(color: kTextSecondary),
+                          style: tt.bodyMedium,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -740,8 +739,7 @@ class _VenueCard extends StatelessWidget {
                         const SizedBox(height: 1),
                         Text(
                           _catLabel(salon.category!),
-                          style: AppTextStyles.cardMeta
-                              .copyWith(color: kTextTertiary),
+                          style: tt.bodyMedium!.copyWith(color: kTextTertiary),
                         ),
                       ],
                     ],
@@ -827,7 +825,8 @@ class _DealPreviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final badgeStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+    final tt = Theme.of(context).textTheme;
+    final badgeStyle = tt.bodySmall?.copyWith(
           color: Colors.white,
           fontSize: 10,
           fontWeight: FontWeight.w600,
@@ -868,7 +867,7 @@ class _DealPreviewCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       title,
-                      style: AppTextStyles.cardTitle,
+                      style: tt.titleMedium!.copyWith(fontWeight: FontWeight.w600),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),

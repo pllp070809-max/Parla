@@ -15,7 +15,7 @@ class AppColors {
   static const Color kTextPrimary   = Color(0xFF2E2028);
   static const Color kTextSecondary = Color(0xFF6B5A65);
   static const Color kTextTertiary  = Color(0xFF9B8492);
-  static const Color kInputHint     = Color(0xFFC2C2C2);
+  static const Color kInputHint     = Color(0xFF9B8492);
 
   // ── Fon / Surface ──────────────────────────────────────────
   static const Color kScaffoldBg = Color(0xFFFDF8F5);
