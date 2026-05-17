@@ -73,8 +73,8 @@ const _kAdditionalInfo = [
 ];
 
 const _kDetailDivider        = AppColors.kDivider;
-const _kDetailChipLavenderBg = AppColors.kChipLavenderBg;
-const _kDetailChipLavenderFg = AppColors.kChipLavenderFg;
+const _kDetailChipLavenderBg = AppColors.kPrimarySoft;
+const _kDetailChipLavenderFg = AppColors.kPrimary;
 const _kDetailChipMintBg     = AppColors.kChipMintBg;
 const _kDetailChipMintFg     = AppColors.kChipMintFg;
 const _kDetailMeta           = AppColors.kTextTertiary;
