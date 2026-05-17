@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import '../app_colors.dart';
 
 import '../app_text_styles.dart';
 import '../app_spacing.dart';
 import '../theme.dart';
 
-const Color _kBottomActionDivider = Color(0xFFF0F1F5);
-const Color _kBottomActionButtonBg = Color(0xFF151517);
-const Color _kBottomActionMeta = Color(0xFF8D8D98);
+const Color _kBottomActionDivider  = AppColors.kDivider;
+const Color _kBottomActionButtonBg = AppColors.kDarkButton;
+const Color _kBottomActionMeta     = AppColors.kTextTertiary;
 
 class BottomActionBar extends StatelessWidget {
   final String? topInfoLabel;

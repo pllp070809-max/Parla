@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/providers.dart';
 import '../screens/home_screen.dart';
@@ -8,9 +9,9 @@ import '../screens/profile_screen.dart';
 import '../app_spacing.dart';
 import '../theme.dart';
 
-const _navSelectedColor = Color(0xFF0E7490);
-const _navSelectedPillColor = Color(0x1F0E7490);
-const _navUnselectedColor = Color(0xFF8A949E);
+const _navSelectedColor     = AppColors.kPrimary;
+const _navSelectedPillColor = AppColors.kPrimarySoft;
+const _navUnselectedColor   = AppColors.kTextSecondary;
 
 /// Icon-only bottom bar; saýlananda M3 ýaly pill indikator we primary reňk.
 class BottomNavShell extends ConsumerWidget {

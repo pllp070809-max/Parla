@@ -27,7 +27,7 @@ class AppTextStyles {
     fontSize: 14,
     fontWeight: FontWeight.w500,
     height: 1.35,
-    color: const Color(0xFF0E7490),
+    color: kPrimary,
   );
 
   static final TextStyle cardTitle = GoogleFonts.inter(

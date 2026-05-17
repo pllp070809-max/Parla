@@ -1,101 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'app_colors.dart';
 import 'app_radius.dart';
 import 'app_spacing.dart';
 
 const String kFontDisplay = 'Plus Jakarta Sans';
 const String kFontBody = 'Inter';
 
-const Color _buttonPrimaryColor = Color(0xFF0E7490);
+// ── Re-exports (gaýry faýllaryň importy bozulmasyn) ──
+const Color kPrimary        = AppColors.kPrimary;
+const Color kPrimarySoft    = AppColors.kPrimarySoft;
+const Color kSecondary      = AppColors.kSecondary;
+const Color kAccentLight    = AppColors.kAccentLight;
+const Color kStickerOutline = AppColors.kStickerOutline;
+const Color kScaffoldBg     = AppColors.kScaffoldBg;
+const Color kSurfaceBg      = AppColors.kSurfaceBg;
+const Color kCardBg         = AppColors.kCardBg;
+const Color kError          = AppColors.kError;
+const Color kSuccess        = AppColors.kSuccess;
+const Color kStar           = AppColors.kStar;
+const Color kTeamSeeAll     = AppColors.kTeamSeeAll;
+const Color kTeamRoleText   = AppColors.kTextTertiary;
+const Color kTeamStar       = AppColors.kTeamStar;
+const Color kTextPrimary    = AppColors.kTextPrimary;
+const Color kTextSecondary  = AppColors.kTextSecondary;
+const Color kTextTertiary   = AppColors.kTextTertiary;
+const Color kBorder         = AppColors.kBorder;
+const Color kBorderMedium   = AppColors.kBorderMedium;
 
-// ── Colors (Fresha style, cyan variant) ──
-const Color kPrimary = Color(0xFF00ACC1);       // Fresha #7C40F6 → cyan
-const Color kPrimarySoft = Color(0xFFE8F8FA); // saýlanan kartlar üçin ýeňil cyan fon
-const Color kSecondary = Color(0xFF0097A7);      // goýuraq cyan
-const Color kAccentLight = Color(0xFF26C6DA);    // açyk cyan
-const Color kScaffoldBg = Color(0xFFFFFFFF);     // Fresha: ak fon
-const Color kSurfaceBg = Color(0xFFFAFAFA);      // Fresha: çeýe fon
-const Color kCardBg = Color(0xFFFFFFFF);         // karta fony
-const Color kError = Color(0xFFE53935);
-const Color kSuccess = Color(0xFF43A047);
-const Color kStar = Color(0xFFFFB800);           // Fresha: reýting ýyldyzy
-const Color kTeamSeeAll = Color(0xFF7B61FF);
-const Color kTeamRoleText = Color(0xFF8E8E93);
-const Color kTeamStar = Color(0xFFFFCC00);
-const Color kTextPrimary = Color(0xFF18181B);    // Fresha: esasy tekst
-const Color kTextSecondary = Color(0xFF71717A);   // Fresha: ikinji tekst
-const Color kTextTertiary = Color(0xFFA1A1AA);    // Fresha: üçünji tekst
-const Color kBorder = Color(0xFFE5E7EB);          // Fresha: gyra/border
-const Color kBorderMedium = Color(0xFFBDBDBD);     // Fresha: orta gyra
+// ── Shadows (re-exports) ──
+List<BoxShadow> get kShadowSm      => AppColors.kShadowSm;
+List<BoxShadow> get kShadowUpMd    => AppColors.kShadowUpMd;
+List<BoxShadow> get kShadowDownSm  => AppColors.kShadowDownSm;
+List<BoxShadow> get kShadowMd      => AppColors.kShadowMd;
+List<BoxShadow> get kShadowPill    => AppColors.kShadowPill;
+List<BoxShadow> get kShadowLg      => AppColors.kShadowLg;
+List<BoxShadow> get kStickerShadow => AppColors.kStickerShadow;
 
-// ── Shadows ──
-List<BoxShadow> kShadowSm = [
-  BoxShadow(
-    color: Colors.black.withValues(alpha: 0.03),
-    blurRadius: 5,
-    offset: const Offset(0, 1),
-  ),
-];
-
-// Fresha stili: aşak panel / ýokarky panel köleleri.
-List<BoxShadow> kShadowUpMd = [
-  BoxShadow(
-    color: Colors.black.withValues(alpha: 0.045),
-    blurRadius: 10,
-    offset: const Offset(0, -4),
-  ),
-];
-
-List<BoxShadow> kShadowDownSm = [
-  BoxShadow(
-    color: Colors.black.withValues(alpha: 0.04),
-    blurRadius: 8,
-    offset: const Offset(0, 4),
-  ),
-];
-
-List<BoxShadow> kShadowMd = [
-  BoxShadow(
-    color: Colors.black.withValues(alpha: 0.045),
-    blurRadius: 10,
-    offset: const Offset(0, 3),
-  ),
-];
-
-List<BoxShadow> kShadowPill = [
-  BoxShadow(
-    color: Colors.black.withValues(alpha: 0.06),
-    blurRadius: 10,
-    offset: const Offset(0, 4),
-  ),
-];
-
-List<BoxShadow> kShadowLg = [
-  BoxShadow(
-    color: Colors.black.withValues(alpha: 0.06),
-    blurRadius: 16,
-    offset: const Offset(0, 6),
-  ),
-];
-
-// ── Stiker-stil tokens ──
-// Subtle cyan-tinted border for sticker cards (matches kPrimary family)
-const Color kStickerOutline = Color(0xFFD9F2F5);
-
-// Two-layer shadow: faint cyan tint + soft black — gives depth without heaviness
-List<BoxShadow> kStickerShadow = [
-  BoxShadow(
-    color: Color(0x1000ACC1), // kPrimary ~6%
-    blurRadius: 16,
-    offset: Offset(0, 5),
-  ),
-  BoxShadow(
-    color: Color(0x08000000), // black ~3%
-    blurRadius: 6,
-    offset: Offset(0, 1),
-  ),
-];
+const Color _buttonPrimaryColor = AppColors.kPrimary;
 
 BoxDecoration kStickerCardDecoration({double radius = AppRadius.m}) => BoxDecoration(
       color: kCardBg,

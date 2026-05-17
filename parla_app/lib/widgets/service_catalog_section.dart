@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../app_colors.dart';
 import '../app_radius.dart';
 import '../app_spacing.dart';
 import '../models/salon.dart';
@@ -347,8 +348,8 @@ class _ServiceCatalogRow extends StatelessWidget {
   }
 }
 
-const kDetailDivider = Color(0xFFF0F1F5);
-const _kDetailMeta = Color(0xFF8D8D98);
+const kDetailDivider = AppColors.kDivider;
+const _kDetailMeta   = AppColors.kTextTertiary;
 
 const List<String> _categoryKeyOrder = [
   'haircut',

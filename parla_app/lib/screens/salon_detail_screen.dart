@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart' show RenderAbstractViewport;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
+import '../app_colors.dart';
 import '../app_text_styles.dart';
 import '../providers/providers.dart';
 import '../app_radius.dart';
@@ -71,13 +72,12 @@ const _kAdditionalInfo = [
   {'icon': Icons.child_friendly_rounded, 'label': 'Çagalar üçin amatly'},
 ];
 
-const _kDetailDivider = Color(0xFFF0F1F5);
-const _kDetailChipLavenderBg = Color(0xFFF2EDFF);
-const _kDetailChipLavenderFg = Color(0xFF6F5CC2);
-const _kDetailChipMintBg = Color(0xFFEAF8EF);
-const _kDetailChipMintFg = Color(0xFF258A52);
-const _kDetailButtonBg = Color(0xFF151517);
-const _kDetailMeta = Color(0xFF8D8D98);
+const _kDetailDivider        = AppColors.kDivider;
+const _kDetailChipLavenderBg = AppColors.kChipLavenderBg;
+const _kDetailChipLavenderFg = AppColors.kChipLavenderFg;
+const _kDetailChipMintBg     = AppColors.kChipMintBg;
+const _kDetailChipMintFg     = AppColors.kChipMintFg;
+const _kDetailMeta           = AppColors.kTextTertiary;
 
 const _kDetailBadges = [
   (

@@ -8,6 +8,7 @@ import '../app_radius.dart';
 import '../app_sizes.dart';
 import '../app_spacing.dart';
 import '../app_text_styles.dart';
+import '../app_colors.dart';
 import '../theme.dart';
 import '../utils/salon_images.dart';
 import '../widgets/shared_widgets.dart';
@@ -89,7 +90,7 @@ class HomeScreen extends ConsumerWidget {
                               icon: const Icon(
                                 Icons.search_rounded,
                                 size: 24,
-                                color: Color(0xFF0E7490),
+                                color: AppColors.kPrimary,
                               ),
                             ),
                           ],
@@ -270,7 +271,7 @@ class HomeScreen extends ConsumerWidget {
                   child: Row(
                     children: [
                       const Icon(Icons.calendar_month_rounded,
-                          color: Color(0xFF0E7490), size: 28),
+                          color: AppColors.kPrimary, size: 28),
                       const SizedBox(width: 14),
                       Expanded(
                         child: Column(
@@ -292,12 +293,12 @@ class HomeScreen extends ConsumerWidget {
                             Text(
                               dateStr,
                               style: AppTextStyles.cardMeta.copyWith(
-                                  color: const Color(0xFF0E7490), fontWeight: FontWeight.w600),
+                                  color: AppColors.kPrimary, fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),
                       ),
-                      const Icon(Icons.arrow_forward_rounded, color: Color(0xFF0E7490), size: 20),
+                      const Icon(Icons.arrow_forward_rounded, color: AppColors.kPrimary, size: 20),
                     ],
                   ),
                 ),
