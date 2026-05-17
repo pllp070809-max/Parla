@@ -893,13 +893,7 @@ class _BookingServiceRow extends StatelessWidget {
                     border: Border.all(
                       color: isSelected ? Colors.black : kDetailDivider,
                     ),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x14000000),
-                        blurRadius: 12,
-                        offset: Offset(0, 4),
-                      ),
-                    ],
+                    boxShadow: AppColors.kShadowCircleBtn,
                   ),
                   child: Icon(
                     isSelected ? Icons.check_rounded : Icons.add_rounded,

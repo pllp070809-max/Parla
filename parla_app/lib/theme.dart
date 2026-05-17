@@ -311,7 +311,7 @@ ThemeData buildParlaTheme() {
         borderSide: const BorderSide(color: kError, width: 2),
       ),
       hintStyle: textTheme.bodyMedium?.copyWith(
-        color: const Color(0xFFC2C2C2),
+        color: AppColors.kInputHint,
         fontWeight: FontWeight.w400,
       ),
       labelStyle: textTheme.bodyMedium,
