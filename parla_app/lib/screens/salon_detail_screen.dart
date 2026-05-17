@@ -181,7 +181,7 @@ TextStyle? _detailSectionTitleStyle(TextTheme tt) {
 
 TextStyle? _detailSubsectionTitleStyle(TextTheme tt) {
   return tt.titleMedium?.copyWith(
-    fontWeight: FontWeight.w500,
+    fontWeight: FontWeight.w600,
     color: kTextPrimary,
     letterSpacing: -0.05,
     height: 1.3,
@@ -594,7 +594,7 @@ class _SalonDetailBodyState extends ConsumerState<_SalonDetailBody> {
               child: Padding(
                 key: _sectionKeys[2],
                 padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.xl, 0, AppSpacing.xl, 0),
+                    AppSpacing.xl, AppSpacing.m, AppSpacing.xl, 0),
                 child: _PortfolioSection(salon: salon, images: images),
               ),
             ),
@@ -862,8 +862,6 @@ class _InfoBlock extends StatelessWidget {
                 )
                 .toList(),
           ),
-          const SizedBox(height: 8),
-          const Divider(height: 1, color: _kDetailDivider),
         ],
       ),
     );
@@ -965,7 +963,6 @@ class _StickySectionNav extends StatelessWidget {
                                     textAlign: TextAlign.center,
                                     style: tt.headlineSmall?.copyWith(
                                       fontWeight: FontWeight.w700,
-                                      fontSize: 21,
                                       height: 1.1,
                                       letterSpacing: -0.5,
                                       color: kTextPrimary,
@@ -1050,12 +1047,10 @@ class _StickySectionNav extends StatelessWidget {
                                         children: [
                                           Text(
                                             tabs[i],
-                                            style: tt.titleLarge?.copyWith(
-                                              fontSize: 18,
+                                            style: tt.titleMedium?.copyWith(
                                               fontWeight: sel
                                                   ? FontWeight.w700
                                                   : FontWeight.w600,
-                                              letterSpacing: -0.35,
                                               height: 1.1,
                                               color: sel
                                                   ? kTextPrimary
@@ -1430,10 +1425,9 @@ class _TeamSection extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       name,
-                      style: tt.labelMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
+                      style: tt.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
                         color: kTextPrimary,
-                        letterSpacing: 0.2,
                       ),
                       textAlign: TextAlign.center,
                       maxLines: 1,
@@ -1829,7 +1823,7 @@ class _NearbySalonCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
-    final metaStyle = tt.bodyMedium!.copyWith(fontSize: 11.5);
+    final metaStyle = tt.labelSmall!.copyWith(color: kTextSecondary);
     final radius = BorderRadius.circular(AppRadius.m);
     return ClipRRect(
       borderRadius: radius,
@@ -1867,7 +1861,7 @@ class _NearbySalonCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: tt.titleMedium!.copyWith(fontWeight: FontWeight.w600, fontSize: 14),
+                      style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w600),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
