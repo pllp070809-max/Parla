@@ -391,8 +391,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
           children: [
             // Top bar (controls only)
             Padding(
-              padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.s, AppSpacing.s - 2, AppSpacing.s, AppSpacing.xs),
+              padding: const EdgeInsets.fromLTRB(10, 7, 9, AppSpacing.xs),
               child: Row(
                 children: [
                   _BookingIconBtn(
@@ -414,7 +413,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                         style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                               color: kTextPrimary,
                               fontWeight: FontWeight.w700,
-                              fontSize: 21,
+                              fontSize: 22,
                               height: 1.1,
                               letterSpacing: -0.5,
                             ),
@@ -908,15 +907,21 @@ class _ServiceStepState extends State<_ServiceStep> {
               AppSpacing.xl,
               0,
             ),
-            child: Text(
-              'Hyzmatlar',
-              style: tt.headlineSmall?.copyWith(
-                color: kTextPrimary,
-                fontWeight: FontWeight.w700,
-                fontSize: 21,
-                height: 1.1,
-                letterSpacing: -0.5,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Hyzmatlar',
+                  style: tt.headlineSmall?.copyWith(
+                    color: kTextPrimary,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 21,
+                    height: 1.1,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                const SizedBox(height: 25),
+              ],
             ),
           ),
         ),
@@ -1088,9 +1093,6 @@ class _BookingServiceCategoryTabsState extends State<_BookingServiceCategoryTabs
     return Container(
       decoration: const BoxDecoration(
         color: kScaffoldBg,
-        border: Border(
-          bottom: BorderSide(color: kDetailDivider),
-        ),
       ),
       alignment: Alignment.centerLeft,
       child: ListView.separated(
@@ -1128,7 +1130,8 @@ class _BookingServiceCategoryTabsState extends State<_BookingServiceCategoryTabs
                   style: tt.labelLarge?.copyWith(
                     fontFamily: tt.titleMedium?.fontFamily,
                     fontFamilyFallback: tt.titleMedium?.fontFamilyFallback,
-                    fontWeight: FontWeight.w400,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
                     color: selected ? Colors.white : kTextSecondary,
                   ),
                 ),
@@ -1172,7 +1175,7 @@ class _BookingServiceCategorySection extends StatelessWidget {
             letterSpacing: -0.2,
           ),
         ),
-        const SizedBox(height: AppSpacing.m),
+        const SizedBox(height: 5),
         for (int index = 0; index < services.length; index++) ...[
           if (index > 0) const Divider(height: 1, color: kDetailDivider),
           _BookingServiceRow(
@@ -1209,7 +1212,6 @@ class _BookingServiceRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
-    final unifiedFontSize = tt.titleMedium?.fontSize ?? 16;
     const fallbackDiscountPercent = 10;
 
     return AnimatedContainer(
@@ -1217,9 +1219,9 @@ class _BookingServiceRow extends StatelessWidget {
       duration: const Duration(milliseconds: 180),
       color: Colors.transparent,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        padding: const EdgeInsets.fromLTRB(2, 16, 0, 16),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Expanded(
               child: Column(
@@ -1231,7 +1233,7 @@ class _BookingServiceRow extends StatelessWidget {
                       fontWeight: FontWeight.w500,
                       color: kTextPrimary,
                       height: 1.3,
-                      fontSize: unifiedFontSize,
+                      fontSize: 17,
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -1240,10 +1242,10 @@ class _BookingServiceRow extends StatelessWidget {
                     style: tt.labelSmall?.copyWith(
                       color: kTextSecondary,
                       fontWeight: FontWeight.w400,
-                      fontSize: unifiedFontSize,
+                      fontSize: 13,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 10),
                   Row(
                     children: [
                       Text(
@@ -1252,54 +1254,44 @@ class _BookingServiceRow extends StatelessWidget {
                           fontWeight: FontWeight.w500,
                           color: kTextPrimary,
                           height: 1.3,
-                          fontSize: unifiedFontSize,
+                          fontSize: 16,
                         ),
                       ),
                       const SizedBox(width: 8),
                       if (hasPromo)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: AppColors.kChipMintBg,
-                            borderRadius: BorderRadius.circular(AppRadius.pill),
-                            border: Border.all(color: AppColors.kSuccess.withValues(alpha: 0.35)),
-                          ),
-                          child: Text(
+                        Text(
                             'Arzanladyş $fallbackDiscountPercent%',
                             style: tt.labelSmall?.copyWith(
                               color: AppColors.kSuccess,
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w400,
+                              fontSize: 16,
                             ),
                           ),
-                        ),
                     ],
                   ),
                 ],
               ),
             ),
             const SizedBox(width: 12),
-            Padding(
-              padding: const EdgeInsets.only(top: 5),
-              child: InkWell(
-                onTap: onTap,
-                borderRadius: BorderRadius.circular(999),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  width: 32,
-                  height: 32,
-                  decoration: isSelected
-                      ? BoxDecoration(
-                          color: Colors.black,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.black),
-                          boxShadow: AppColors.kShadowCircleBtn,
-                        )
-                      : null,
-                  child: Icon(
-                    isSelected ? Icons.check_rounded : Icons.add_rounded,
-                    color: isSelected ? Colors.white : Colors.black,
-                    size: 16,
+            InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(999),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                width: 35,
+                height: 35,
+                decoration: BoxDecoration(
+                  color: isSelected ? Colors.black : Colors.transparent,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: isSelected ? Colors.black : kDetailDivider,
                   ),
+                  boxShadow: isSelected ? AppColors.kShadowCircleBtn : null,
+                ),
+                child: Icon(
+                  isSelected ? Icons.check_rounded : Icons.add_rounded,
+                  color: isSelected ? Colors.white : Colors.black,
+                  size: 19,
                 ),
               ),
             ),
@@ -1980,7 +1972,7 @@ class _SelectedServicesBannerChip extends StatelessWidget {
             boxShadow: kShadowSm,
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 7),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -1989,6 +1981,7 @@ class _SelectedServicesBannerChip extends StatelessWidget {
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: kPrimary,
                         fontWeight: FontWeight.w500,
+                        fontSize: 14,
                       ),
                 ),
                 const SizedBox(width: 10),
@@ -2013,10 +2006,13 @@ class _BookingIconBtn extends StatelessWidget {
       onTap: onTap,
       radius: 22,
       highlightShape: BoxShape.circle,
-      child: SizedBox(
-        width: 40,
-        height: 40,
-        child: Icon(icon, size: 20, color: kTextPrimary),
+      child: Padding(
+        padding: const EdgeInsets.only(top: 1),
+        child: SizedBox(
+          width: 43,
+          height: 43,
+          child: Icon(icon, size: 23, color: kTextPrimary),
+        ),
       ),
     );
   }
