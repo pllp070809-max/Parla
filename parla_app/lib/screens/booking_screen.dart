@@ -1358,7 +1358,7 @@ class _StaffStep extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(
           AppSpacing.xl, AppSpacing.l, AppSpacing.xl, AppSpacing.xl),
       itemCount: _mockStaffList.length,
-      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.m),
+      separatorBuilder: (_, __) => const Divider(height: 1, color: kDetailDivider),
       itemBuilder: (_, i) {
         final s = _mockStaffList[i];
         final sel = s.id == selectedId;
@@ -1370,19 +1370,8 @@ class _StaffStep extends StatelessWidget {
               HapticFeedback.selectionClick();
               onSelect(s.id);
             },
-            borderRadius: BorderRadius.circular(AppRadius.m),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 220),
-              padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.l, vertical: AppSpacing.m + 2),
-              decoration: BoxDecoration(
-                color: sel ? kPrimarySoft : kCardBg,
-                borderRadius: BorderRadius.circular(AppRadius.m),
-                border: Border.all(
-                    color: sel ? kPrimary.withValues(alpha: 0.45) : kBorder,
-                    width: sel ? 1.5 : 1),
-                boxShadow: sel ? kShadowMd : kShadowSm,
-              ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 14),
               child: Row(
                 children: [
                   if (isAny)
@@ -1390,14 +1379,11 @@ class _StaffStep extends StatelessWidget {
                       width: 52,
                       height: 52,
                       decoration: BoxDecoration(
-                          color: sel ? kCardBg : kSurfaceBg,
+                          color: kSurfaceBg,
                           shape: BoxShape.circle,
-                          border: Border.all(
-                              color: sel
-                                  ? kPrimary.withValues(alpha: 0.35)
-                                  : kBorder)),
-                      child: Icon(Icons.groups_rounded,
-                          color: sel ? kPrimary : kTextSecondary, size: 26),
+                          border: Border.all(color: kBorder)),
+                      child: const Icon(Icons.groups_rounded,
+                          color: kTextSecondary, size: 26),
                     )
                   else
                     ClipOval(
@@ -1444,7 +1430,7 @@ class _StaffStep extends StatelessWidget {
                       sel
                           ? Icons.check_circle_rounded
                           : Icons.radio_button_unchecked_rounded,
-                      color: sel ? kPrimary : kBorderMedium,
+                      color: sel ? Colors.black : kBorderMedium,
                       size: 28),
                 ],
               ),
