@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../app_colors.dart';
-import '../app_radius.dart';
 import '../app_spacing.dart';
 import '../models/salon.dart';
 import '../theme.dart';

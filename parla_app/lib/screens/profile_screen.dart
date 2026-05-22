@@ -10,7 +10,6 @@ import 'settings_screen.dart';
 
 const _kPrefName = 'profile_name';
 const _kPrefPhone = 'profile_phone';
-const _kPrefGender = 'profile_gender';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});

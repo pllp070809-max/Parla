@@ -120,8 +120,8 @@ class BottomActionBar extends StatelessWidget {
   ButtonStyle _buttonStyle() {
     return FilledButton.styleFrom(
       backgroundColor: _kBottomActionButtonBg,
-      disabledBackgroundColor: _kBottomActionButtonBg,
-      disabledForegroundColor: Colors.white,
+      disabledBackgroundColor: AppColors.kBorder,
+      disabledForegroundColor: AppColors.kTextTertiary,
       foregroundColor: Colors.white,
       shape: const StadiumBorder(),
       minimumSize: const Size(45, 52),

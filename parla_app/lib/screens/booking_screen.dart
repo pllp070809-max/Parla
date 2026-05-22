@@ -79,10 +79,12 @@ class BookingScreen extends ConsumerStatefulWidget {
 }
 
 class _BookingScreenState extends ConsumerState<BookingScreen> {
-  static const int _kTotalSteps = 5;
-
   int _step = 0;
   late final PageController _pageCtrl;
+  bool _profileLoaded = false;
+  bool _hasProfile = false;
+
+  int get _totalSteps => _hasProfile ? 4 : 5;
 
   late List<int> _selectedServiceIds;
   late int _selectedServiceId;
@@ -91,7 +93,6 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
   String? _selectedSlot;
   List<String>? _slots;
   bool _loadingSlots = false;
-  int _guestCount = 1;
 
   final _nameCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
@@ -113,7 +114,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
     final hasPreselectedService =
         pre != null && widget.services.any((service) => service.id == pre);
     if (hasPreselectedService) {
-      _selectedServiceId = pre!;
+      _selectedServiceId = pre;
       _selectedServiceIds = [pre];
     } else {
       _selectedServiceIds = [];
@@ -128,15 +129,23 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
     final prefs = await SharedPreferences.getInstance();
     final name = prefs.getString('profile_name') ?? '';
     final phone = prefs.getString('profile_phone') ?? '';
-    if (name.isNotEmpty) _nameCtrl.text = name;
+    String strippedPhone = '';
     if (phone.isNotEmpty) {
       if (phone.startsWith('+993')) {
-        _phoneCtrl.text = phone.substring(4);
+        strippedPhone = phone.substring(4);
       } else if (phone.startsWith('993')) {
-        _phoneCtrl.text = phone.substring(3);
+        strippedPhone = phone.substring(3);
       } else {
-        _phoneCtrl.text = phone;
+        strippedPhone = phone;
       }
+    }
+    if (mounted) {
+      setState(() {
+        if (name.isNotEmpty) _nameCtrl.text = name;
+        if (strippedPhone.isNotEmpty) _phoneCtrl.text = strippedPhone;
+        _hasProfile = name.trim().isNotEmpty && strippedPhone.trim().isNotEmpty;
+        _profileLoaded = true;
+      });
     }
   }
 
@@ -253,7 +262,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
 
   Future<void> _onPrimaryAction() async {
     HapticFeedback.mediumImpact();
-    if (_step == 3) {
+    if (!_hasProfile && _step == 3) {
       final name = _nameCtrl.text.trim();
       final phone = _phoneCtrl.text.replaceAll(RegExp(r'[^\d]'), '');
       if (name.length < 2) {
@@ -272,7 +281,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
       await prefs.setString('profile_phone', fullPhone);
       ref.read(userPhoneProvider.notifier).setPhone(fullPhone);
     }
-    if (_step < _kTotalSteps - 1) {
+    if (_step < _totalSteps - 1) {
       await _goToStep(_step + 1);
     } else {
       await _submit();
@@ -304,6 +313,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
       await prefs.setString('profile_phone', fullPhone);
       ref.read(userPhoneProvider.notifier).setPhone(fullPhone);
 
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
         fadeSlideRoute(
@@ -361,7 +371,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
   }
 
   String _primaryLabel() {
-    if (_step == _kTotalSteps - 1) return 'Bron etmek';
+    if (_step == _totalSteps - 1) return 'Bron etmek';
     return 'Dowam et';
   }
 
@@ -411,6 +421,13 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_profileLoaded) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(color: kPrimary),
+        ),
+      );
+    }
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -532,7 +549,8 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                         },
                         onSelectSlot: (s) => setState(() => _selectedSlot = s),
                       ),
-                      _ContactStep(nameCtrl: _nameCtrl, phoneCtrl: _phoneCtrl),
+                      if (!_hasProfile)
+                        _ContactStep(nameCtrl: _nameCtrl, phoneCtrl: _phoneCtrl),
                       _ReviewStep(
                         salonName: widget.salonName,
                         services: _selectedServices,
@@ -542,6 +560,8 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                             .firstWhere((s) => s.id == _selectedStaffId)
                             .name,
                         slot: _selectedSlot,
+                        guestName: _nameCtrl.text.trim(),
+                        guestPhone: _phoneCtrl.text.trim(),
                       ),
                     ],
                   ),
@@ -1580,205 +1600,6 @@ class _DateTimeStep extends StatelessWidget {
 }
 
 // ═══════════════════════════════════════════════════════════
-// Step 4 — Näçe adam?
-// ═══════════════════════════════════════════════════════════
-class _GuestCountStep extends StatelessWidget {
-  final int count;
-  final ValueChanged<int> onChanged;
-  const _GuestCountStep({required this.count, required this.onChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    final tt = Theme.of(context).textTheme;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-      child: Column(
-        children: [
-          const SizedBox(height: AppSpacing.xxl),
-          Container(
-            width: 80,
-            height: 80,
-            decoration:
-                BoxDecoration(color: kSurfaceBg, shape: BoxShape.circle),
-            child: const Icon(Icons.groups_rounded, size: 40, color: kPrimary),
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          Text('Myhmanlaryň sany',
-              style: tt.headlineMedium?.copyWith(fontWeight: FontWeight.w800)),
-          const SizedBox(height: AppSpacing.m),
-          Text(
-            'Bir wagtda birnäçe adam üçin bron edip bilersiňiz.\nHer myhman üçin soňraky ädimde ady görkezip bilersiňiz.',
-            textAlign: TextAlign.center,
-            style: tt.bodyMedium?.copyWith(color: kTextSecondary, height: 1.5),
-          ),
-          const SizedBox(height: AppSpacing.xxl),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _CounterBtn(
-                  icon: Icons.remove_rounded,
-                  onTap: count > 1 ? () => onChanged(count - 1) : null),
-              SizedBox(
-                width: 80,
-                child: Column(
-                  children: [
-                    Text('$count',
-                        style: tt.headlineLarge
-                            ?.copyWith(fontWeight: FontWeight.w900)),
-                    Text('adam',
-                        style: tt.bodySmall?.copyWith(color: kTextSecondary)),
-                  ],
-                ),
-              ),
-              _CounterBtn(
-                  icon: Icons.add_rounded,
-                  onTap: count < 10 ? () => onChanged(count + 1) : null,
-                  filled: true),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.l),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.info_outline_rounded,
-                  size: 16, color: kTextTertiary),
-              const SizedBox(width: 6),
-              Text('Iň köp 10 myhman',
-                  style: tt.bodySmall?.copyWith(color: kTextTertiary)),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CounterBtn extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback? onTap;
-  final bool filled;
-  const _CounterBtn({required this.icon, this.onTap, this.filled = false});
-
-  @override
-  Widget build(BuildContext context) {
-    final enabled = onTap != null;
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        width: 52,
-        height: 52,
-        decoration: BoxDecoration(
-          color: filled ? (enabled ? kTextPrimary : kBorderMedium) : kSurfaceBg,
-          shape: BoxShape.circle,
-          border: filled
-              ? null
-              : Border.all(color: enabled ? kBorderMedium : kBorder),
-        ),
-        child: Icon(icon,
-            color: filled
-                ? Colors.white
-                : (enabled ? kTextPrimary : kTextTertiary),
-            size: 24),
-      ),
-    );
-  }
-}
-
-// ═══════════════════════════════════════════════════════════
-// Step 5 — Adamlar (myhman atlary)
-// ═══════════════════════════════════════════════════════════
-class _GuestNamesStep extends StatelessWidget {
-  final int count;
-  final List<TextEditingController> controllers;
-  const _GuestNamesStep({required this.count, required this.controllers});
-
-  @override
-  Widget build(BuildContext context) {
-    final tt = Theme.of(context).textTheme;
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(
-          AppSpacing.xl, AppSpacing.l, AppSpacing.xl, AppSpacing.xl),
-      children: [
-        Text('Myhmanlaryň maglumaty',
-            style: tt.headlineMedium?.copyWith(fontWeight: FontWeight.w800)),
-        const SizedBox(height: AppSpacing.s),
-        Text('Islege görä dolduryň — salon myhmanlaryň sanawyny görüp bilýär.',
-            style: tt.bodyMedium?.copyWith(color: kTextSecondary)),
-        const SizedBox(height: AppSpacing.m),
-        Container(
-          padding: const EdgeInsets.all(AppSpacing.m),
-          decoration: BoxDecoration(
-              color: kSurfaceBg,
-              borderRadius: BorderRadius.circular(AppRadius.m)),
-          child: Row(
-            children: [
-              const Icon(Icons.verified_rounded, color: kPrimary, size: 22),
-              const SizedBox(width: AppSpacing.s),
-              Expanded(
-                  child: Text(
-                      'Maglumatlar diňe brony tassyklamak we habarlaşmak üçin ulanylýar.',
-                      style: tt.bodySmall?.copyWith(color: kTextSecondary))),
-            ],
-          ),
-        ),
-        const SizedBox(height: AppSpacing.xl),
-        for (int i = 0; i < count && i < controllers.length; i++) ...[
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.l),
-            decoration: BoxDecoration(
-                color: kCardBg,
-                borderRadius: BorderRadius.circular(AppRadius.m),
-                border: Border.all(color: kBorder),
-                boxShadow: kShadowSm),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                      color: kSurfaceBg,
-                      borderRadius: BorderRadius.circular(AppRadius.s),
-                      border: Border.all(color: kBorder)),
-                  alignment: Alignment.center,
-                  child: Text('${i + 1}',
-                      style:
-                          tt.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
-                ),
-                const SizedBox(width: AppSpacing.m),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Adyňyz',
-                          style: tt.titleSmall
-                              ?.copyWith(fontWeight: FontWeight.w700)),
-                      Text('Islege görä',
-                          style: tt.bodySmall?.copyWith(color: kTextTertiary)),
-                      const SizedBox(height: AppSpacing.s),
-                      TextField(
-                        controller: controllers[i],
-                        decoration: InputDecoration(
-                            hintText: 'Meselem: Aýgül Amanowa',
-                            hintStyle:
-                                tt.bodyMedium?.copyWith(color: kTextTertiary)),
-                        textCapitalization: TextCapitalization.words,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (i < count - 1) const SizedBox(height: AppSpacing.m),
-        ],
-      ],
-    );
-  }
-}
-
-// ═══════════════════════════════════════════════════════════
 // Step 6 — Habarlaşmak maglumatlary
 // ═══════════════════════════════════════════════════════════
 class _ContactStep extends StatelessWidget {
@@ -1836,6 +1657,8 @@ class _ReviewStep extends StatelessWidget {
   final double totalPrice;
   final String staffName;
   final String? slot;
+  final String guestName;
+  final String guestPhone;
 
   const _ReviewStep({
     required this.salonName,
@@ -1844,6 +1667,8 @@ class _ReviewStep extends StatelessWidget {
     required this.totalPrice,
     required this.staffName,
     required this.slot,
+    required this.guestName,
+    required this.guestPhone,
   });
 
   @override
@@ -1890,6 +1715,18 @@ class _ReviewStep extends StatelessWidget {
           const Divider(height: 1),
           _RevRow(
               icon: Icons.access_time_rounded, label: 'Wagt', value: timeLabel),
+        ]),
+        const SizedBox(height: AppSpacing.m),
+        _RevCard(children: [
+          _RevRow(
+              icon: Icons.person_rounded,
+              label: 'Müşderi',
+              value: guestName),
+          const Divider(height: 1),
+          _RevRow(
+              icon: Icons.phone_rounded,
+              label: 'Telefon',
+              value: guestPhone.startsWith('+993') ? guestPhone : '+993$guestPhone'),
         ]),
       ],
     );
@@ -2031,39 +1868,6 @@ class _BookingIconBtn extends StatelessWidget {
           height: 43,
           child: Icon(icon, size: 23, color: kTextPrimary),
         ),
-      ),
-    );
-  }
-}
-
-class _BookingSegmentProgress extends StatelessWidget {
-  final int current;
-  final int total;
-  const _BookingSegmentProgress({required this.current, required this.total});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m),
-      child: Row(
-        children: List.generate(total, (i) {
-          final done = i < current;
-          final active = i == current;
-          return Expanded(
-            child: Container(
-              margin: EdgeInsets.only(right: i < total - 1 ? 4 : 0),
-              height: 4,
-              decoration: BoxDecoration(
-                color: active
-                    ? kPrimary
-                    : done
-                        ? kTextPrimary
-                        : kBorder,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          );
-        }),
       ),
     );
   }
