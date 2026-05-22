@@ -713,7 +713,7 @@ class _VenueCard extends StatelessWidget {
                               _rating.toStringAsFixed(1),
                               style: tt.bodyMedium!.copyWith(
                                   color: kTextPrimary,
-                                  fontWeight: FontWeight.w600),
+                                  fontWeight: FontWeight.w400),
                             ),
                             Text(
                               ' ($_reviews)',

@@ -1384,7 +1384,7 @@ class _StaffStep extends StatelessWidget {
                     onSelect(s.id);
                   },
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 14),
+                    padding: const EdgeInsets.fromLTRB(2, 16, 0, 16),
                     child: Row(
                       children: [
                         if (isAny)
@@ -1418,13 +1418,17 @@ class _StaffStep extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(s.name,
-                                  style: tt.titleSmall?.copyWith(
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: -0.2)),
+                                  style: tt.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.w500,
+                                      color: kTextPrimary,
+                                      height: 1.3,
+                                      fontSize: 17)),
                               const SizedBox(height: 2),
                               Text(s.role,
-                                  style:
-                                      tt.bodySmall?.copyWith(color: kTextSecondary)),
+                                  style: tt.labelSmall?.copyWith(
+                                      color: kTextSecondary,
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 13)),
                               if (!isAny && s.rating > 0) ...[
                                 const SizedBox(height: 6),
                                 Row(mainAxisSize: MainAxisSize.min, children: [
@@ -1432,8 +1436,10 @@ class _StaffStep extends StatelessWidget {
                                       size: 16, color: kStar),
                                   const SizedBox(width: 4),
                                   Text(s.rating.toStringAsFixed(1),
-                                      style: tt.labelSmall
-                                          ?.copyWith(fontWeight: FontWeight.w800)),
+                                      style: tt.titleMedium?.copyWith(
+                                          fontWeight: FontWeight.w500,
+                                          color: kTextPrimary,
+                                          fontSize: 16)),
                                 ]),
                               ],
                             ],
@@ -1501,7 +1507,11 @@ class _DateTimeStep extends StatelessWidget {
         ),
         const SizedBox(height: 25),
         Text(monthLabel,
-            style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+            style: tt.titleLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: kTextPrimary,
+              letterSpacing: -0.2,
+            )),
         const SizedBox(height: AppSpacing.m),
         SizedBox(
           height: 72,
@@ -1527,14 +1537,14 @@ class _DateTimeStep extends StatelessWidget {
                     children: [
                       Text(DateFormat('EE').format(d).toUpperCase(),
                           style: TextStyle(
-                              fontSize: 11,
+                              fontSize: 12,
                               color: sel ? Colors.white70 : kTextSecondary,
-                              fontWeight: FontWeight.w600)),
+                              fontWeight: FontWeight.w500)),
                       const SizedBox(height: 4),
                       Text('${d.day}',
                           style: TextStyle(
                               fontSize: 18,
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.w700,
                               color: sel ? Colors.white : kTextPrimary)),
                       Container(
                         margin: const EdgeInsets.only(top: 4),
@@ -1554,15 +1564,30 @@ class _DateTimeStep extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.xl),
         Text('Elýeterli wagtlar',
-            style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+            style: tt.titleLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: kTextPrimary,
+              letterSpacing: -0.2,
+            )),
         const SizedBox(height: AppSpacing.m),
         if (loadingSlots)
-          const Padding(
-              padding: EdgeInsets.all(AppSpacing.xl),
-              child: Center(child: CircularProgressIndicator(color: kPrimary)))
+          const SizedBox(
+            height: 150,
+            child: Center(
+              child: CircularProgressIndicator(color: kPrimary),
+            ),
+          )
         else if (slots != null && slots!.isEmpty)
-          Text('Bu gün üçin boş wagt ýok',
-              style: tt.bodyMedium, textAlign: TextAlign.center)
+          SizedBox(
+            height: 100,
+            child: Center(
+              child: Text(
+                'Bu gün üçin boş wagt ýok',
+                style: tt.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+            ),
+          )
         else if (slots != null)
           ..._buildGroupedSlots(tt),
       ],
@@ -1603,7 +1628,7 @@ class _DateTimeStep extends StatelessWidget {
               child: Text(label,
                   style: TextStyle(
                       fontSize: 14,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w600,
                       color: sel ? Colors.white : kTextPrimary)),
             ),
           );

@@ -188,6 +188,71 @@ TextStyle? _detailSubsectionTitleStyle(TextTheme tt) {
   );
 }
 
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  final Key? titleKey;
+  final String? count;
+  final String? actionLabel;
+  final VoidCallback? onActionPressed;
+  final Key? actionKey;
+
+  const _SectionHeader({
+    required this.title,
+    this.titleKey,
+    this.count,
+    this.actionLabel,
+    this.onActionPressed,
+    this.actionKey,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
+      children: [
+        Text(
+          title,
+          key: titleKey,
+          style: _detailSectionTitleStyle(tt),
+        ),
+        if (count != null) ...[
+          const SizedBox(width: 6),
+          Text(
+            count!,
+            style: tt.labelSmall?.copyWith(
+              color: _kDetailMeta,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ],
+        if (actionLabel != null && onActionPressed != null) ...[
+          const Spacer(),
+          TextButton(
+            key: actionKey,
+            onPressed: onActionPressed,
+            style: TextButton.styleFrom(
+              foregroundColor: _kDetailMeta,
+              padding: EdgeInsets.zero,
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              alignment: Alignment.centerRight,
+            ),
+            child: Text(
+              actionLabel!,
+              style: tt.labelMedium?.copyWith(
+                color: _kDetailMeta,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
 // ── Helpers ──
 
 // ═════════════════════════════════════════════
@@ -532,14 +597,26 @@ class _SalonDetailBodyState extends ConsumerState<_SalonDetailBody> {
               child: Padding(
                 key: _sectionKeys[0],
                 padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.xl,
-                  AppSpacing.m,
-                  AppSpacing.xl,
+                  AppSpacing.screenPadding,
+                  AppSpacing.large,
+                  AppSpacing.screenPadding,
                   0,
                 ),
-                child: _ServicesSection(
-                  salon: salon,
-                  onBook: (svc) => _openBooking(preselectedServiceId: svc.id),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const _SectionHeader(title: 'Hyzmatlar'),
+                    const SizedBox(height: 12),
+                    _ServicesSection(
+                      salon: salon,
+                      onBook: (svc) => _openBooking(preselectedServiceId: svc.id),
+                      onToggleExpand: (isExpanded) async {
+                        if (!isExpanded) {
+                          await _scrollToSectionImpl(0);
+                        }
+                      },
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -549,9 +626,9 @@ class _SalonDetailBodyState extends ConsumerState<_SalonDetailBody> {
               child: Padding(
                 key: _sectionKeys[1],
                 padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.xl,
-                  AppSpacing.xl,
-                  AppSpacing.xl,
+                  AppSpacing.screenPadding,
+                  AppSpacing.large,
+                  AppSpacing.screenPadding,
                   0,
                 ),
                 child: _TeamSection(salon: salon),
@@ -563,7 +640,10 @@ class _SalonDetailBodyState extends ConsumerState<_SalonDetailBody> {
               child: Padding(
                 key: _sectionKeys[2],
                 padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.xl, AppSpacing.m, AppSpacing.xl, 0),
+                    AppSpacing.screenPadding,
+                    AppSpacing.large,
+                    AppSpacing.screenPadding,
+                    0),
                 child: _PortfolioSection(salon: salon, images: images),
               ),
             ),
@@ -573,7 +653,10 @@ class _SalonDetailBodyState extends ConsumerState<_SalonDetailBody> {
               child: Padding(
                 key: _sectionKeys[3],
                 padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, 0),
+                    AppSpacing.screenPadding,
+                    AppSpacing.large,
+                    AppSpacing.screenPadding,
+                    0),
                 child: _AboutSection(salon: salon),
               ),
             ),
@@ -584,7 +667,10 @@ class _SalonDetailBodyState extends ConsumerState<_SalonDetailBody> {
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, 0),
+                    AppSpacing.screenPadding,
+                    AppSpacing.large,
+                    AppSpacing.screenPadding,
+                    0),
                 child: _NearbySalonsSection(currentSalon: salon),
               ),
             ),
@@ -751,10 +837,10 @@ class _InfoBlock extends StatelessWidget {
       width: double.infinity,
       color: kScaffoldBg,
       padding: const EdgeInsets.fromLTRB(
-        AppSpacing.xl,
-        AppSpacing.xl,
-        AppSpacing.xl,
-        AppSpacing.s,
+        AppSpacing.screenPadding,
+        AppSpacing.screenPadding,
+        AppSpacing.screenPadding,
+        0,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -987,7 +1073,7 @@ class _StickySectionNav extends StatelessWidget {
                               key: const ValueKey('sticky-tabs-scroll'),
                               scrollDirection: Axis.horizontal,
                               padding: const EdgeInsets.symmetric(
-                                horizontal: AppSpacing.xl,
+                                horizontal: AppSpacing.screenPadding,
                               ),
                               itemCount: tabs.length,
                               separatorBuilder: (_, __) =>
@@ -1018,8 +1104,8 @@ class _StickySectionNav extends StatelessWidget {
                                             tabs[i],
                                             style: tt.titleMedium?.copyWith(
                                               fontWeight: sel
-                                                  ? FontWeight.w700
-                                                  : FontWeight.w600,
+                                                  ? FontWeight.w600
+                                                  : FontWeight.w400,
                                               height: 1.1,
                                               color: sel
                                                   ? kTextPrimary
@@ -1240,7 +1326,12 @@ class _UnifiedFavoriteButtonOverlay extends StatelessWidget {
 class _ServicesSection extends StatelessWidget {
   final Salon salon;
   final ValueChanged<Service> onBook;
-  const _ServicesSection({required this.salon, required this.onBook});
+  final Future<void> Function(bool)? onToggleExpand;
+  const _ServicesSection({
+    required this.salon,
+    required this.onBook,
+    this.onToggleExpand,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1248,8 +1339,9 @@ class _ServicesSection extends StatelessWidget {
       services: salon.services,
       actionMode: ServiceCatalogActionMode.book,
       onAction: onBook,
-      showTitle: true,
+      showTitle: false,
       showViewAllButton: true,
+      onToggleExpand: onToggleExpand,
     );
   }
 }
@@ -1268,41 +1360,21 @@ class _TeamSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Text(
-              'Topar',
-              key: const ValueKey('section-title-team'),
-              style: _detailSectionTitleStyle(tt),
-            ),
-            const Spacer(),
-            TextButton(
-              key: const ValueKey('team-see-all'),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  fadeSlideRoute(SalonStaffScreen(salonName: salon.name)),
-                );
-              },
-              style: TextButton.styleFrom(
-                foregroundColor: _kDetailMeta,
-                padding: EdgeInsets.zero,
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: Text(
-                'Ählisi',
-                style: tt.labelMedium?.copyWith(
-                  color: _kDetailMeta,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
+        _SectionHeader(
+          title: 'Topar',
+          titleKey: const ValueKey('section-title-team'),
+          actionLabel: 'Ählisi',
+          actionKey: const ValueKey('team-see-all'),
+          onActionPressed: () {
+            Navigator.push(
+              context,
+              fadeSlideRoute(SalonStaffScreen(salonName: salon.name)),
+            );
+          },
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 12),
         SizedBox(
-          height: 158,
+          height: 134,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.only(right: AppSpacing.s),
@@ -1310,8 +1382,8 @@ class _TeamSection extends StatelessWidget {
             separatorBuilder: (_, __) => const SizedBox(width: 12),
             itemBuilder: (_, i) {
               final s = _kMockStaff[i];
-              final name = (s['name'] as String).toUpperCase();
-              final role = (s['role'] as String).toUpperCase();
+              final name = s['name'] as String;
+              final role = s['role'] as String;
               final imagePath = s['imagePath'] as String;
               final rating = s['rating'] as double?;
               return SizedBox(
@@ -1443,28 +1515,12 @@ class _PortfolioSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Portfolio',
-              key: const ValueKey('section-title-portfolio'),
-              style: _detailSectionTitleStyle(tt),
-            ),
-            const SizedBox(width: 6),
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                '$totalCount',
-                style: tt.labelSmall?.copyWith(
-                  color: _kDetailMeta,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-            ),
-          ],
+        _SectionHeader(
+          title: 'Portfolio',
+          titleKey: const ValueKey('section-title-portfolio'),
+          count: '$totalCount',
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         if (images.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 20),
@@ -1475,6 +1531,7 @@ class _PortfolioSection extends StatelessWidget {
           )
         else
           GridView.builder(
+            padding: EdgeInsets.zero,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: visibleCount,
@@ -1550,21 +1607,19 @@ class _AboutSectionState extends State<_AboutSection> {
 
   @override
   Widget build(BuildContext context) {
-    final tt = Theme.of(context).textTheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Barada',
-          key: const ValueKey('section-title-about'),
-          style: _detailSectionTitleStyle(tt),
+        const _SectionHeader(
+          title: 'Barada',
+          titleKey: ValueKey('section-title-about'),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 12),
         _AboutDescriptionFlat(
           expanded: _expanded,
           onToggle: () => setState(() => _expanded = !_expanded),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 24),
         const _AboutOpeningHoursFlat(),
         const SizedBox(height: 24),
         const _AboutAdditionalInfoFlat(),
@@ -1643,7 +1698,7 @@ class _AboutOpeningHoursFlat extends StatelessWidget {
           key: const ValueKey('about-opening-hours-title'),
           style: _detailSubsectionTitleStyle(tt),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         ..._kOpeningHours.asMap().entries.map((entry) {
           final index = entry.key;
           final hours = entry.value;
@@ -1655,14 +1710,14 @@ class _AboutOpeningHoursFlat extends StatelessWidget {
             child: Row(
               children: [
                 Container(
-                  width: 10,
-                  height: 10,
-                  decoration: const BoxDecoration(
-                    color: kSuccess,
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: isToday ? kSuccess : kTextTertiary.withValues(alpha: 0.3),
                     shape: BoxShape.circle,
                   ),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 16),
                 Expanded(
                   child: Text(
                     hours['day'] as String,
@@ -1703,7 +1758,7 @@ class _AboutAdditionalInfoFlat extends StatelessWidget {
           key: const ValueKey('about-additional-info-title'),
           style: _detailSubsectionTitleStyle(tt),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         ..._kAdditionalInfo.asMap().entries.map((entry) {
           final index = entry.key;
           final info = entry.value;
@@ -1740,26 +1795,19 @@ class _NearbySalonsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tt = Theme.of(context).textTheme;
     final images = portfolioImages(currentSalon);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            const Icon(Icons.location_on_rounded,
-                size: 20, color: kTextPrimary),
-            const SizedBox(width: 12),
-            Text(
-              'Töwerekde salonlar',
-              style: _detailSubsectionTitleStyle(tt),
-            ),
-          ],
+        const _SectionHeader(
+          title: 'Töwerekde salonlar',
+          titleKey: ValueKey('section-title-nearby'),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 12),
         SizedBox(
           height: 140,
           child: ListView.separated(
+            padding: EdgeInsets.zero,
             scrollDirection: Axis.horizontal,
             itemCount: 2,
             separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.m),
@@ -1768,7 +1816,7 @@ class _NearbySalonsSection extends StatelessWidget {
               return _NearbySalonCard(
                 imagePath: images[imgIdx],
                 title: 'Ýakyndaky salon ${i + 1}',
-                distance: '${(1.1 + i * 0.4).toStringAsFixed(1)} km · mock',
+                distance: '${(1.1 + i * 0.4).toStringAsFixed(1)} km',
               );
             },
           ),
@@ -1843,7 +1891,7 @@ class _NearbySalonCard extends StatelessWidget {
                           _kMockRating.toStringAsFixed(1),
                           style: metaStyle.copyWith(
                             color: kTextPrimary,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w400,
                           ),
                         ),
                         Text(

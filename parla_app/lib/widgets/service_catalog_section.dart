@@ -17,6 +17,7 @@ class ServiceCatalogSection extends StatefulWidget {
   final Set<int> selectedServiceIds;
   final bool showTitle;
   final bool showViewAllButton;
+  final Future<void> Function(bool)? onToggleExpand;
   final String title;
   final int initialVisibleCount;
   final EdgeInsetsGeometry padding;
@@ -29,6 +30,7 @@ class ServiceCatalogSection extends StatefulWidget {
     this.selectedServiceIds = const <int>{},
     this.showTitle = true,
     this.showViewAllButton = false,
+    this.onToggleExpand,
     this.title = 'Hyzmatlar',
     this.initialVisibleCount = 5,
     this.padding = EdgeInsets.zero,
@@ -79,7 +81,7 @@ class _ServiceCatalogSectionState extends State<ServiceCatalogSection> {
           key: const ValueKey('section-title-services'),
           style: _sectionTitleStyle(tt),
         ),
-        const SizedBox(height: 18),
+        const SizedBox(height: 12),
       ],
       SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -157,6 +159,7 @@ class _ServiceCatalogSectionState extends State<ServiceCatalogSection> {
         _buildServiceRows(
           services: baseServices,
           showLeadingDivider: false,
+          stripLastBottomPadding: !showViewAll,
         ),
       );
       if (showViewAll) {
@@ -191,7 +194,17 @@ class _ServiceCatalogSectionState extends State<ServiceCatalogSection> {
             width: double.infinity,
             child: OutlinedButton(
               key: const ValueKey('services-view-all-button'),
-              onPressed: () => setState(() => _showAll = !_showAll),
+              onPressed: () async {
+                final next = !_showAll;
+                if (!next && widget.onToggleExpand != null) {
+                  await widget.onToggleExpand!(next);
+                }
+                if (!mounted) return;
+                setState(() => _showAll = next);
+                if (next && widget.onToggleExpand != null) {
+                  widget.onToggleExpand!(next);
+                }
+              },
               style: _wideOutlinedButtonStyle(tt),
               child: Text(
                 _showAll ? 'Az görkez' : 'Hemmesi',
@@ -219,10 +232,12 @@ class _ServiceCatalogSectionState extends State<ServiceCatalogSection> {
   List<Widget> _buildServiceRows({
     required List<Service> services,
     required bool showLeadingDivider,
+    bool stripLastBottomPadding = false,
   }) {
     final rows = <Widget>[];
     for (int i = 0; i < services.length; i++) {
       final service = services[i];
+      final isLastInList = stripLastBottomPadding && (i == services.length - 1);
       rows.add(
         Column(
           mainAxisSize: MainAxisSize.min,
@@ -234,6 +249,7 @@ class _ServiceCatalogSectionState extends State<ServiceCatalogSection> {
               actionMode: widget.actionMode,
               isSelected: widget.selectedServiceIds.contains(service.id),
               onAction: () => widget.onAction(service),
+              isLast: isLastInList,
             ),
           ],
         ),
@@ -248,12 +264,14 @@ class _ServiceCatalogRow extends StatelessWidget {
   final ServiceCatalogActionMode actionMode;
   final bool isSelected;
   final VoidCallback onAction;
+  final bool isLast;
 
   const _ServiceCatalogRow({
     required this.service,
     required this.actionMode,
     required this.isSelected,
     required this.onAction,
+    this.isLast = false,
   });
 
   @override
@@ -266,7 +284,7 @@ class _ServiceCatalogRow extends StatelessWidget {
           ? Colors.black.withValues(alpha: 0.02)
           : Colors.transparent,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        padding: EdgeInsets.only(top: 16, bottom: isLast ? 0 : 16),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
