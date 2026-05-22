@@ -1354,90 +1354,106 @@ class _StaffStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
-    return ListView.separated(
+    return ListView(
       padding: const EdgeInsets.fromLTRB(
           AppSpacing.xl, AppSpacing.l, AppSpacing.xl, AppSpacing.xl),
-      itemCount: _mockStaffList.length,
-      separatorBuilder: (_, __) => const Divider(height: 1, color: kDetailDivider),
-      itemBuilder: (_, i) {
-        final s = _mockStaffList[i];
-        final sel = s.id == selectedId;
-        final isAny = s.id == 0;
-        return Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () {
-              HapticFeedback.selectionClick();
-              onSelect(s.id);
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 14),
-              child: Row(
-                children: [
-                  if (isAny)
-                    Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                          color: kSurfaceBg,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: kBorder)),
-                      child: const Icon(Icons.groups_rounded,
-                          color: kTextSecondary, size: 26),
-                    )
-                  else
-                    ClipOval(
-                      child: Image.asset(
-                        imageForKey(null, fallbackId: s.id),
-                        width: 52,
-                        height: 52,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
+      children: [
+        Text(
+          'Ussalar',
+          style: tt.headlineSmall?.copyWith(
+            color: kTextPrimary,
+            fontWeight: FontWeight.w700,
+            fontSize: 21,
+            height: 1.1,
+            letterSpacing: -0.5,
+          ),
+        ),
+        const SizedBox(height: 25),
+        ...List.generate(_mockStaffList.length, (i) {
+          final s = _mockStaffList[i];
+          final sel = s.id == selectedId;
+          final isAny = s.id == 0;
+          return Column(
+            children: [
+              if (i > 0) const Divider(height: 1, color: kDetailDivider),
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    onSelect(s.id);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 14),
+                    child: Row(
+                      children: [
+                        if (isAny)
+                          Container(
                             width: 52,
                             height: 52,
-                            color: kSurfaceBg,
-                            child: const Icon(Icons.person_rounded)),
-                      ),
-                    ),
-                  const SizedBox(width: AppSpacing.m),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(s.name,
-                            style: tt.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: -0.2)),
-                        const SizedBox(height: 2),
-                        Text(s.role,
-                            style:
-                                tt.bodySmall?.copyWith(color: kTextSecondary)),
-                        if (!isAny && s.rating > 0) ...[
-                          const SizedBox(height: 6),
-                          Row(mainAxisSize: MainAxisSize.min, children: [
-                            const Icon(Icons.star_rounded,
-                                size: 16, color: kStar),
-                            const SizedBox(width: 4),
-                            Text(s.rating.toStringAsFixed(1),
-                                style: tt.labelSmall
-                                    ?.copyWith(fontWeight: FontWeight.w800)),
-                          ]),
-                        ],
+                            decoration: BoxDecoration(
+                                color: kSurfaceBg,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: kBorder)),
+                            child: const Icon(Icons.groups_rounded,
+                                color: kTextSecondary, size: 26),
+                          )
+                        else
+                          ClipOval(
+                            child: Image.asset(
+                              imageForKey(null, fallbackId: s.id),
+                              width: 52,
+                              height: 52,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => Container(
+                                  width: 52,
+                                  height: 52,
+                                  color: kSurfaceBg,
+                                  child: const Icon(Icons.person_rounded)),
+                            ),
+                          ),
+                        const SizedBox(width: AppSpacing.m),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(s.name,
+                                  style: tt.titleSmall?.copyWith(
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: -0.2)),
+                              const SizedBox(height: 2),
+                              Text(s.role,
+                                  style:
+                                      tt.bodySmall?.copyWith(color: kTextSecondary)),
+                              if (!isAny && s.rating > 0) ...[
+                                const SizedBox(height: 6),
+                                Row(mainAxisSize: MainAxisSize.min, children: [
+                                  const Icon(Icons.star_rounded,
+                                      size: 16, color: kStar),
+                                  const SizedBox(width: 4),
+                                  Text(s.rating.toStringAsFixed(1),
+                                      style: tt.labelSmall
+                                          ?.copyWith(fontWeight: FontWeight.w800)),
+                                ]),
+                              ],
+                            ],
+                          ),
+                        ),
+                        Icon(
+                            sel
+                                ? Icons.check_circle_rounded
+                                : Icons.radio_button_unchecked_rounded,
+                            color: sel ? Colors.black : kBorderMedium,
+                            size: 28),
                       ],
                     ),
                   ),
-                  Icon(
-                      sel
-                          ? Icons.check_circle_rounded
-                          : Icons.radio_button_unchecked_rounded,
-                      color: sel ? Colors.black : kBorderMedium,
-                      size: 28),
-                ],
+                ),
               ),
-            ),
-          ),
-        );
-      },
+            ],
+          );
+        }),
+      ],
     );
   }
 }
@@ -1473,6 +1489,17 @@ class _DateTimeStep extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(
           AppSpacing.xl, AppSpacing.l, AppSpacing.xl, AppSpacing.xl),
       children: [
+        Text(
+          'Sene we wagt',
+          style: tt.headlineSmall?.copyWith(
+            color: kTextPrimary,
+            fontWeight: FontWeight.w700,
+            fontSize: 21,
+            height: 1.1,
+            letterSpacing: -0.5,
+          ),
+        ),
+        const SizedBox(height: 25),
         Text(monthLabel,
             style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
         const SizedBox(height: AppSpacing.m),
@@ -1527,7 +1554,7 @@ class _DateTimeStep extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.xl),
         Text('Elýeterli wagtlar',
-            style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
+            style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
         const SizedBox(height: AppSpacing.m),
         if (loadingSlots)
           const Padding(
