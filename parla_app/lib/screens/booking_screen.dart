@@ -1509,13 +1509,15 @@ class _DateTimeStep extends StatelessWidget {
                               fontSize: 18,
                               fontWeight: FontWeight.w800,
                               color: sel ? Colors.white : kTextPrimary)),
-                      if (sel)
-                        Container(
-                            margin: const EdgeInsets.only(top: 4),
-                            width: 6,
-                            height: 6,
-                            decoration: const BoxDecoration(
-                                color: kPrimary, shape: BoxShape.circle)),
+                      Container(
+                        margin: const EdgeInsets.only(top: 4),
+                        width: 6,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: sel ? kPrimary : Colors.transparent,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
                     ],
                   ),
                 ),
