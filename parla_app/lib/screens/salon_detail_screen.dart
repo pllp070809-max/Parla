@@ -188,37 +188,6 @@ TextStyle? _detailSubsectionTitleStyle(TextTheme tt) {
   );
 }
 
-TextStyle? _detailRowTitleStyle(TextTheme tt) {
-  return tt.titleMedium?.copyWith(
-    fontWeight: FontWeight.w500,
-    color: kTextPrimary,
-    height: 1.3,
-  );
-}
-
-TextStyle? _detailRowMetaStyle(TextTheme tt) {
-  return tt.labelSmall?.copyWith(
-    color: _kDetailMeta,
-    fontWeight: FontWeight.w400,
-  );
-}
-
-ButtonStyle _detailWideOutlinedButtonStyle(TextTheme tt) {
-  return OutlinedButton.styleFrom(
-    side: const BorderSide(color: kPrimary),
-    foregroundColor: kTextPrimary,
-    backgroundColor: kCardBg,
-    shape: const StadiumBorder(),
-    elevation: 0,
-    minimumSize: const Size.fromHeight(42),
-    padding: const EdgeInsets.symmetric(
-      horizontal: AppSpacing.xl,
-      vertical: 10,
-    ),
-    textStyle: tt.labelMedium?.copyWith(fontWeight: FontWeight.w700),
-  );
-}
-
 // ── Helpers ──
 
 // ═════════════════════════════════════════════

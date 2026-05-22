@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/providers.dart';
 import '../widgets/bottom_nav.dart';
 import '../theme.dart';
+
 class ConfirmationScreen extends StatefulWidget {
   final Booking booking;
   final String salonName;
@@ -35,55 +36,137 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> with SingleTick
   }
 
   @override
-  void dispose() { _ctrl.dispose(); super.dispose(); }
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
     final dateStr = DateFormat('dd MMMM yyyy, HH:mm').format(widget.booking.slotAt);
-    final serviceLabel = widget.booking.serviceSummary(maxNames: 3);
+    final serviceLabel = widget.booking.serviceSummary(maxNames: 4);
 
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl - 4),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.l),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Spacer(flex: 2),
-              _ParlaAnimatedBuilder(
-                animation: _ctrl,
-                builder: (_, __) => Opacity(
-                  opacity: _fade.value,
-                  child: Transform.scale(
-                    scale: _scale.value,
-                    child: Container(
-                      width: 96, height: 96,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [kSuccess.withValues(alpha: 0.2), kSuccess.withValues(alpha: 0.08)],
+              const SizedBox(height: AppSpacing.xxl),
+              
+              // Animated Success Checkmark
+              Center(
+                child: _ParlaAnimatedBuilder(
+                  animation: _ctrl,
+                  builder: (_, __) => Opacity(
+                    opacity: _fade.value,
+                    child: Transform.scale(
+                      scale: _scale.value,
+                      child: Container(
+                        width: 88,
+                        height: 88,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              kSuccess.withValues(alpha: 0.15),
+                              kSuccess.withValues(alpha: 0.05),
+                            ],
+                          ),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: kSuccess.withValues(alpha: 0.2),
+                            width: 1.5,
+                          ),
                         ),
-                        shape: BoxShape.circle,
+                        child: const Icon(Icons.check_rounded, size: 48, color: kSuccess),
                       ),
-                      child: const Icon(Icons.check_rounded, size: 52, color: kSuccess),
                     ),
                   ),
                 ),
               ),
               const SizedBox(height: AppSpacing.xl),
-              Text('Bron edildi!', style: tt.headlineMedium?.copyWith(color: kSuccess)),
+              
+              // Status text
+              Text(
+                'Bronyňyz kabul edildi!',
+                style: tt.headlineLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: kTextPrimary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                'Wagtyňyz we ýeriňiz tassyklanyldy.',
+                style: tt.bodyMedium?.copyWith(color: kTextSecondary),
+                textAlign: TextAlign.center,
+              ),
               const SizedBox(height: AppSpacing.xxl),
 
-              _InfoRow(label: 'Salon', value: widget.salonName),
-              _InfoRow(label: 'Hyzmat', value: serviceLabel),
-              _InfoRow(label: 'Wagt', value: dateStr),
-              _InfoRow(label: 'Müşderi', value: widget.booking.guestName),
-              _InfoRow(label: 'Telefon', value: widget.booking.guestPhone),
-              _InfoRow(label: 'Bron #', value: widget.booking.id.toString()),
+              // Sticker Booking Details Card
+              Container(
+                decoration: kStickerCardDecoration(),
+                padding: const EdgeInsets.all(AppSpacing.xl),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.receipt_long_rounded, color: kPrimary, size: 20),
+                        const SizedBox(width: AppSpacing.s),
+                        Text(
+                          'Bron maglumatlary',
+                          style: tt.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: kTextPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.m),
+                    const Divider(),
+                    const SizedBox(height: AppSpacing.m),
+                    _InfoRow(
+                      icon: Icons.storefront_rounded,
+                      label: 'Salon',
+                      value: widget.salonName,
+                    ),
+                    _InfoRow(
+                      icon: Icons.spa_rounded,
+                      label: 'Hyzmat',
+                      value: serviceLabel,
+                    ),
+                    _InfoRow(
+                      icon: Icons.access_time_rounded,
+                      label: 'Wagt',
+                      value: dateStr,
+                    ),
+                    _InfoRow(
+                      icon: Icons.person_rounded,
+                      label: 'Müşderi',
+                      value: widget.booking.guestName,
+                    ),
+                    _InfoRow(
+                      icon: Icons.phone_iphone_rounded,
+                      label: 'Telefon',
+                      value: widget.booking.guestPhone,
+                    ),
+                    _InfoRow(
+                      icon: Icons.tag_rounded,
+                      label: 'Bron #',
+                      value: widget.booking.id.toString(),
+                      isId: true,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xxl * 1.5),
 
-              const Spacer(flex: 3),
-
+              // Actions
               Consumer(
                 builder: (context, ref, _) {
                   return ElevatedButton(
@@ -98,7 +181,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> with SingleTick
               const SizedBox(height: AppSpacing.m),
               Consumer(
                 builder: (context, ref, _) {
-                  return TextButton(
+                  return OutlinedButton(
                     onPressed: () {
                       ref.read(selectedTabIndexProvider.notifier).state = 1;
                       _resetToHome(context);
@@ -107,7 +190,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> with SingleTick
                   );
                 },
               ),
-              const SizedBox(height: AppSpacing.xxl),
+              const SizedBox(height: AppSpacing.xl),
             ],
           ),
         ),
@@ -130,19 +213,44 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> with SingleTick
 }
 
 class _InfoRow extends StatelessWidget {
+  final IconData icon;
   final String label;
   final String value;
-  const _InfoRow({required this.label, required this.value});
+  final bool isId;
+
+  const _InfoRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.isId = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.s - 2),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.s),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 90, child: Text(label, style: tt.bodyMedium)),
-          Expanded(child: Text(value, style: tt.bodyLarge)),
+          Icon(icon, size: 18, color: kTextTertiary),
+          const SizedBox(width: 12),
+          SizedBox(
+            width: 80,
+            child: Text(
+              label,
+              style: tt.bodyMedium?.copyWith(color: kTextSecondary),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: tt.bodyLarge?.copyWith(
+                fontWeight: isId ? FontWeight.w700 : FontWeight.w500,
+                color: isId ? kPrimary : kTextPrimary,
+              ),
+            ),
+          ),
         ],
       ),
     );

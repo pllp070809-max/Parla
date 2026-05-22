@@ -250,7 +250,10 @@ class _BookingTile extends StatelessWidget {
                   alignment: Alignment.centerRight,
                   child: TextButton.icon(
                     onPressed: () async {
-                      await onCancel?.call();
+                      final confirmed = await _showCancelConfirmationBottomSheet(context, booking);
+                      if (confirmed == true) {
+                        await onCancel?.call();
+                      }
                     },
                     icon: const Icon(Icons.cancel_rounded, size: 18),
                     label: const Text('Ýatyrmak'),
@@ -293,4 +296,135 @@ class _BookingTileSkeleton extends StatelessWidget {
       ),
     );
   }
+}
+
+Future<bool?> _showCancelConfirmationBottomSheet(BuildContext context, Booking booking) {
+  final dateStr = DateFormat('dd MMM yyyy, HH:mm').format(booking.slotAt);
+  final salonLabel = booking.salonName ?? 'Salon #${booking.salonId}';
+  final serviceLabel = booking.serviceSummary(maxNames: 4);
+
+  return showModalBottomSheet<bool>(
+    context: context,
+    backgroundColor: kCardBg,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.m)),
+    ),
+    builder: (context) {
+      final tt = Theme.of(context).textTheme;
+      return SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.l),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Align(
+                alignment: Alignment.center,
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: AppSpacing.xl),
+                  decoration: BoxDecoration(
+                    color: kBorderMedium.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(AppRadius.s),
+                  ),
+                ),
+              ),
+              Center(
+                child: Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: kError.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.warning_amber_rounded,
+                    color: kError,
+                    size: 32,
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.l),
+              Text(
+                'Brony ýatyrmak isleýärsiňizmi?',
+                style: tt.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: kTextPrimary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppSpacing.s),
+              Text(
+                'Bu hereketi yza alyp bolmaýar.',
+                style: tt.bodyMedium?.copyWith(color: kTextSecondary),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.l),
+                decoration: BoxDecoration(
+                  color: kSurfaceBg.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(AppRadius.m),
+                  border: Border.all(color: kBorder.withValues(alpha: 0.5)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      salonLabel,
+                      style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                    if (serviceLabel.isNotEmpty) ...[
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        serviceLabel,
+                        style: tt.bodyMedium?.copyWith(color: kTextSecondary),
+                      ),
+                    ],
+                    const SizedBox(height: AppSpacing.s),
+                    Row(
+                      children: [
+                        const Icon(Icons.access_time_rounded, size: 16, color: kTextTertiary),
+                        const SizedBox(width: 6),
+                        Text(
+                          dateStr,
+                          style: tt.bodyMedium?.copyWith(
+                            color: kTextPrimary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xxl),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: const Text('Ýok, sakla'),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.m),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: kError,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Text('Hawa, ýatyr'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
 }
