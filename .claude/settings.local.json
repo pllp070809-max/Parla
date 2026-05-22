@@ -7,7 +7,9 @@
       "Read(//e/Parla/parla_app/lib/screens\" | grep -E '/**)",
       "Bash(findstr /R \"Color\\(0x\" screens\\\\*.dart widgets\\\\*.dart)",
       "Bash(findstr /V \"theme.dart\")",
-      "Bash(flutter analyze *)"
+      "Bash(flutter analyze *)",
+      "Bash(git push *)",
+      "Bash(git pull *)"
     ]
   }
 }

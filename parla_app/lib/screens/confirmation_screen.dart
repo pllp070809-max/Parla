@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/booking.dart';
 import '../app_spacing.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/providers.dart';
+import '../widgets/bottom_nav.dart';
 import '../theme.dart';
-
 class ConfirmationScreen extends StatefulWidget {
   final Booking booking;
   final String salonName;
@@ -82,20 +84,47 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> with SingleTick
 
               const Spacer(flex: 3),
 
-              ElevatedButton(
-                onPressed: () => Navigator.of(context).popUntil((r) => r.isFirst),
-                child: const Text('Sahypa'),
+              Consumer(
+                builder: (context, ref, _) {
+                  return ElevatedButton(
+                    onPressed: () {
+                      ref.read(selectedTabIndexProvider.notifier).state = 0;
+                      _resetToHome(context);
+                    },
+                    child: const Text('Baş sahypa'),
+                  );
+                },
               ),
               const SizedBox(height: AppSpacing.m),
-              TextButton(
-                onPressed: () => Navigator.of(context).popUntil((r) => r.isFirst),
-                child: const Text('Meniň bronlarym'),
+              Consumer(
+                builder: (context, ref, _) {
+                  return TextButton(
+                    onPressed: () {
+                      ref.read(selectedTabIndexProvider.notifier).state = 1;
+                      _resetToHome(context);
+                    },
+                    child: const Text('Meniň bronlarym'),
+                  );
+                },
               ),
               const SizedBox(height: AppSpacing.xxl),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  void _resetToHome(BuildContext context) {
+    Navigator.of(context).pushAndRemoveUntil(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => const BottomNavShell(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 300),
+      ),
+      (route) => false,
     );
   }
 }

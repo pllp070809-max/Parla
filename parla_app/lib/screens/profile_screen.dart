@@ -25,7 +25,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   final _phoneCtrl = TextEditingController();
   final _phoneFocus = FocusNode();
 
-  String? _gender;
   bool _editing = false;
   bool _saving = false;
   bool _loaded = false;
@@ -42,7 +41,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     _nameCtrl.text = prefs.getString(_kPrefName) ?? '';
     _phoneCtrl.text = _stripPrefix(prefs.getString(_kPrefPhone) ?? '');
     setState(() {
-      _gender = prefs.getString(_kPrefGender);
       _loaded = true;
       _editing = _nameCtrl.text.isEmpty && _phoneCtrl.text.isEmpty;
     });
@@ -73,11 +71,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final phone = _fullPhone();
     await prefs.setString(_kPrefName, _nameCtrl.text.trim());
     await prefs.setString(_kPrefPhone, phone);
-    if (_gender != null) {
-      await prefs.setString(_kPrefGender, _gender!);
-    } else {
-      await prefs.remove(_kPrefGender);
-    }
     if (!mounted) return;
     ref.read(userPhoneProvider.notifier).setPhone(phone);
     ref.invalidate(myBookingsProvider);
@@ -105,7 +98,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     _nameCtrl.text = prefs.getString(_kPrefName) ?? '';
     _phoneCtrl.text = _stripPrefix(prefs.getString(_kPrefPhone) ?? '');
     setState(() {
-      _gender = prefs.getString(_kPrefGender);
       _editing = false;
     });
   }
@@ -118,7 +110,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     if (cleared == true && mounted) {
       _nameCtrl.clear();
       _phoneCtrl.clear();
-      setState(() { _gender = null; _editing = true; });
+      setState(() { _editing = true; });
     }
   }
 
@@ -145,6 +137,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<int>(selectedTabIndexProvider, (prev, next) {
+      if (next == 2 && prev != 2) {
+        _load();
+      }
+    });
     final tt = Theme.of(context).textTheme;
 
     return Scaffold(
@@ -225,20 +222,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             style: tt.bodyMedium,
             textAlign: TextAlign.center,
           ),
-          if (_gender != null) ...[
-            const SizedBox(height: AppSpacing.xs),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m, vertical: AppSpacing.xs),
-              decoration: BoxDecoration(
-                color: kPrimary.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(AppRadius.m),
-              ),
-              child: Text(
-                _gender == 'male' ? 'Erkek' : 'Zenan',
-                style: tt.labelLarge?.copyWith(color: kPrimary, fontSize: 12),
-              ),
-            ),
-          ],
         ] else ...[
           Text('Maglumatyňyz', style: tt.headlineMedium, textAlign: TextAlign.center),
           const SizedBox(height: AppSpacing.xs),
@@ -262,14 +245,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             label: 'Telefon',
             value: _fullPhone().isNotEmpty ? _formatPhone(_phoneCtrl.text) : '—',
           ),
-          if (_gender != null) ...[
-            const Divider(height: 1),
-            _InfoRow(
-              icon: _gender == 'male' ? Icons.male_rounded : Icons.female_rounded,
-              label: 'Jyns',
-              value: _gender == 'male' ? 'Erkek' : 'Zenan',
-            ),
-          ],
         ],
       ),
       const SizedBox(height: AppSpacing.l),
@@ -316,11 +291,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   textInputAction: TextInputAction.done,
                   validator: _validatePhone,
                   onFieldSubmitted: (_) => _save(),
-                ),
-                const SizedBox(height: AppSpacing.l),
-                _GenderSelector(
-                  value: _gender,
-                  onChanged: (v) => setState(() => _gender = v),
                 ),
               ],
             ),
@@ -387,77 +357,4 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-class _GenderSelector extends StatelessWidget {
-  final String? value;
-  final ValueChanged<String?> onChanged;
-  const _GenderSelector({required this.value, required this.onChanged});
 
-  @override
-  Widget build(BuildContext context) {
-    final tt = Theme.of(context).textTheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Jyns (hökmany däl)', style: tt.bodyMedium),
-        const SizedBox(height: AppSpacing.s),
-        Row(
-          children: [
-            Expanded(child: _GenderChip(
-              icon: Icons.male_rounded,
-              label: 'Erkek',
-              selected: value == 'male',
-              onTap: () => onChanged(value == 'male' ? null : 'male'),
-            )),
-            const SizedBox(width: AppSpacing.m),
-            Expanded(child: _GenderChip(
-              icon: Icons.female_rounded,
-              label: 'Zenan',
-              selected: value == 'female',
-              onTap: () => onChanged(value == 'female' ? null : 'female'),
-            )),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _GenderChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-  const _GenderChip({required this.icon, required this.label, required this.selected, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final tt = Theme.of(context).textTheme;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppRadius.m),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.m),
-          decoration: BoxDecoration(
-            color: selected ? kPrimary.withValues(alpha: 0.1) : Colors.transparent,
-            borderRadius: BorderRadius.circular(AppRadius.m),
-            border: Border.all(
-              color: selected ? kPrimary : kTextSecondary.withValues(alpha: 0.3),
-              width: selected ? 2 : 1,
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 20, color: selected ? kPrimary : kTextSecondary),
-              const SizedBox(width: AppSpacing.s),
-              Text(label, style: tt.labelLarge?.copyWith(color: selected ? kPrimary : kTextSecondary)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}

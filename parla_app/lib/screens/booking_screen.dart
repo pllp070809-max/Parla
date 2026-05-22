@@ -79,7 +79,7 @@ class BookingScreen extends ConsumerStatefulWidget {
 }
 
 class _BookingScreenState extends ConsumerState<BookingScreen> {
-  static const int _kTotalSteps = 7;
+  static const int _kTotalSteps = 5;
 
   int _step = 0;
   late final PageController _pageCtrl;
@@ -92,7 +92,6 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
   List<String>? _slots;
   bool _loadingSlots = false;
   int _guestCount = 1;
-  late List<TextEditingController> _guestCtrls;
 
   final _nameCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
@@ -121,7 +120,6 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
     }
     _selectedDate = DateTime.now();
     _days = List.generate(7, (i) => DateTime.now().add(Duration(days: i)));
-    _guestCtrls = [TextEditingController()];
     _loadSlots();
     _loadSavedProfile();
   }
@@ -131,7 +129,15 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
     final name = prefs.getString('profile_name') ?? '';
     final phone = prefs.getString('profile_phone') ?? '';
     if (name.isNotEmpty) _nameCtrl.text = name;
-    if (phone.isNotEmpty) _phoneCtrl.text = phone;
+    if (phone.isNotEmpty) {
+      if (phone.startsWith('+993')) {
+        _phoneCtrl.text = phone.substring(4);
+      } else if (phone.startsWith('993')) {
+        _phoneCtrl.text = phone.substring(3);
+      } else {
+        _phoneCtrl.text = phone;
+      }
+    }
   }
 
   Future<void> _loadSlots() async {
@@ -216,14 +222,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
     await _loadSlots();
   }
 
-  void _syncGuestControllers() {
-    while (_guestCtrls.length < _guestCount) {
-      _guestCtrls.add(TextEditingController());
-    }
-    while (_guestCtrls.length > _guestCount) {
-      _guestCtrls.removeLast().dispose();
-    }
-  }
+  // Sync guest controllers removed
 
   Future<void> _goToStep(int s) async {
     setState(() {
@@ -244,13 +243,8 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
       case 2:
         return _selectedSlot != null;
       case 3:
-        return _guestCount >= 1;
-      case 4:
         return true;
-      case 5:
-        return _nameCtrl.text.trim().length >= 2 &&
-            _phoneCtrl.text.replaceAll(RegExp(r'[^\d]'), '').length >= 8;
-      case 6:
+      case 4:
         return true;
       default:
         return false;
@@ -259,8 +253,26 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
 
   Future<void> _onPrimaryAction() async {
     HapticFeedback.mediumImpact();
+    if (_step == 3) {
+      final name = _nameCtrl.text.trim();
+      final phone = _phoneCtrl.text.replaceAll(RegExp(r'[^\d]'), '');
+      if (name.length < 2) {
+        _snack('Dowam etmek üçün adyňyzy ýazyň (iň az 2 harp).');
+        return;
+      }
+      if (phone.length < 8) {
+        _snack('Dowam etmek üçün telefon belgiňizi ýazyň (iň az 8 san).');
+        return;
+      }
+
+      // Save contact info immediately to profile when pressing "Dowam et"
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('profile_name', name);
+      final fullPhone = '+993$phone';
+      await prefs.setString('profile_phone', fullPhone);
+      ref.read(userPhoneProvider.notifier).setPhone(fullPhone);
+    }
     if (_step < _kTotalSteps - 1) {
-      if (_step == 3) _syncGuestControllers();
       await _goToStep(_step + 1);
     } else {
       await _submit();
@@ -270,18 +282,28 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
   Future<void> _submit() async {
     setState(() => _submitting = true);
     try {
+      final phoneDigits = _phoneCtrl.text.replaceAll(RegExp(r'[^\d]'), '');
+      final fullPhone = '+993$phoneDigits';
+
       final booking = await ref.read(apiServiceProvider).createBooking(
             salonId: widget.salonId,
             serviceId: _selectedServiceId,
             serviceIds: _selectedServiceIds,
             guestName: _nameCtrl.text.trim(),
-            guestPhone: _phoneCtrl.text.trim(),
+            guestPhone: fullPhone,
             slotAt: _selectedSlot!,
             totalDurationMinutes: _selectedTotalDurationMinutes,
             totalPrice: _selectedTotalPrice,
           );
       if (!mounted) return;
       ref.invalidate(myBookingsProvider);
+
+      // Save name and phone to SharedPreferences and update provider
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('profile_name', _nameCtrl.text.trim());
+      await prefs.setString('profile_phone', fullPhone);
+      ref.read(userPhoneProvider.notifier).setPhone(fullPhone);
+
       Navigator.pushReplacement(
         context,
         fadeSlideRoute(
@@ -327,8 +349,15 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
   }
 
   void _snack(String msg) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(msg), backgroundColor: kError));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: kError,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.only(bottom: 110, left: AppSpacing.l, right: AppSpacing.l),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.m)),
+      ),
+    );
   }
 
   String _primaryLabel() {
@@ -377,9 +406,6 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
     _pageCtrl.dispose();
     _nameCtrl.dispose();
     _phoneCtrl.dispose();
-    for (final c in _guestCtrls) {
-      c.dispose();
-    }
     super.dispose();
   }
 
@@ -506,10 +532,6 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                         },
                         onSelectSlot: (s) => setState(() => _selectedSlot = s),
                       ),
-                      _GuestCountStep(
-                          count: _guestCount,
-                          onChanged: (c) => setState(() => _guestCount = c)),
-                      _GuestNamesStep(count: _guestCount, controllers: _guestCtrls),
                       _ContactStep(nameCtrl: _nameCtrl, phoneCtrl: _phoneCtrl),
                       _ReviewStep(
                         salonName: widget.salonName,
@@ -520,7 +542,6 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                             .firstWhere((s) => s.id == _selectedStaffId)
                             .name,
                         slot: _selectedSlot,
-                        guestCount: _guestCount,
                       ),
                     ],
                   ),
@@ -1789,10 +1810,16 @@ class _ContactStep extends StatelessWidget {
         TextField(
           controller: phoneCtrl,
           decoration: InputDecoration(
-              labelText: 'Telefon',
-              prefixIcon: const Icon(Icons.phone_rounded),
-              hintText: '+993...'),
+            labelText: 'Telefon',
+            prefixIcon: const Icon(Icons.phone_rounded),
+            prefixText: '+993 ',
+            prefixStyle: tt.bodyLarge?.copyWith(color: kTextSecondary),
+          ),
           keyboardType: TextInputType.phone,
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            LengthLimitingTextInputFormatter(8),
+          ],
         ),
       ],
     );
@@ -1809,7 +1836,6 @@ class _ReviewStep extends StatelessWidget {
   final double totalPrice;
   final String staffName;
   final String? slot;
-  final int guestCount;
 
   const _ReviewStep({
     required this.salonName,
@@ -1818,7 +1844,6 @@ class _ReviewStep extends StatelessWidget {
     required this.totalPrice,
     required this.staffName,
     required this.slot,
-    required this.guestCount,
   });
 
   @override
@@ -1865,13 +1890,6 @@ class _ReviewStep extends StatelessWidget {
           const Divider(height: 1),
           _RevRow(
               icon: Icons.access_time_rounded, label: 'Wagt', value: timeLabel),
-        ]),
-        const SizedBox(height: AppSpacing.m),
-        _RevCard(children: [
-          _RevRow(
-              icon: Icons.groups_rounded,
-              label: 'Adam sany',
-              value: '$guestCount'),
         ]),
       ],
     );
