@@ -17,7 +17,7 @@ class AppSizes {
 
   static const double headerHeight = 72;
   static const double bottomNavHeight = 64;
-  static const double sectionGap = 32;
+  static const double sectionGap = 24; // UI expert: reduced from 32 to 24
 
   static const double cardWidth = 240;
   static const double cardHeight = 294;

@@ -50,53 +50,42 @@ class HomeScreen extends ConsumerWidget {
             slivers: [
               // ── Baş sahypa header: Siz üçin + bildirişler + gözleg ──
               SliverToBoxAdapter(
-                child: SizedBox(
-                  height: AppSizes.headerHeight,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: AppSizes.paddingHorizontal),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'Siz üçin',
-                                style: tt.displaySmall,
-                              ),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                      AppSizes.paddingHorizontal,
+                      AppSpacing.l,
+                      AppSizes.paddingHorizontal,
+                      AppSpacing.s),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Siz üçin',
+                              style: tt.displaySmall,
                             ),
-                            IconButton(
-                              icon: const Icon(
-                                Icons.notifications_none_rounded,
-                                size: 26,
-                              ),
-                              onPressed: () => Navigator.push(
-                                context,
-                                fadeSlideRoute(const NotificationsScreen()),
-                              ),
-                              style: IconButton.styleFrom(
-                                foregroundColor: kTextSecondary,
-                              ),
+                          ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.notifications_none_rounded,
+                              size: 26,
                             ),
-                            const SizedBox(width: 4),
-                            IconButton(
-                              onPressed: () {
-                                HapticFeedback.lightImpact();
-                                Navigator.push(context,
-                                    fadeSlideRoute(const SearchScreen()));
-                              },
-                              icon: const Icon(
-                                Icons.search_rounded,
-                                size: 24,
-                                color: AppColors.kPrimary,
-                              ),
+                            onPressed: () => Navigator.push(
+                              context,
+                              fadeSlideRoute(const NotificationsScreen()),
                             ),
-                          ],
-                        ),
-                      ],
-                    ),
+                            style: IconButton.styleFrom(
+                              foregroundColor: kTextSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      const _HomeSearchBar(),
+                    ],
                   ),
                 ),
               ),
@@ -175,52 +164,7 @@ class HomeScreen extends ConsumerWidget {
               ),
               _salonRow(salons, ref, context, cardW, false),
 
-              // ── Top categories ──
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSizes.paddingHorizontal,
-                    homeSectionGap,
-                    AppSizes.paddingHorizontal,
-                    24, // As per UI spec: 24px margin bottom below header
-                  ),
-                  child: Text(
-                    'Esasy kategoriýalar',
-                    style: tt.titleLarge,
-                  ),
-                ),
-              ),
 
-              // ── Category Grid ──
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: AppSizes.paddingHorizontal),
-                sliver: SliverGrid(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    mainAxisSpacing: AppSizes.sectionGap,
-                    crossAxisSpacing: 24,
-                    mainAxisExtent: 142, // 96 image + 12 gap + label space
-                  ),
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final cat = _categories[index];
-                      return _CategoryCircle(
-                        label: cat.label,
-                        imagePath: cat.imagePath,
-                        onTap: () {
-                          HapticFeedback.lightImpact();
-                          Navigator.push(
-                            context,
-                            fadeSlideRoute(SalonsListScreen(category: cat.key)),
-                          );
-                        },
-                      );
-                    },
-                    childCount: _categories.length,
-                  ),
-                ),
-              ),
 
               const SliverToBoxAdapter(child: SizedBox(height: 100)),
             ],
@@ -785,6 +729,79 @@ class _VenueCard extends StatelessWidget {
           ),
         ),
       );
+}
+
+// ── Home Search Bar ──
+
+class _HomeSearchBar extends StatelessWidget {
+  const _HomeSearchBar();
+
+  @override
+  Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    return Semantics(
+      label: 'Ähli prosedurary gözle',
+      button: true,
+      child: Material(
+        color: AppColors.kCardBg,
+        borderRadius: BorderRadius.circular(100),
+        elevation: 0,
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.lightImpact();
+            Navigator.push(context, fadeSlideRoute(const SearchScreen()));
+          },
+          borderRadius: BorderRadius.circular(100),
+          child: Container(
+            height: 48,
+            decoration: BoxDecoration(
+              color: AppColors.kCardBg,
+              borderRadius: BorderRadius.circular(100),
+              border: Border.all(color: AppColors.kBorder), // has gowşak border däl-de standart border
+              boxShadow: AppColors.kShadowSm, // Uly kölegäniň ýerine standart we has asuda kölege
+            ),
+            padding: const EdgeInsets.only(left: 14, right: 6),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.search_rounded,
+                  color: AppColors.kTextPrimary,
+                  size: 22,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Ähli hyzmatlary gözle',
+                    style: tt.bodyMedium?.copyWith(
+                      color: AppColors.kInputHint,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Container(
+                  height: 36,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: AppColors.kPrimary, // Kapyalaşmagy üçin programmanyň esasy reňki (Primary)
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    'Gözleg',
+                    style: tt.labelMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 // ── Skeleton ──
