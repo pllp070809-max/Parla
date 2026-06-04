@@ -36,7 +36,7 @@ dependencies:
   intl: ^0.19.0
   share_plus: ^13.0.0
   shared_preferences: ^2.3.4
-
+  flutter_svg: ^2.0.10+1
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -57,7 +57,7 @@ flutter:
 
   assets:
     - images/
-    - images/BOLUMLER/
+    - assets/icons/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

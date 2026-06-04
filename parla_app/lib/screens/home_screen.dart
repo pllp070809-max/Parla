@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import '../providers/providers.dart';
 import '../models/salon.dart';
@@ -21,16 +22,23 @@ final _featuredProvider = FutureProvider<List<Salon>>((ref) {
   return ref.read(apiServiceProvider).getSalons();
 });
 
+class _Cat {
+  final String label;
+  final IconData iconData;
+  final String key;
+  const _Cat(this.label, this.iconData, this.key);
+}
+
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
-  static const _categories = [
-    _Cat('Saç salony', 'images/BOLUMLER/SAC_SALONY.jpg', 'salon'),
-    _Cat('Barberhana', 'images/BOLUMLER/BARBERHANA.png', 'barber'),
-    _Cat('Dyrnak', 'images/BOLUMLER/DYRNAK.png', 'salon'),
-    _Cat('Kirpik', 'images/BOLUMLER/KIRPIK.png', 'gözellik'),
-    _Cat('Makiýaž', 'images/BOLUMLER/MAKIYAZ.png', 'gözellik'),
-    _Cat('Spa', 'images/BOLUMLER/SPA.png', 'spa'),
+  static final _categories = [
+    _Cat('Ählisi', Icons.grid_view_outlined, 'all'),
+    _Cat('Saç ukladka', Icons.face_retouching_natural_outlined, 'salon'),
+    _Cat('Dyrnak', Icons.back_hand_outlined, 'salon'),
+    _Cat('Kirpik/Gaş', Icons.remove_red_eye_outlined, 'gözellik'),
+    _Cat('Makiýaž', Icons.brush_outlined, 'gözellik'),
+    _Cat('Spa/Massaž', Icons.spa_outlined, 'spa'),
   ];
 
   @override
@@ -86,6 +94,40 @@ class HomeScreen extends ConsumerWidget {
                       const SizedBox(height: 12),
                       const _HomeSearchBar(),
                     ],
+                  ),
+                ),
+              ),
+
+              // ── Kategoriýalar (Gorizontal hatar) ──
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 240, // 2 hatar: (104 + 16 spacing)
+                  child: GridView.builder(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: AppSizes.paddingHorizontal),
+                    scrollDirection: Axis.horizontal,
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 16,
+                      crossAxisSpacing: 16,
+                      childAspectRatio: 1.0, // Her elementiň uzynlygy we ininiň gatnaşygy
+                      mainAxisExtent: 80, // Elementiň ini (72 + 8 spacing gapdalyndan)
+                    ),
+                    itemCount: _categories.length,
+                    itemBuilder: (context, index) {
+                      final cat = _categories[index];
+                      return _CategorySquircle(
+                        label: cat.label,
+                        iconData: cat.iconData,
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          Navigator.push(
+                            context,
+                            fadeSlideRoute(SalonsListScreen(category: cat.key)),
+                          );
+                        },
+                      );
+                    },
                   ),
                 ),
               ),
@@ -465,23 +507,14 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
-// ── Data ──
+// ── Category Squircle (Fresha line-art style) ──
 
-class _Cat {
+class _CategorySquircle extends StatelessWidget {
   final String label;
-  final String imagePath;
-  final String key;
-  const _Cat(this.label, this.imagePath, this.key);
-}
-
-// ── Category Circle (Fresha style) ──
-
-class _CategoryCircle extends StatelessWidget {
-  final String label;
-  final String imagePath;
+  final IconData iconData;
   final VoidCallback onTap;
-  const _CategoryCircle(
-      {required this.label, required this.imagePath, required this.onTap});
+  const _CategorySquircle(
+      {required this.label, required this.iconData, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -493,45 +526,39 @@ class _CategoryCircle extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(
-            width: 96,
-            height: 96,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Container(
-                  decoration: const BoxDecoration(
-                    color: kCardBg,
-                    shape: BoxShape.circle,
-                  ),
-                  child: ClipOval(
-                    child: Image.asset(
-                      imagePath,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(color: kCardBg),
-                    ),
-                  ),
-                ),
-                Positioned.fill(
-                  child: Material(
-                    color: Colors.transparent,
-                    shape: const CircleBorder(),
-                    clipBehavior: Clip.antiAlias,
-                    child: InkWell(
-                      onTap: onTap,
-                      customBorder: const CircleBorder(),
-                    ),
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: const Color(0xFFF0F0F0), width: 1.5),
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onTap,
+                borderRadius: BorderRadius.circular(20),
+                child: Center(
+                  child: Icon(
+                    iconData,
+                    size: 30,
+                    color: AppColors.kTextPrimary,
                   ),
                 ),
-              ],
+              ),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           SizedBox(
-            width: 104,
+            width: 80,
             child: Text(
               label,
-              style: tt.titleSmall,
+              style: tt.bodySmall?.copyWith(
+                color: AppColors.kTextPrimary,
+                fontWeight: FontWeight.w500,
+                fontSize: 12,
+              ),
               textAlign: TextAlign.center,
               maxLines: 1,
               softWrap: false,
