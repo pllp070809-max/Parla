@@ -24,21 +24,27 @@ final _featuredProvider = FutureProvider<List<Salon>>((ref) {
 
 class _Cat {
   final String label;
-  final IconData iconData;
+  final IconData? iconData;
+  final String? svgPath;
   final String key;
-  const _Cat(this.label, this.iconData, this.key);
+  const _Cat({
+    required this.label,
+    this.iconData,
+    this.svgPath,
+    required this.key,
+  });
 }
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   static final _categories = [
-    _Cat('Ählisi', Icons.grid_view_outlined, 'all'),
-    _Cat('Saç ukladka', Icons.face_retouching_natural_outlined, 'salon'),
-    _Cat('Dyrnak', Icons.back_hand_outlined, 'salon'),
-    _Cat('Kirpik/Gaş', Icons.remove_red_eye_outlined, 'gözellik'),
-    _Cat('Makiýaž', Icons.brush_outlined, 'gözellik'),
-    _Cat('Spa/Massaž', Icons.spa_outlined, 'spa'),
+    const _Cat(label: 'Ählisi', iconData: Icons.grid_view_outlined, key: 'all'),
+    const _Cat(label: 'Saç ukladka', svgPath: 'assets/icons/Hair and styling.svg', key: 'salon'),
+    const _Cat(label: 'Dyrnak', svgPath: 'assets/icons/nails.svg', key: 'salon'),
+    const _Cat(label: 'Kirpik/Gaş', svgPath: 'assets/icons/Brows and lashes.svg', key: 'gözellik'),
+    const _Cat(label: 'Makiýaž', svgPath: 'assets/icons/makeup.svg', key: 'gözellik'),
+    const _Cat(label: 'Spa/Massaž', svgPath: 'assets/icons/spa.svg', key: 'spa'),
   ];
 
   @override
@@ -119,6 +125,7 @@ class HomeScreen extends ConsumerWidget {
                       return _CategorySquircle(
                         label: cat.label,
                         iconData: cat.iconData,
+                        svgPath: cat.svgPath,
                         onTap: () {
                           HapticFeedback.lightImpact();
                           Navigator.push(
@@ -511,10 +518,16 @@ class HomeScreen extends ConsumerWidget {
 
 class _CategorySquircle extends StatelessWidget {
   final String label;
-  final IconData iconData;
+  final IconData? iconData;
+  final String? svgPath;
   final VoidCallback onTap;
-  const _CategorySquircle(
-      {required this.label, required this.iconData, required this.onTap});
+  
+  const _CategorySquircle({
+    required this.label,
+    this.iconData,
+    this.svgPath,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -540,11 +553,21 @@ class _CategorySquircle extends StatelessWidget {
                 onTap: onTap,
                 borderRadius: BorderRadius.circular(20),
                 child: Center(
-                  child: Icon(
-                    iconData,
-                    size: 30,
-                    color: AppColors.kTextPrimary,
-                  ),
+                  child: svgPath != null
+                      ? SvgPicture.asset(
+                          svgPath!,
+                          width: 30,
+                          height: 30,
+                          colorFilter: const ColorFilter.mode(
+                            AppColors.kTextPrimary,
+                            BlendMode.srcIn,
+                          ),
+                        )
+                      : Icon(
+                          iconData,
+                          size: 30,
+                          color: AppColors.kTextPrimary,
+                        ),
                 ),
               ),
             ),
