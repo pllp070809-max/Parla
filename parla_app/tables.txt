@@ -1,0 +1,398 @@
+SYPAT	NÄME ÜÇIN MÖHÜM
+Spesifik	"Ýagşy bolsun" däl-de, anyk ugur. Mysal: "Ulanyjy gowy duýsun" → "Hiç ekran 3 klikden uzak däl".
+Çekişme	Tarsdan eşidende biri "men bilen ylalaşmaýan" diýip biljek. "Aňsat bolsun" — kim garşy? Çekişme ýok.
+Saýlawly	Bir zady saýlap, başgasyny goýbolsun edýär. "Speed over polish" — wagt geçirmek üçin polish azaltmaga taýyn.
+Ýatdan çykmaýan	5 söz töwerek, slogan ýaly. "Speed is a feature" — Linear-yň prinsibi, bütin pudak ony bilýär.
+ÝERINE...	...ŞUNY SAÝLA
+Süýji bezeg	Duýgyly ýönekeýlik
+Köp maglumat	Az we anyk
+Çalt animasiýa	Ýumşak animasiýa
+Tekst düşündirişi	Surat görkezişi
+Uly tekst	Uly boş ýer
+Köp düwme	Bir esasy düwme
+FONT	ROLY	NIREDЕ ULANYLÝAR
+Fraunces	Display & aksent	Hero heading, salon ady (detail sahypa), success/welcome ekrany, uly KPI sanlary
+Plus Jakarta Sans	UI fundament	Buttonlar, list elementleri, body tekst, caption, badge — hemme UI
+✓  DOGRY	✗  NÄDOGRY
+"Salon X" — detail sahypa başlygy → Fraunces italik	"Habarlaş" button → Fraunces
+"Tassyklandy" — success ekran → Fraunces uly	List elementleri → Fraunces
+"Habarlaş" button → Plus Jakarta SemiBold	Body tekst → Fraunces
+Hemme UI teksti → Plus Jakarta	Fraunces-i 3+ sözlem üçin ulanmak
+WEIGHT	BAHASY	FAÝL	ULANYŞ
+Regular 400	~90 KB	Fraunces-Regular.ttf	Display tekst (göni)
+Italic 400	~90 KB	Fraunces-Italic.ttf	Display tekst (italik aksent)
+WEIGHT	BAHASY	FAÝL	ULANYŞ
+Regular 400	~75 KB	PlusJakartaSans-Regular.ttf	Body, caption, adaty tekst
+Medium 500	~75 KB	PlusJakartaSans-Medium.ttf	Emphasized body, sub-başlyklar
+SemiBold 600	~75 KB	PlusJakartaSans-SemiBold.ttf	Buttonlar, ekran başlyklary
+Bold 700	~75 KB	PlusJakartaSans-Bold.ttf	Bold aksent (seýrek)
+TOKEN	ÖLÇEG	WEIGHT	LH	LS	FONT	ULANYŞ
+display	32 px	400 italic	1.1	−2%	Fraunces	Hero, success, welcome (seýrek)
+title	24 px	500	1.2	−1%	Plus Jakarta	Ekran başlygy, salon ady list-da
+headline	17 px	600	1.4	−0.3%	Plus Jakarta	Emphasized body, button tekst
+body	15 px	400	1.5	0	Plus Jakarta	Adaty tekst — iň köp ulanylýan
+caption	13 px	400	1.45	0	Plus Jakarta	(127 syn), form help tekst
+micro	11 px	500	1.3	+8%	Plus Jakarta	Badge, status (CAPS), timestamp
+TOKEN	PX	LINE HEIGHT	HAKYKY PIKSEL
+display	32	1.1	32 × 1.1 = 35 px
+title	24	1.2	24 × 1.2 = 29 px
+headline	17	1.4	17 × 1.4 = 24 px
+body	15	1.5	15 × 1.5 = 22-23 px
+caption	13	1.45	13 × 1.45 = 19 px
+micro	11	1.3	11 × 1.3 = 14 px
+TOKEN	PX	LETTER SPACING	SEBÄBI
+display	32	−2%	Uly tekst optiki ýakynlaşdyrma gerek
+title	24	−1%	Az ýakynlaşdyrma
+headline	17	−0.3%	Minimal
+body	15	0	Default — üýtgetme
+caption	13	0	Default
+micro (CAPS)	11	+8%	UPPERCASE tekst üçin açyk aralyk — okalmagy aňsatlaşdyrýar
+✓  DOGRY ITALIK ULANYŞY	✗  NÄDOGRY ITALIK ULANYŞY
+Salon ady detail sahypa başlygy → Fraunces italic	Ulanyjy adyny body tekst içinde italik bellemek
+"Tassyklandy" success ekrany → Fraunces italic	Plus Jakarta "Habarlaş" italik button
+Welcome: "Salam, Aman" — at italik	Bir paragraph italik düşündiriş tekst
+TOKEN	PX	W	LH	LS	FONT	ITALIK	ULANYŞ
+display	32	400	1.1	−2%	Fraunces	Elmydama	Hero, success, welcome
+title	24	500	1.2	−1%	Plus Jakarta	Hiç haçan	Ekran başlygy, salon ady
+headline	17	600	1.4	−0.3%	Plus Jakarta	Hiç haçan	Emphasized body, button
+body	15	400	1.5	0	Plus Jakarta	Hiç haçan	Adaty tekst — esasy
+caption	13	400	1.45	0	Plus Jakarta	Hiç haçan	(127 syn), form kömek teksti
+micro	11	500	1.3	+8%	Plus Jakarta	Hiç haçan	Badge, status CAPS, timestamp
+FAÝL ADY	ÖLÇEGI	ROLY
+Fraunces-Regular.ttf	~90 KB	Display (göni)
+Fraunces-Italic.ttf	~90 KB	Display (italik)
+PlusJakartaSans-Regular.ttf	~75 KB	Body, caption
+PlusJakartaSans-Medium.ttf	~75 KB	Title, emphasized body
+PlusJakartaSans-SemiBold.ttf	~75 KB	Buttonlar, başlyklar
+PlusJakartaSans-Bold.ttf	~75 KB	Bold aksent (seýrek)
+SWATCH	TOKEN	HEX	ULANYŞ
+50	brand-50	#FCF2F7	Iň ýagty fon, soft badge bg
+100	brand-100	#F8E0EC	Hover state fon, soft surface
+200	brand-200	#F0C2D8	Disabled button bg, pale chip
+300	brand-300	#DFA0B9	Tertiary aksent, icon background
+400	brand-400	#BF6D95	Ýagty primary (light variant)
+500	brand-500	#A8527E	DEFAULT primary — esasy brand reňki
+600	brand-600	#8E3D66	Hover, "See all" linki
+700	brand-700	#6F2B4F	Pressed, brand-coloured text
+800	brand-800	#4E1E37	Iň güýçli emphasis
+900	brand-900	#2E1322	Brand-coloured text iň gara variant
+FON	KONTRAST	STANDART	NETIJE
+Ak (#FFFFFF)	4.0 : 1	4.5 : 1	✗ Body üçin pes
+Krem bg-scaffold (#FDF8F5)	3.9 : 1	4.5 : 1	✗ Body üçin pes
+Soft surface (#F5EDF3)	3.8 : 1	4.5 : 1	✗ Body üçin pes
+SWATCH	TOKEN	HEX	ULANYŞ
+0	neutral-0	#FFFFFF	Saf ak — kart fonlary
+50	neutral-50	#FDF8F5	Ýyly krem — scaffold bg
+100	neutral-100	#F5EDF3	Soft surface, list bg
+200	neutral-200	#E8D9E3	Açyk border, default divider
+300	neutral-300	#C4AEBA	Orta border, strong divider
+400	neutral-400	#9B8492	Tertiary text, placeholder
+500	neutral-500	#6B5A65	Text secondary
+700	neutral-700	#2E2028	Text primary — esasy
+900	neutral-900	#1A1018	Dark CTA button bg, deep ink
+SEMANTIC	SOFT	MAIN	STRONG
+Success	#E3F0E5	#4A9447	#2D6A35
+Warning	#FBF0DC	#C77A1A	#8E5510
+Error	#FBE5EA	#C93B52	#8E2840
+Info	#DFE8F2	#1A5FAD	#103E72
+ELEMENT	TOKEN
+"Booking tassyklandy" badge	success-soft bg + success-main text
+"Töleg möhleti golaýlaýar"	warning-soft bg + warning-strong text
+"Ýalňyş — täzeden synanyş"	error-soft bg + error-main text
+Form input ýalňyşlyk border	error-main
+"Saklandy" toast	success-main bg + neutral-0 text
+TOKEN	GYMMATLYK	ALPHA	ULANYŞ
+overlay-strong	rgba(46, 32, 40, 0.60)	60%	Modal backdrop
+overlay-light	rgba(46, 32, 40, 0.30)	30%	Dropdown shadow, tooltip bg
+overlay-blur	rgba(253, 248, 245, 0.80)	80%	Bottom nav blur bg
+TOKEN	GYMMATLYK	ULANYŞ
+focus-ring	brand-500 (#A8527E)	outline: 3px solid + offset 2px
+focus-ring-soft	rgba(168, 82, 126, 0.20)	Input focus halo (soft glow)
+TOKEN	EQUALS	ULANYŞ
+link-default	brand-600	Body içinde adaty link — "şu ýere basyň"
+link-hover	brand-700	Üstünde duranda
+link-visited	brand-700	Geçilen link (web-de ulanýarys)
+TOKEN	EQUALS	ULANYŞ
+skeleton-base	neutral-100	Esasy fon (placeholder shape)
+skeleton-shine	neutral-200	Shimmer ýagty (1.5s loop)
+ROL	TOKEN	GYMMATLYK
+Background	neutral-900	#1A1018
+Text	neutral-0	#FFFFFF
+Hover bg	brand-900	#2E1322 — pink-tintli hover
+Pressed bg	brand-800	#4E1E37
+KÖNE TOKEN	KÖNE HEX	ÇALŞYGY
+kTeamStar	#FFCC00	AÝRYLDY → star-main
+kTeamSeeAll	#6F5CC2	AÝRYLDY → brand-600
+kChipLavenderBg/Fg	#F2EDFF / #6F5CC2	AÝRYLDY → brand chip
+kChipMintBg/Fg	#EEF8ED / #4A9447	AÝRYLDY → success-soft/main
+SWATCH	TOKEN	HEX	ULANYŞ
+★	star-main	#FFB800	Rating ★, premium nyşan
+★	star-soft	#FFF4D9	"Premium" badge bg
+KÖNE	SEBÄP	ÇALŞYGY
+kInputHint	kTextTertiary bilen meňzeş	neutral-400 / text-tertiary
+kDivider	kSurfaceBg bilen meňzeş	neutral-200 / border-default
+kTeamStar	kStar bilen meňzeş	star-main
+ALIAS	EQUALS	NÄME ÜÇIN
+text-primary	neutral-700	Esasy tekst
+text-secondary	neutral-500	Kömekçi tekst
+text-tertiary	neutral-400	Placeholder, hint
+text-on-brand	neutral-0	Brand bg üstünde tekst
+text-link	brand-600	Inline link tekst
+bg-scaffold	neutral-50	Ekran esasy fon
+bg-card	neutral-0	Kart fon
+bg-surface	neutral-100	Sanaw, ikinji fon
+bg-overlay	overlay-strong	Modal backdrop
+border-default	neutral-200	Adaty border
+border-strong	neutral-300	Section divider
+border-brand	brand-500	Selected, focused
+border-focus	focus-ring	Klawiatura focus outline
+ALIAS	LIGHT	DARK (geljek)
+text-primary	#2E2028	#FDF8F5
+bg-card	#FFFFFF	#1F1A1D
+bg-scaffold	#FDF8F5	#15121A
+border-default	#E8D9E3	#3A2F36
+GRID	KIM ULAN.	PLUS	MINUS
+4px	Apple HIG, modern konsumer apps	Çeýe, kiçijik düzediş	Köp basgançak, disiplina gerek
+8px	Material, köne SaaS	Az basgançak, sada	Käwagt gysylan ýa boş
+TOKEN	PX	WIZUAL	KATEGORIA	ULANYŞ
+space-0	0		none	Reset, edge-to-edge
+space-1	4	█	hairline	Icon-text gap
+space-2	8	██	tight	Chip padding
+space-3	12	███	cozy	Input padding Y, list gap
+space-4	16	████	default	Kart padding, screen edge
+space-5	24	██████	relaxed	Section element arasy
+space-6	32	████████	spacious	Section arasy
+space-7	48	████████████	breathing	Major section arasy
+space-8	64	████████████████	generous	Screen top padding
+space-9	96	████████████████████████	hero	Welcome, success hero
+TOKEN	PX	KATEGORIA	ULANYŞ
+size-icon-xs	16	icon	Inline icon (text içinde)
+size-icon-sm	20	icon	Kiçi icon (chip, badge)
+size-icon-md	24	icon	DEFAULT icon (button, nav)
+size-icon-lg	32	icon	Uly icon (empty state, hero)
+size-control-sm	36	control height	Chip, kiçi pill
+size-control-md	44	control height	Kompakt input
+size-control-lg	48	control height	DEFAULT button, input height
+size-control-xl	56	control height	List item, rahat tap target
+size-avatar-sm	32	avatar	Inline avatar (gepleşik)
+size-avatar-md	48	avatar	List item avatar
+size-avatar-lg	80	avatar	Profile sahypa, ussa kart
+size-avatar-xl	120	avatar	Hero portret (profile head)
+TIP	MANYSY	ULANYŞ
+Padding	Element içki boş ýer	Button içinde tekstiň iki tarapy
+Gap	Child element-leriň arasy	List item-ler arasy, grid hücreler
+Margin	Element daşky boş ýer	Section iki tarapy, ekran gyrasy
+ELEMENT	TOKEN	BELLIK
+Primary button height	size-control-lg (48)	Width — content görä
+Icon button	size-control-lg (48 × 48)	Icon 24, daşky 12 padding
+List item (tap)	size-control-xl (56)	Rahat basmak üçin (Material standart)
+Tab bar nyşany	size-control-lg (48 × 48)	Bottom nav element
+Chip	size-control-sm (36)	Kiçräk OK — ortaça duranok
+Kompakt input	size-control-md (44)	Dense form üçin
+EKRAN / ELEMENT	EDGE MARGIN	BELLIK
+Ekran umumy content	space-4 (16)	DEFAULT — hemme ýerde
+Hero image (salon detail)	space-0 (0)	Edge-to-edge — surat uly görünsin
+Banner / Carousel	space-0 (0)	Edge-to-edge, içinde content 16
+Modal content	space-5 (24)	Modal-da generous — premium duýgy
+Welcome / Onboarding	space-5 (24)	Generous, breathing
+BÖLÜM	EDGE	NÄME
+[Hero image — uly surat]	0	edge-to-edge
+[Salon ady, rating]	16	content edge
+[Hyzmatlar sanawy]	16	content edge
+[Ussalar carousel]	0	edge-to-edge
+[Synlar]	16	content edge
+ARALYK ROLY	TOKEN	PX
+Içerki element arasy	space-3	12
+Sub-section arasy	space-5	24
+Section arasy	space-6	32
+Major section arasy	space-7	48
+Screen ýokarsy padding	space-8	64
+ELEMENT	GAP	TOKEN
+[Screen title]	—	top: 64
+↓	32	space-6
+[Stat cards section]	—	
+↓ (içerki gap)	12	space-3
+[Card 1, Card 2 — vertical]	—	
+↓ (major section)	48	space-7
+[Recent activity title]	—	
+↓ (sub-section)	24	space-5
+[Activity list — gap 12]	—	
+RADIUS	BRAND HÄSIÝETI	MYSAL
+0px	Editorial, Swiss, professional	NYT, Linear, Vercel
+2-4px	Minimal, corporate	Stripe, Notion
+8-12px	Modern, balansly	Material apps, Slack
+16-20px	Ýumşak, premium, friendly	Apple, Airbnb, Parla ←
+24-32px	Playful, organic	Käbir consumer apps
+9999px	Pill, tag, friendly	Avatar, badge, status
+TOKEN	PX	ULANYŞ
+radius-none	0	Edge-to-edge image, full-bleed banner
+radius-xs	4	Inline tag, kiçi marker
+radius-sm	8	Chip, badge, small button, tooltip
+radius-md	12	Input field, secondary button, image inline, toast
+radius-lg	16	PRIMARY button, card, dropdown menu — DEFAULT
+radius-xl	20	Large card, hero card, premium panels
+radius-2xl	28	Modal, bottom sheet (top-only)
+radius-full	9999	Avatar, pill, circular icon button
+KOMPONENT	TOKEN	PX	SEBÄBI
+Primary button	radius-lg	16	Esasy CTA — premium duýgy
+Secondary button	radius-lg	16	Primary bilen sync
+Icon button	radius-full	∞	Tegelek, ýumşak
+Input field	radius-md	12	Button-dan kiçi — hierarhiýa
+Card	radius-lg	16	Standart kart
+Large card / Hero	radius-xl	20	Salon detail, premium
+Modal (centered)	radius-2xl	28	Premium soft feel
+Bottom sheet	radius-2xl top	28	DIŇE top — aşagy ekran gyrasy
+Chip	radius-sm	8	Compact, scan-able
+Badge	radius-sm	8	Chip bilen sync
+Avatar	radius-full	∞	Hemişe tegelek — exception ÝOK
+Image (inline)	radius-md	12	Surat ýumşak
+Image (hero/banner)	radius-none	0	Edge-to-edge — uly duýular
+Toast / Snackbar	radius-md	12	Inline notification
+Tooltip	radius-sm	8	Kiçi popup
+Dropdown menu	radius-lg	16	Card bilen sync
+Tab indicator (pill)	radius-full	∞	Pill indicator
+TIP	RADIUS	BELLIK
+Bottom sheet	28 28 0 0	Diňe ýokarky 2 burç
+Modal (centered)	28 dört burç	Hemme burç ýumşak
+Full-screen modal	0	Edge-to-edge — radius ýok
+DAŞKY	PADDING	IÇKI	NETIJE
+Card radius 16	16	Image radius 0	Concentric ✓
+Card radius 16	12	Image radius 4	Concentric ✓
+Card radius 20	16	Image radius 4	Concentric ✓
+Card radius 12	8	Image radius 4	Concentric ✓
+DAŞKY	PADDING	IÇKI	PROBLEM
+Card radius 16	16	Image radius 16	Meňzeş — concentric däl
+Card radius 16	16	Image radius 20	Içki uly — partlaýan görnüş
+MYSAL	SEBÄBI
+Button 16, Input 12	Hierarhiýa — button has möhüm
+Salon kart 16, içinde image 12 (padding 4)	Concentric
+Bottom sheet diňe top 28	Mobile native pattern
+Avatar hemişe radius-full	Brand exception ÝOK
+ÝALŇYŞLYK	SEBÄBI
+Bir ekranda 2 dürli button radius	Konsistensiýa bozulýar
+Kart içindäki image ULY kart radius-y	Visual chaos
+Square avatar	Parla off-brand — avatar tegelek
+Random radius 14, 18, 24	Scale-de ýok
+Sharp 0px radius card	Parla ýumşak premium — sharp off-brand
+Input radius ULY button radius-y	Hierarhiýa ters
+TOKEN	GYMMATLYK	ALPHA	ULANYŞ
+shadow-none	none	—	Adaty kart (default)
+shadow-xs	0 1px 2px rgba(46,32,40,0.05)	0.05	Input focus glow
+shadow-sm	0 2px 4px rgba(46,32,40,0.06)	0.06	Hover state lift
+shadow-md	0 4px 12px rgba(46,32,40,0.08)	0.08	Dropdown, tooltip, FAB
+shadow-lg	0 8px 24px rgba(46,32,40,0.10)	0.10	Modal, popover
+shadow-xl	0 16px 48px rgba(46,32,40,0.14)	0.14	Sticky CTA, bottom sheet
+LEVEL	KATEGORIA	SHADOW	MYSAL
+Level 0	Neutral surface	shadow-none	Kart, content
+Level 1	Interactive lift	shadow-sm	Hover, pressed
+Level 2	Overlay container	shadow-md	Dropdown, tooltip
+Level 3	Temporary surface	shadow-lg	Modal, popover
+Level 4	Anchored sticky	shadow-xl	Sticky CTA, sheet
+KOMPONENT	SHADOW	SEBÄBI
+Adaty kart (default)	shadow-none + border	Border ýeterlik, shadow noise
+Kart (hover)	shadow-sm	Lift duýgusy — interaktiwlik
+Kart (pressed)	shadow-none	Pressed = "ýere düşmek"
+Floating action button (FAB)	shadow-md	Uçýan element
+Dropdown menu	shadow-md	Content üstünde durýar
+Tooltip	shadow-md	Çalt görünip ýitýär
+Modal (centered)	shadow-lg	Backdrop bilen birlikde
+Popover	shadow-lg	Temporary surface
+Bottom sheet	shadow-xl (top)	Aşakdan göterilýär
+Sticky CTA bar	shadow-xl (top)	Top-shadow (ýokarsy görünýär)
+Toast / Snackbar	shadow-md	Kiçi floating
+Input field (default)	shadow-none	Border ýeterlik
+Input field (focused)	shadow-xs (brand halo)	Soft glow brand reňk
+Sticky header / nav	shadow-sm	Scroll-da bilýär
+Image (inline)	shadow-none	Surat özi durýar
+Avatar	shadow-none	Hemişe flat
+ÝAGDAÝ	BORDER	SHADOW
+Adaty kart	border-default (1px)	shadow-none
+Hover kart	border-default (1px)	shadow-sm
+Modal	ÝOK	shadow-lg
+Dropdown	border-default (1px)	shadow-md
+MYSAL	SEBÄBI
+Salon kart default — diňe border, shadow ýok	Border ýeterlik, sahypa "agyr" däl
+Modal — shadow-lg, border ýok	Backdrop bilen "uçýan" duýgy
+Bottom sheet — shadow-xl top-shadow	Aşakdan göterilýän duýgy
+Input focus — soft brand halo	Premium detal
+FAB — shadow-md	Uçýan UI element
+ÝALŇYŞLYK	SEBÄBI
+Hemme kart-da shadow goýmak	Visual noise — sahypa "agyr"
+Saf gara shadow rgba(0,0,0)	Brand atmosfera bozulýar
+Alpha 0.20+ shadow	Çenden agyr, korporatiw
+Modal-da border + shadow ikisi	Iki tagam — biri ýeterlik
+Avatar-a shadow	Avatar flat bolmaly
+Inset shadow pressed üçin	Agyr — scale animation ulan
+Sticky CTA aşaky shadow	Ýalňyş — top-shadow ulan
+Bir ekranda 3+ floating element	Hierarhiýa bulaşyk
+TOKEN	MS	ULANYŞ
+duration-instant	100	Tap feedback, ripple, color flash
+duration-fast	150	Hover, focus, small UI changes
+duration-medium	250	DEFAULT — modal, sheet, list items
+duration-slow	400	Page transitions, hero animations
+duration-slowest	600	Complex orchestrated sequences
+TOKEN	CUBIC-BEZIER	DUÝGY
+ease-out	cubic-bezier(0.0, 0.0, 0.2, 1.0)	DEFAULT — gelmek (entrance)
+ease-in	cubic-bezier(0.4, 0.0, 1.0, 1.0)	Gitmek (exit)
+ease-in-out	cubic-bezier(0.4, 0.0, 0.2, 1.0)	Iki tarapa (position change)
+ease-spring	cubic-bezier(0.34, 1.56, 0.64, 1)	Bounce, emosional aksent
+HEREKET	EASING	SEBÄBI
+Element gelýär (modal in, fade in)	ease-out	"Geldim" duýgy
+Element gidýär (modal out)	ease-in	"Gitdim" duýgy
+Pozisiýa üýtgeýär (list scroll)	ease-in-out	Iki tarapy hem ýumşak
+Bounce / playful (success, like)	ease-spring	Aksent, üns çekýär
+KOMPONENT	HEREKET	DURATION	EASING
+Button (tap)	scale 0.96	instant	ease-out
+Button (release)	scale 1.0	fast	ease-out
+Button (hover)	bg color change	fast	ease-out
+Modal (in)	scale 0.95→1 + fade in	medium	ease-out
+Modal (out)	scale 1→0.95 + fade out	fast	ease-in
+Bottom sheet (in)	translateY 100%→0	medium	ease-out
+Bottom sheet (out)	translateY 0→100%	fast	ease-in
+Backdrop overlay	opacity 0→1	medium	ease-out
+Page transition (forward)	slide-X + fade	slow	ease-in-out
+Page transition (back)	reverse slide	slow	ease-in-out
+Tab switch	slide indicator + fade	medium	ease-out
+Toast (in)	translateY -20→0 + fade	medium	ease-out
+Dropdown (open)	scale-Y 0→1 + fade	fast	ease-out
+List item (enter)	fade + translateY 8→0	medium	ease-out
+Skeleton shimmer	bg gradient loop	1500ms	ease-in-out
+Success check	scale 0→1 + opacity	slow	ease-spring
+Favorite (heart)	scale 1→1.2→1	slow	ease-spring
+ITEM	DELAY	DURATION
+Item 1	0ms	250ms
+Item 2	40ms	250ms
+Item 3	80ms	250ms
+...	...	...
+Item 10	360ms	250ms (total 610ms)
+ÝAGDAÝ	REDUCED MOTION-da
+Page transitions	instant (0ms)
+Modal in/out	fade only (transform ÝOK)
+Stagger	hemmesi bir wagtda
+Bounce / spring	ease-out (spring DÄL)
+Skeleton shimmer	static base reňk (loop ÝOK)
+PURSAT	ANIMATION	DURATION	EASING
+Salon kart tap	scale 0.97	instant	ease-out
+Salon detail-e geçiş	hero image expand	slow	ease-in-out
+Hyzmat saýla (chip)	scale + color	fast	ease-out
+Wagt saýla (slot)	bg fill + border	fast	ease-out
+"Tölegi tassykla" tap	dark CTA scale	instant	ease-out
+Booking tassyklandy	success check spring	slow	ease-spring
+Confetti celebration	particles fall	1500ms	ease-in
+MYSAL	SEBÄBI
+Modal in: scale + fade, 250ms, ease-out	Premium native iOS pattern
+Button tap: scale 0.96, instant	"Tap duýdum" duýgy
+Page transition: 400ms slide + parallax	Spatial relationship anyk
+List stagger: 40ms delay	Tertipli we ýumşak
+Success check: spring easing	Emosional pursat, üns çekýär
+Skeleton shimmer: 1500ms loop	App "hereket edýär" duýgy
+ÝALŇYŞLYK	SEBÄBI
+Linear easing hemme ýerde	Robotik, mehaniki görünýär
+1000ms+ modal animation	Gaty haýal, app doňan ýaly
+Spring/bounce her ýerde	Aksent ýitýär, çagaça duýular
+Tap feedback ÝOK button	"Ölen" button — interaktiw däl
+Page transition 1000ms+	Ulanyjy ýadar, hereket gysylan
+Stagger 200ms+ delay	"Haçan gutarjak?" duýgy
+Skeleton 5000ms loop	Loading wagty has uzak duýular
+Reduced motion görmezlik	Accessibility bozulýar
+Animation maksatsyz	Visual noise, sahypa "agyr"

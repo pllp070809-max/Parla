@@ -67,9 +67,9 @@ class HomeScreen extends ConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(
                       AppSizes.paddingHorizontal,
-                      AppSpacing.l,
+                      AppSpacing.large, // Ýokarky boşluk (24px) - has giň we dem alýan dizaýn
                       AppSizes.paddingHorizontal,
-                      AppSpacing.s),
+                      24.0), // Gözleg zolagy bilen kategoriýalaryň arasyndaky aralyk (öň 8px-di)
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -107,19 +107,13 @@ class HomeScreen extends ConsumerWidget {
               // ── Kategoriýalar (Gorizontal hatar) ──
               SliverToBoxAdapter(
                 child: SizedBox(
-                  height: 240, // 2 hatar: (104 + 16 spacing)
-                  child: GridView.builder(
+                  height: 98, // Kategoriýalaryň we ýazgylaryň takyk beýikligi (64 + 8 + 26)
+                  child: ListView.separated(
                     padding: const EdgeInsets.symmetric(
                         horizontal: AppSizes.paddingHorizontal),
                     scrollDirection: Axis.horizontal,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 16,
-                      crossAxisSpacing: 16,
-                      childAspectRatio: 1.0, // Her elementiň uzynlygy we ininiň gatnaşygy
-                      mainAxisExtent: 80, // Elementiň ini (72 + 8 spacing gapdalyndan)
-                    ),
                     itemCount: _categories.length,
+                    separatorBuilder: (context, index) => const SizedBox(width: 16),
                     itemBuilder: (context, index) {
                       final cat = _categories[index];
                       return _CategorySquircle(
@@ -540,24 +534,24 @@ class _CategorySquircle extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            width: 72,
-            height: 72,
+            width: 64,
+            height: 64,
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(18),
               border: Border.all(color: const Color(0xFFF0F0F0), width: 1.5),
             ),
             child: Material(
               color: Colors.transparent,
               child: InkWell(
                 onTap: onTap,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(18),
                 child: Center(
                   child: svgPath != null
                       ? SvgPicture.asset(
                           svgPath!,
-                          width: 30,
-                          height: 30,
+                          width: 26,
+                          height: 26,
                           colorFilter: const ColorFilter.mode(
                             AppColors.kTextPrimary,
                             BlendMode.srcIn,
@@ -565,7 +559,7 @@ class _CategorySquircle extends StatelessWidget {
                         )
                       : Icon(
                           iconData,
-                          size: 30,
+                          size: 26,
                           color: AppColors.kTextPrimary,
                         ),
                 ),
@@ -574,7 +568,7 @@ class _CategorySquircle extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           SizedBox(
-            width: 80,
+            width: 76,
             child: Text(
               label,
               style: tt.bodySmall?.copyWith(
@@ -583,8 +577,8 @@ class _CategorySquircle extends StatelessWidget {
                 fontSize: 12,
               ),
               textAlign: TextAlign.center,
-              maxLines: 1,
-              softWrap: false,
+              maxLines: 2,
+              softWrap: true,
               overflow: TextOverflow.ellipsis,
             ),
           ),
