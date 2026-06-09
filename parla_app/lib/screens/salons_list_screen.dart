@@ -75,7 +75,7 @@ class _SalonsListScreenState extends ConsumerState<SalonsListScreen> {
         builder: (context, snap) {
           if (snap.connectionState == ConnectionState.waiting) {
             return ListView.separated(
-              padding: const EdgeInsets.all(AppSpacing.xl),
+              padding: const EdgeInsets.all(AppSpacing.m),
               itemCount: 4,
               separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.m),
               itemBuilder: (_, __) => const SalonTileSkeleton(),
@@ -101,7 +101,7 @@ class _SalonsListScreenState extends ConsumerState<SalonsListScreen> {
             );
           }
           return ListView.separated(
-            padding: const EdgeInsets.all(AppSpacing.xl),
+            padding: const EdgeInsets.all(AppSpacing.m),
             itemCount: salons.length,
             separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.m),
             itemBuilder: (_, i) {
@@ -140,7 +140,7 @@ class _SalonTile extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.l),
+          padding: const EdgeInsets.all(AppSpacing.m),
           child: Row(
             children: [
               Container(
@@ -179,3 +179,4 @@ class _SalonTile extends StatelessWidget {
     );
   }
 }
+

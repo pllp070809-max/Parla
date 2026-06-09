@@ -12,26 +12,26 @@ class PrivacyPolicyScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Gizlinlik syýasaty')),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.m, AppSpacing.xl, AppSpacing.xxl),
+        padding: const EdgeInsets.fromLTRB(AppSpacing.m, AppSpacing.m, AppSpacing.m, AppSpacing.m),
         children: [
           Text(
             'Parla bukilikleriňizi goramaga we gizlinligiňize hörmet etmäge söz berýär.',
             style: tt.bodyLarge,
           ),
-          const SizedBox(height: AppSpacing.l),
+          const SizedBox(height: AppSpacing.m),
           _Section(tt: tt, title: 'Ýygnanýan maglumatlar', body: '''
 • Adyňyz we telefon nomeriňiz – bron üçin we siziň bilen habarlaşmak üçin
 • Bron maglumatlary – wagty, salon we hyzmatlar
 • Enjamyňyzdaky sazlamalar (meselem, saýlanan dil)
 
 Bu maglumatlar diňe hyzmaty üpjün etmek we siziň bilen habarlaşmak üçin ulanylýar.'''),
-          const SizedBox(height: AppSpacing.l),
+          const SizedBox(height: AppSpacing.m),
           _Section(tt: tt, title: 'Maglumatlary paýlaşmak', body: '''
 Salonlara diňe bron üçin zerur maglumatlar (adyňyz, wagtyňyz) berilýär. Maglumatlaryňyzy üçünji tarapa satmaýarys we reklama üçin üçünji tarapa bermeýäris.'''),
-          const SizedBox(height: AppSpacing.l),
+          const SizedBox(height: AppSpacing.m),
           _Section(tt: tt, title: 'Maglumatlary pozmak', body: '''
 Sazlamalaryňyzdan "Maglumatlary pozmak" arkaly profil maglumatlaryňyzy pozup bilersiňiz. Soňundan täzeden dolduryp, hyzmaty dowam etdirip bilersiňiz.'''),
-          const SizedBox(height: AppSpacing.l),
+          const SizedBox(height: AppSpacing.m),
           Text(
             'Soraglaryňyz üçin: support@parla.tm',
             style: tt.bodyMedium?.copyWith(color: kTextSecondary, fontStyle: FontStyle.italic),
@@ -61,3 +61,4 @@ class _Section extends StatelessWidget {
     );
   }
 }
+

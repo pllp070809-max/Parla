@@ -171,10 +171,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           : Form(
               key: _formKey,
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.s, AppSpacing.xl, 100),
+                padding: const EdgeInsets.fromLTRB(AppSpacing.m, AppSpacing.s, AppSpacing.m, 100),
                 children: [
                   _buildHeader(tt),
-                  const SizedBox(height: AppSpacing.xl),
+                  const SizedBox(height: AppSpacing.m),
 
                   if (_editing) ..._buildEditMode(tt)
                   else ..._buildViewMode(tt),
@@ -208,7 +208,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 : const Icon(Icons.person_rounded, size: 48, color: kPrimary),
           ),
         ),
-        const SizedBox(height: AppSpacing.l),
+        const SizedBox(height: AppSpacing.m),
         if (hasName && !_editing) ...[
           Text(
             _nameCtrl.text.trim(),
@@ -246,7 +246,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
         ],
       ),
-      const SizedBox(height: AppSpacing.l),
+      const SizedBox(height: AppSpacing.m),
       OutlinedButton.icon(
         onPressed: _startEdit,
         icon: const Icon(Icons.edit_rounded, size: 18),
@@ -264,7 +264,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       _ProfileInfoCard(
         children: [
           Padding(
-            padding: const EdgeInsets.all(AppSpacing.l),
+            padding: const EdgeInsets.all(AppSpacing.m),
             child: Column(
               children: [
                 TextFormField(
@@ -275,7 +275,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   validator: _validateName,
                   onFieldSubmitted: (_) => _phoneFocus.requestFocus(),
                 ),
-                const SizedBox(height: AppSpacing.l),
+                const SizedBox(height: AppSpacing.m),
                 TextFormField(
                   controller: _phoneCtrl,
                   focusNode: _phoneFocus,
@@ -296,7 +296,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
         ],
       ),
-      const SizedBox(height: AppSpacing.l),
+      const SizedBox(height: AppSpacing.m),
       ElevatedButton(
         onPressed: _saving ? null : _save,
         child: _saving
@@ -336,7 +336,7 @@ class _InfoRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.l, vertical: AppSpacing.m + 4),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m, vertical: AppSpacing.m + 4),
       child: Row(
         children: [
           Container(
@@ -355,5 +355,6 @@ class _InfoRow extends StatelessWidget {
     );
   }
 }
+
 
 

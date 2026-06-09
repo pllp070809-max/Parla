@@ -281,7 +281,7 @@ ThemeData buildParlaTheme() {
       clipBehavior: Clip.antiAlias,
     ),
     listTileTheme: ListTileThemeData(
-      contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.l, vertical: AppSpacing.xs),
+      contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.m, vertical: AppSpacing.xs),
       iconColor: kTextSecondary,
       textColor: kTextPrimary,
       tileColor: Colors.transparent,
@@ -315,7 +315,8 @@ ThemeData buildParlaTheme() {
         fontWeight: FontWeight.w400,
       ),
       labelStyle: textTheme.bodyMedium,
-      contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.l, vertical: 14),
+      contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.m, vertical: 14),
     ),
   );
 }
+

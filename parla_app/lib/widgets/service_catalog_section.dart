@@ -436,9 +436,10 @@ ButtonStyle _wideOutlinedButtonStyle(TextTheme tt) {
     elevation: 0,
     minimumSize: const Size.fromHeight(42),
     padding: const EdgeInsets.symmetric(
-      horizontal: AppSpacing.xl,
+      horizontal: AppSpacing.m,
       vertical: 10,
     ),
     textStyle: tt.labelMedium?.copyWith(fontWeight: FontWeight.w700),
   );
 }
+

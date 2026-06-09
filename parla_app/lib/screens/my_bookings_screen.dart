@@ -44,7 +44,7 @@ class _NoPhoneView extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -56,14 +56,14 @@ class _NoPhoneView extends StatelessWidget {
               ),
               child: Icon(Icons.person_rounded, size: 48, color: kPrimary.withValues(alpha: 0.5)),
             ),
-            const SizedBox(height: AppSpacing.xl),
+            const SizedBox(height: AppSpacing.m),
             Text('Profiliňizi dolduryň', style: tt.titleLarge, textAlign: TextAlign.center),
             const SizedBox(height: AppSpacing.s),
             Text(
               'Bronlaryňyzy görmek üçin ilki Profil sahypasynda telefon nomeriňizi ýazyň.',
               style: tt.bodyMedium, textAlign: TextAlign.center,
             ),
-            const SizedBox(height: AppSpacing.xl),
+            const SizedBox(height: AppSpacing.m),
             FilledButton.icon(
               onPressed: () => ref.read(selectedTabIndexProvider.notifier).state = 2,
               icon: const Icon(Icons.person_rounded, size: 20),
@@ -87,7 +87,7 @@ class _BookingsBody extends StatelessWidget {
 
     return bookingsAsync.when(
       loading: () => ListView.separated(
-        padding: const EdgeInsets.all(AppSpacing.xl),
+        padding: const EdgeInsets.all(AppSpacing.m),
         itemCount: 4,
         separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.s + 2),
         itemBuilder: (_, __) => const _BookingTileSkeleton(),
@@ -117,7 +117,7 @@ class _BookingsBody extends StatelessWidget {
           color: kPrimary,
           onRefresh: () async => ref.invalidate(myBookingsProvider),
           child: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.s),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m, vertical: AppSpacing.s),
             physics: const AlwaysScrollableScrollPhysics(),
             children: [
               if (upcoming.isNotEmpty) ...[
@@ -137,7 +137,7 @@ class _BookingsBody extends StatelessWidget {
                     )),
               ],
               if (past.isNotEmpty) ...[
-                SizedBox(height: upcoming.isNotEmpty ? AppSpacing.xl : 0),
+                SizedBox(height: upcoming.isNotEmpty ? AppSpacing.m : 0),
                 _SectionHeader(title: 'Tamamlandy', count: past.length, muted: true),
                 const SizedBox(height: AppSpacing.s),
                 ...past.map((b) => _BookingTile(booking: b, isPast: true, onCancel: null)),
@@ -199,7 +199,7 @@ class _BookingTile extends StatelessWidget {
       child: Card(
         margin: const EdgeInsets.only(bottom: AppSpacing.s + 2),
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.l),
+          padding: const EdgeInsets.all(AppSpacing.m),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -275,7 +275,7 @@ class _BookingTileSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.l),
+        padding: const EdgeInsets.all(AppSpacing.m),
         child: Row(
           children: const [
             SkeletonBox(width: 48, height: 48, radius: AppRadius.m),
@@ -313,7 +313,7 @@ Future<bool?> _showCancelConfirmationBottomSheet(BuildContext context, Booking b
       final tt = Theme.of(context).textTheme;
       return SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.l),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m, vertical: AppSpacing.m),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -323,7 +323,7 @@ Future<bool?> _showCancelConfirmationBottomSheet(BuildContext context, Booking b
                 child: Container(
                   width: 36,
                   height: 4,
-                  margin: const EdgeInsets.only(bottom: AppSpacing.xl),
+                  margin: const EdgeInsets.only(bottom: AppSpacing.m),
                   decoration: BoxDecoration(
                     color: kBorderMedium.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(AppRadius.s),
@@ -345,7 +345,7 @@ Future<bool?> _showCancelConfirmationBottomSheet(BuildContext context, Booking b
                   ),
                 ),
               ),
-              const SizedBox(height: AppSpacing.l),
+              const SizedBox(height: AppSpacing.m),
               Text(
                 'Brony ýatyrmak isleýärsiňizmi?',
                 style: tt.headlineSmall?.copyWith(
@@ -360,9 +360,9 @@ Future<bool?> _showCancelConfirmationBottomSheet(BuildContext context, Booking b
                 style: tt.bodyMedium?.copyWith(color: kTextSecondary),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: AppSpacing.xl),
+              const SizedBox(height: AppSpacing.m),
               Container(
-                padding: const EdgeInsets.all(AppSpacing.l),
+                padding: const EdgeInsets.all(AppSpacing.m),
                 decoration: BoxDecoration(
                   color: kSurfaceBg.withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(AppRadius.m),
@@ -399,7 +399,7 @@ Future<bool?> _showCancelConfirmationBottomSheet(BuildContext context, Booking b
                   ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.xxl),
+              const SizedBox(height: AppSpacing.m),
               Row(
                 children: [
                   Expanded(
@@ -428,3 +428,4 @@ Future<bool?> _showCancelConfirmationBottomSheet(BuildContext context, Booking b
     },
   );
 }
+

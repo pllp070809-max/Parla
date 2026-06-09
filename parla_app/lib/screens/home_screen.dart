@@ -679,7 +679,7 @@ class _VenueCard extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(
-                      0, 10, AppSpacing.l, AppSpacing.m),
+                      0, 10, AppSpacing.m, AppSpacing.m),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -872,3 +872,4 @@ class _VenueCardSkeleton extends StatelessWidget {
     );
   }
 }
+

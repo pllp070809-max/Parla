@@ -13,13 +13,13 @@ class HelpScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Kömek / Habarlaşmak')),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.m, AppSpacing.xl, AppSpacing.xxl),
+        padding: const EdgeInsets.fromLTRB(AppSpacing.m, AppSpacing.m, AppSpacing.m, AppSpacing.m),
         children: [
           Text(
             'Kömek gerekmi? Bize ýazyň – size çalt kömek ederis.',
             style: tt.bodyLarge,
           ),
-          const SizedBox(height: AppSpacing.xl),
+          const SizedBox(height: AppSpacing.m),
           _ContactCard(
             tt: tt,
             icon: Icons.email_rounded,
@@ -33,7 +33,7 @@ class HelpScreen extends StatelessWidget {
             label: 'Telefon',
             value: '+993 12 34 56 78',
           ),
-          const SizedBox(height: AppSpacing.xl),
+          const SizedBox(height: AppSpacing.m),
           Text('Köp berilýän soraglar', style: tt.titleSmall?.copyWith(color: kPrimary)),
           const SizedBox(height: AppSpacing.s),
           _FaqItem(tt: tt, q: 'Brony nädip edip bilerin?', a: 'Salon saýlaň, hyzmat we wagt saýlaň, atyňyzy we telefonuňyzy ýazyň we "Bron et" basyň.'),
@@ -56,7 +56,7 @@ class _ContactCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.l),
+      padding: const EdgeInsets.all(AppSpacing.m),
       decoration: BoxDecoration(
         color: kCardBg,
         borderRadius: BorderRadius.circular(AppRadius.m),
@@ -100,7 +100,7 @@ class _FaqItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.l),
+      padding: const EdgeInsets.only(bottom: AppSpacing.m),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -112,3 +112,4 @@ class _FaqItem extends StatelessWidget {
     );
   }
 }
+

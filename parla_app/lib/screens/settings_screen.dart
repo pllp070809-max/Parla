@@ -18,7 +18,7 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Sazlamalar')),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.l, AppSpacing.xl, AppSpacing.xxl),
+        padding: const EdgeInsets.fromLTRB(AppSpacing.m, AppSpacing.m, AppSpacing.m, AppSpacing.m),
         children: [
           _SectionLabel('Esasy', tt),
           const SizedBox(height: AppSpacing.s),
@@ -47,7 +47,7 @@ class SettingsScreen extends ConsumerWidget {
             ],
           ),
 
-          const SizedBox(height: AppSpacing.xl),
+          const SizedBox(height: AppSpacing.m),
           _SectionLabel('Maglumat', tt),
           const SizedBox(height: AppSpacing.s),
           _SettingsCard(
@@ -72,7 +72,7 @@ class SettingsScreen extends ConsumerWidget {
             ],
           ),
 
-          const SizedBox(height: AppSpacing.xl),
+          const SizedBox(height: AppSpacing.m),
           _SectionLabel('Howply zona', tt, isDestructive: true),
           const SizedBox(height: AppSpacing.s),
           _SettingsCard(
@@ -201,7 +201,7 @@ class _SettingsTile extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.l, vertical: AppSpacing.m + 4),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m, vertical: AppSpacing.m + 4),
         child: Row(
           children: [
             Container(
@@ -222,3 +222,4 @@ class _SettingsTile extends StatelessWidget {
     );
   }
 }
+

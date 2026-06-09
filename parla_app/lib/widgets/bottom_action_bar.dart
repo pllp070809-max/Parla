@@ -51,9 +51,9 @@ class BottomActionBar extends StatelessWidget {
         boxShadow: kShadowUpMd,
       ),
       padding: EdgeInsets.fromLTRB(
-        AppSpacing.xl,
         AppSpacing.m,
-        AppSpacing.xl,
+        AppSpacing.m,
+        AppSpacing.m,
         MediaQuery.of(context).padding.bottom + AppSpacing.m,
       ),
       child: Row(
@@ -127,8 +127,9 @@ class BottomActionBar extends StatelessWidget {
       minimumSize: const Size(45, 52),
       padding: const EdgeInsets.symmetric(
         horizontal: 18,
-        vertical: AppSpacing.xl,
+        vertical: AppSpacing.m,
       ),
     );
   }
 }
+

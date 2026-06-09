@@ -50,7 +50,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(AppSpacing.l, AppSpacing.m, AppSpacing.l, AppSpacing.m),
+              padding: const EdgeInsets.fromLTRB(AppSpacing.m, AppSpacing.m, AppSpacing.m, AppSpacing.m),
               child: Row(
                 children: [
                   IconButton(
@@ -83,7 +83,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         ),
                         filled: true,
                         fillColor: kSurfaceBg,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.l, vertical: AppSpacing.m),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.m, vertical: AppSpacing.m),
                       ),
                     ),
                   ),
@@ -102,7 +102,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   Widget _buildSuggestions(TextTheme tt) {
     final recent = ref.watch(recentSearchQueriesProvider);
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m),
       children: [
         const SizedBox(height: 8),
         if (recent.isNotEmpty) ...[
@@ -140,7 +140,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           );
         }
         return ListView.separated(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.s),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m, vertical: AppSpacing.s),
           itemCount: salons.length,
           separatorBuilder: (_, __) => const Divider(height: 1),
           itemBuilder: (_, i) {
@@ -193,7 +193,7 @@ class _SuggestionChip extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppRadius.m),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.l, vertical: AppSpacing.m),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m, vertical: AppSpacing.m),
           decoration: BoxDecoration(
             color: kSurfaceBg,
             borderRadius: BorderRadius.circular(AppRadius.m),
@@ -210,3 +210,4 @@ class _SuggestionChip extends StatelessWidget {
     );
   }
 }
+

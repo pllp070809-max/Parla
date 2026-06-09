@@ -364,7 +364,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
         content: Text(msg),
         backgroundColor: kError,
         behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.only(bottom: 110, left: AppSpacing.l, right: AppSpacing.l),
+        margin: const EdgeInsets.only(bottom: 110, left: AppSpacing.m, right: AppSpacing.m),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.m)),
       ),
     );
@@ -910,10 +910,10 @@ class _ServiceStepState extends State<_ServiceStep> {
       return ListView(
         controller: _scrollController,
         padding: const EdgeInsets.fromLTRB(
-          AppSpacing.xl,
-          AppSpacing.l,
-          AppSpacing.xl,
-          AppSpacing.xl,
+          AppSpacing.m,
+          AppSpacing.m,
+          AppSpacing.m,
+          AppSpacing.m,
         ),
         children: [
           Text(
@@ -926,7 +926,7 @@ class _ServiceStepState extends State<_ServiceStep> {
               letterSpacing: -0.5,
             ),
           ),
-          const SizedBox(height: AppSpacing.xl),
+          const SizedBox(height: AppSpacing.m),
           Text(
             'Bu bölümde hyzmat ýok',
             style: tt.bodyMedium?.copyWith(color: kTextSecondary),
@@ -943,9 +943,9 @@ class _ServiceStepState extends State<_ServiceStep> {
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(
-              AppSpacing.xl,
-              AppSpacing.l,
-              AppSpacing.xl,
+              AppSpacing.m,
+              AppSpacing.m,
+              AppSpacing.m,
               0,
             ),
             child: Column(
@@ -985,9 +985,9 @@ class _ServiceStepState extends State<_ServiceStep> {
             child: Padding(
               key: _sectionKeys[categoryKey],
               padding: const EdgeInsets.fromLTRB(
-                AppSpacing.xl,
-                AppSpacing.l,
-                AppSpacing.xl,
+                AppSpacing.m,
+                AppSpacing.m,
+                AppSpacing.m,
                 0,
               ),
               child: _BookingServiceCategorySection(
@@ -1003,7 +1003,7 @@ class _ServiceStepState extends State<_ServiceStep> {
             ),
           ),
         const SliverToBoxAdapter(
-          child: SizedBox(height: AppSpacing.xl),
+          child: SizedBox(height: AppSpacing.m),
         ),
       ],
     );
@@ -1141,7 +1141,7 @@ class _BookingServiceCategoryTabsState extends State<_BookingServiceCategoryTabs
         controller: _scrollController,
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.xl,
+          horizontal: AppSpacing.m,
           vertical: 10,
         ),
         itemCount: widget.categoryKeys.length,
@@ -1356,7 +1356,7 @@ class _StaffStep extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
     return ListView(
       padding: const EdgeInsets.fromLTRB(
-          AppSpacing.xl, AppSpacing.l, AppSpacing.xl, AppSpacing.xl),
+          AppSpacing.m, AppSpacing.m, AppSpacing.m, AppSpacing.m),
       children: [
         Text(
           'Ussalar',
@@ -1493,7 +1493,7 @@ class _DateTimeStep extends StatelessWidget {
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
-          AppSpacing.xl, AppSpacing.l, AppSpacing.xl, AppSpacing.xl),
+          AppSpacing.m, AppSpacing.m, AppSpacing.m, AppSpacing.m),
       children: [
         Text(
           'Sene we wagt',
@@ -1562,7 +1562,7 @@ class _DateTimeStep extends StatelessWidget {
             },
           ),
         ),
-        const SizedBox(height: AppSpacing.xl),
+        const SizedBox(height: AppSpacing.m),
         Text('Elýeterli wagtlar',
             style: tt.titleLarge?.copyWith(
               fontWeight: FontWeight.w700,
@@ -1652,14 +1652,14 @@ class _ContactStep extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
     return ListView(
       padding: const EdgeInsets.fromLTRB(
-          AppSpacing.xl, AppSpacing.l, AppSpacing.xl, AppSpacing.xl),
+          AppSpacing.m, AppSpacing.m, AppSpacing.m, AppSpacing.m),
       children: [
         Text('Habarlaşmak üçin maglumat',
             style: tt.headlineMedium?.copyWith(fontWeight: FontWeight.w800)),
         const SizedBox(height: AppSpacing.s),
         Text('Salon sizi tassyklamak üçin habarlaşar.',
             style: tt.bodyMedium?.copyWith(color: kTextSecondary)),
-        const SizedBox(height: AppSpacing.xl),
+        const SizedBox(height: AppSpacing.m),
         TextField(
           controller: nameCtrl,
           decoration: InputDecoration(
@@ -1667,7 +1667,7 @@ class _ContactStep extends StatelessWidget {
               prefixIcon: const Icon(Icons.person_rounded)),
           textCapitalization: TextCapitalization.words,
         ),
-        const SizedBox(height: AppSpacing.l),
+        const SizedBox(height: AppSpacing.m),
         TextField(
           controller: phoneCtrl,
           decoration: InputDecoration(
@@ -1724,14 +1724,14 @@ class _ReviewStep extends StatelessWidget {
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
-          AppSpacing.xl, AppSpacing.l, AppSpacing.xl, AppSpacing.xl),
+          AppSpacing.m, AppSpacing.m, AppSpacing.m, AppSpacing.m),
       children: [
         Text('Bronyňyzy tassyklaň',
             style: tt.headlineMedium?.copyWith(fontWeight: FontWeight.w800)),
         const SizedBox(height: AppSpacing.s),
         Text('Maglumatlaryňyzy barlaň we bron etmek basyň.',
             style: tt.bodyMedium?.copyWith(color: kTextSecondary)),
-        const SizedBox(height: AppSpacing.xl),
+        const SizedBox(height: AppSpacing.m),
         _RevCard(children: [
           _RevRow(
               icon: Icons.storefront_rounded, label: 'Salon', value: salonName),
@@ -1805,7 +1805,7 @@ class _RevRow extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
     return Padding(
       padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.l, vertical: AppSpacing.m + 2),
+          horizontal: AppSpacing.m, vertical: AppSpacing.m + 2),
       child: Row(
         children: [
           Container(
@@ -1912,4 +1912,5 @@ class _BookingIconBtn extends StatelessWidget {
     );
   }
 }
+
 

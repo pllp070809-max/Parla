@@ -50,11 +50,11 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> with SingleTick
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.l),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m, vertical: AppSpacing.m),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: AppSpacing.xxl),
+              const SizedBox(height: AppSpacing.m),
               
               // Animated Success Checkmark
               Center(
@@ -88,7 +88,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> with SingleTick
                   ),
                 ),
               ),
-              const SizedBox(height: AppSpacing.xl),
+              const SizedBox(height: AppSpacing.m),
               
               // Status text
               Text(
@@ -105,12 +105,12 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> with SingleTick
                 style: tt.bodyMedium?.copyWith(color: kTextSecondary),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: AppSpacing.xxl),
+              const SizedBox(height: AppSpacing.m),
 
               // Sticker Booking Details Card
               Container(
                 decoration: kStickerCardDecoration(),
-                padding: const EdgeInsets.all(AppSpacing.xl),
+                padding: const EdgeInsets.all(AppSpacing.m),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -164,7 +164,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> with SingleTick
                   ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.xxl * 1.5),
+              const SizedBox(height: AppSpacing.m * 1.5),
 
               // Actions
               Consumer(
@@ -190,7 +190,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> with SingleTick
                   );
                 },
               ),
-              const SizedBox(height: AppSpacing.xl),
+              const SizedBox(height: AppSpacing.m),
             ],
           ),
         ),
@@ -273,3 +273,4 @@ class _Inner extends AnimatedWidget {
   @override
   Widget build(BuildContext context) => builder(context, null);
 }
+
