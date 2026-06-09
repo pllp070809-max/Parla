@@ -8,6 +8,8 @@ import '../theme.dart';
 import '../widgets/shared_widgets.dart';
 import 'salons_list_screen.dart';
 import 'salon_detail_screen.dart';
+import '../services/mock_api_data.dart';
+import '../widgets/professional_card.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
@@ -101,19 +103,55 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   Widget _buildSuggestions(TextTheme tt) {
     final recent = ref.watch(recentSearchQueriesProvider);
-    return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m),
-      children: [
-        const SizedBox(height: 8),
-        if (recent.isNotEmpty) ...[
-          Text('Soňky gözlegler', style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 12),
-          ...recent.map((q) => _SuggestionChip(label: q, onTap: () => _onSearch(q))),
-          const SizedBox(height: 24),
-        ],
-        Text('Meşhur gözlegler', style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
-        const SizedBox(height: 12),
-        ..._popularSearches.map((q) => _SuggestionChip(label: q, onTap: () => _onSearch(q))),
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m),
+          sliver: SliverList(
+            delegate: SliverChildListDelegate([
+              const SizedBox(height: 8),
+              if (recent.isNotEmpty) ...[
+                Text('Soňky gözlegler', style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+                const SizedBox(height: 12),
+                ...recent.map((q) => _SuggestionChip(label: q, onTap: () => _onSearch(q))),
+                const SizedBox(height: 24),
+              ],
+              Text('Meşhur gözlegler', style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 12),
+              ..._popularSearches.map((q) => _SuggestionChip(label: q, onTap: () => _onSearch(q))),
+              const SizedBox(height: 32),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Meşhur ussalar', style: tt.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
+                  Text('Ählisi', style: tt.titleSmall?.copyWith(color: kPrimary)),
+                ],
+              ),
+              const SizedBox(height: 16),
+            ]),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final staff = kMockStaffList[index];
+                return ProfessionalCard(
+                  staff: staff,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      fadeSlideRoute(SalonDetailScreen(salonId: staff.salonId)),
+                    );
+                  },
+                );
+              },
+              childCount: kMockStaffList.length,
+            ),
+          ),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 40)),
       ],
     );
   }
@@ -126,7 +164,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         onRetry: () => ref.invalidate(_searchResultsProvider(_queryCtrl.text.trim())),
       ),
       data: (salons) {
-        if (salons.isEmpty) {
+        final queryStr = _queryCtrl.text.trim().toLowerCase();
+        final matchedStaff = kMockStaffList.where((staff) {
+          if (queryStr.isEmpty) return false;
+          return staff.name.toLowerCase().contains(queryStr) || 
+                 staff.role.toLowerCase().contains(queryStr);
+        }).toList();
+
+        if (salons.isEmpty && matchedStaff.isEmpty) {
           return Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -139,29 +184,52 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ),
           );
         }
-        return ListView.separated(
+
+        return ListView(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m, vertical: AppSpacing.s),
-          itemCount: salons.length,
-          separatorBuilder: (_, __) => const Divider(height: 1),
-          itemBuilder: (_, i) {
-            final s = salons[i];
-            return ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: kPrimary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(AppRadius.m),
-                ),
-                child: const Icon(Icons.storefront_rounded, color: kPrimary),
-              ),
-              title: Text(s.name, style: tt.titleSmall),
-              subtitle: s.address != null ? Text(s.address!, style: tt.bodySmall, maxLines: 1) : null,
-              trailing: const Icon(Icons.arrow_forward_rounded, color: kTextTertiary, size: 20),
-              onTap: () => Navigator.push(context, fadeSlideRoute(SalonDetailScreen(salonId: s.id))),
-            );
-          },
+          children: [
+            if (matchedStaff.isNotEmpty) ...[
+              Text('Ussalar (${matchedStaff.length})', style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 12),
+              ...matchedStaff.map((staff) => ProfessionalCard(
+                staff: staff,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    fadeSlideRoute(SalonDetailScreen(salonId: staff.salonId)),
+                  );
+                },
+              )),
+              const SizedBox(height: 16),
+              const Divider(height: 1),
+              const SizedBox(height: 16),
+            ],
+            if (salons.isNotEmpty) ...[
+              Text('Salonlar (${salons.length})', style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 12),
+              ...salons.map((s) => Column(
+                children: [
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: kPrimary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(AppRadius.m),
+                      ),
+                      child: const Icon(Icons.storefront_rounded, color: kPrimary),
+                    ),
+                    title: Text(s.name, style: tt.titleSmall),
+                    subtitle: s.address != null ? Text(s.address!, style: tt.bodySmall, maxLines: 1) : null,
+                    trailing: const Icon(Icons.arrow_forward_rounded, color: kTextTertiary, size: 20),
+                    onTap: () => Navigator.push(context, fadeSlideRoute(SalonDetailScreen(salonId: s.id))),
+                  ),
+                  const Divider(height: 1),
+                ],
+              )),
+            ],
+          ],
         );
       },
     );

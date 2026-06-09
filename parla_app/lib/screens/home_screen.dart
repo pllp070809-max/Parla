@@ -16,7 +16,10 @@ import 'salons_list_screen.dart';
 import 'salon_detail_screen.dart';
 import 'search_screen.dart';
 import 'notifications_screen.dart';
-
+import '../widgets/bottom_action_bar.dart';
+import '../services/mock_api_data.dart';
+import '../widgets/professional_card.dart';
+import '../widgets/horizontal_salon_card.dart';
 
 final _featuredProvider = FutureProvider<List<Salon>>((ref) {
   return ref.read(apiServiceProvider).getSalons();
@@ -161,7 +164,7 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              _salonRow(salons, ref, context, cardW, false),
+              _salonRow(salons, ref, context, cardW, false, offset: 0, limit: 5),
 
               // ── Meşhur ──
               SliverToBoxAdapter(
@@ -183,7 +186,7 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              _salonRow(salons, ref, context, cardW, true),
+              _salonRow(salons, ref, context, cardW, false, offset: 5, limit: 5),
 
               // ── Täze Parla-da ──
               SliverToBoxAdapter(
@@ -205,15 +208,113 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              _salonRow(salons, ref, context, cardW, false),
+              _salonRow(salons, ref, context, cardW, false, offset: 10, limit: 5),
 
+              // ── Golaýdaky salonlar (Vertical List) ──
+              _nearbyVenues(salons, context, offset: 15),
 
+              // ── Golaýdaky ussalar (Vertical List) ──
+              _nearbyProfessionals(context),
 
               const SliverToBoxAdapter(child: SizedBox(height: 100)),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _nearbyVenues(AsyncValue<List<Salon>> data, BuildContext context, {int offset = 0, int? limit}) {
+    return data.when(
+      loading: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
+      error: (_, __) => const SliverToBoxAdapter(child: SizedBox.shrink()),
+      data: (salons) {
+        var list = List<Salon>.from(salons);
+        if (offset < list.length) {
+          list = list.sublist(offset);
+        } else {
+          list = [];
+        }
+        if (limit != null && list.length > limit) {
+          list = list.sublist(0, limit);
+        }
+        
+        if (list.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
+        
+        return SliverMainAxisGroup(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSizes.paddingHorizontal,
+                  AppSizes.sectionGap,
+                  AppSizes.paddingHorizontal,
+                  AppSizes.sectionTitleToCardGap,
+                ),
+                child: _sectionHeader(context, 'Golaýdaky salonlar'),
+              ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingHorizontal),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final salon = list[index];
+                    return HorizontalSalonCard(
+                      salon: salon,
+                      onTap: () => Navigator.push(
+                        context,
+                        fadeSlideRoute(SalonDetailScreen(salonId: salon.id)),
+                      ),
+                    );
+                  },
+                  childCount: list.length,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _nearbyProfessionals(BuildContext context) {
+    if (kMockStaffList.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
+    
+    return SliverMainAxisGroup(
+      slivers: [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSizes.paddingHorizontal,
+              AppSizes.sectionGap,
+              AppSizes.paddingHorizontal,
+              AppSizes.sectionTitleToCardGap,
+            ),
+            child: _sectionHeader(context, 'Golaýdaky ussalar'),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingHorizontal),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final staff = kMockStaffList[index];
+                return ProfessionalCard(
+                  staff: staff,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      fadeSlideRoute(SalonDetailScreen(salonId: staff.salonId)),
+                    );
+                  },
+                );
+              },
+              childCount: kMockStaffList.length,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -396,8 +497,10 @@ class HomeScreen extends ConsumerWidget {
     WidgetRef ref,
     BuildContext context,
     double cardW,
-    bool reversed,
-  ) {
+    bool reversed, {
+    int offset = 0,
+    int? limit,
+  }) {
     return data.when(
       loading: () => SliverToBoxAdapter(
         child: SizedBox(
@@ -440,6 +543,15 @@ class HomeScreen extends ConsumerWidget {
         }).toList();
         if (list.isEmpty) list = List.from(salons);
         if (reversed) list = list.reversed.toList();
+        
+        if (offset < list.length) {
+          list = list.sublist(offset);
+        } else {
+          list = [];
+        }
+        if (limit != null && list.length > limit) {
+          list = list.sublist(0, limit);
+        }
         if (list.isEmpty) {
           return SliverToBoxAdapter(
             child: Padding(
@@ -602,12 +714,9 @@ class _VenueCard extends StatelessWidget {
     required this.isFavourite,
   });
 
-  double get _rating {
-    const r = [5.0, 4.9, 4.8, 4.7, 4.6];
-    return r[salon.id % r.length];
-  }
+  double get _rating => salon.rating > 0 ? salon.rating : 5.0;
 
-  int get _reviews => (salon.id * 127 + 42) % 500 + 10;
+  int get _reviews => salon.reviewsCount > 0 ? salon.reviewsCount : (salon.id * 127 + 42) % 500 + 10;
 
   String get _distanceKm {
     final km = (salon.id % 5 + 1) + (salon.id % 10) / 10.0;
@@ -667,7 +776,7 @@ class _VenueCard extends StatelessWidget {
                                       ? Icons.favorite_rounded
                                       : Icons.favorite_border_rounded,
                                   size: 18,
-                                  color: isFavourite ? kError : kTextPrimary,
+                                  color: isFavourite ? kPrimary : kTextTertiary.withValues(alpha: 0.6),
                                 ),
                               ),
                             ),

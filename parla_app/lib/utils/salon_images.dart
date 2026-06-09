@@ -14,6 +14,10 @@ const _allImages = <String>[
   'images/7.webp',
   'images/8.jpg',
   'images/9.jpg',
+  'images/ai_hair.png',
+  'images/ai_spa.png',
+  'images/ai_tattoo.png',
+  'images/ai_clinic.png',
 ];
 
 const _keyToImage = <String, String>{
@@ -26,6 +30,14 @@ const _keyToImage = <String, String>{
   'img7': 'images/7.webp',
   'img8': 'images/8.jpg',
   'img9': 'images/9.jpg',
+  'ai_hair': 'images/ai_hair.png',
+  'ai_spa': 'images/ai_spa.png',
+  'ai_tattoo': 'images/ai_tattoo.png',
+  'ai_clinic': 'images/ai_clinic.png',
+  'avatar_f1': 'images/avatar_f1.png',
+  'avatar_f2': 'images/avatar_f2.png',
+  'avatar_m1': 'images/avatar_m1.png',
+  'avatar_m2': 'images/avatar_m2.png',
 };
 
 /// imageKey-den asset path almak. Tapylmasa salon.id boýunça fallback.

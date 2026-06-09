@@ -1310,7 +1310,7 @@ class _UnifiedFavoriteButtonOverlay extends StatelessWidget {
             icon: isFavourite
                 ? Icons.favorite_rounded
                 : Icons.favorite_border_rounded,
-            iconColor: isFavourite ? kError : kTextPrimary,
+            iconColor: isFavourite ? kPrimary : kTextPrimary,
             right: AppSpacing.m - 5,
             buttonKey: const ValueKey('unified-favorite-button'),
           ),

@@ -167,7 +167,7 @@ class _SalonTile extends StatelessWidget {
                 ),
               ),
               IconButton(
-                icon: Icon(isFavourite ? Icons.favorite_rounded : Icons.favorite_border_rounded, color: isFavourite ? kError : kTextSecondary),
+                icon: Icon(isFavourite ? Icons.favorite_rounded : Icons.favorite_border_rounded, color: isFavourite ? kPrimary : kTextSecondary),
                 onPressed: onFavouriteToggle,
                 tooltip: isFavourite ? 'Saýlananlardan aýyr' : 'Saýlananlara goş',
               ),

@@ -6,6 +6,8 @@ class Salon {
   final String? imageKey;
   final double? latitude;
   final double? longitude;
+  final double rating;
+  final int reviewsCount;
   final List<Service> services;
 
   const Salon({
@@ -16,6 +18,8 @@ class Salon {
     this.imageKey,
     this.latitude,
     this.longitude,
+    this.rating = 0.0,
+    this.reviewsCount = 0,
     this.services = const [],
   });
 
@@ -29,6 +33,8 @@ class Salon {
         imageKey: json['image_key'] as String?,
         latitude: (json['latitude'] as num?)?.toDouble(),
         longitude: (json['longitude'] as num?)?.toDouble(),
+        rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
+        reviewsCount: (json['reviews_count'] as int?) ?? 0,
         services: (json['services'] as List<dynamic>?)
                 ?.map((e) => Service.fromJson(e as Map<String, dynamic>))
                 .toList() ??
