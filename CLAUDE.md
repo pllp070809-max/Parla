@@ -2,6 +2,9 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Custom AI Instructions
+- **IMPORTANT LANGUAGE RULE**: ALWAYS reply and communicate with the user ONLY in the Turkmen language (Türkmen dili). Never use English or other languages for conversation unless explicitly requested to do so for a specific code snippet.
+
 ## Commands
 
 ```bash

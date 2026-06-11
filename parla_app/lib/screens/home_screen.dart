@@ -16,7 +16,6 @@ import 'salons_list_screen.dart';
 import 'salon_detail_screen.dart';
 import 'search_screen.dart';
 import 'notifications_screen.dart';
-import '../widgets/bottom_action_bar.dart';
 import '../services/mock_api_data.dart';
 import '../widgets/professional_card.dart';
 import '../widgets/horizontal_salon_card.dart';

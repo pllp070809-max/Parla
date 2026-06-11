@@ -67,6 +67,36 @@ class FavouriteSalonsNotifier extends StateNotifier<Set<int>> {
   }
 }
 
+/// Saýlanan hünärmenleriň (Staff) ID-leri (Favourite) – Ussa kartasynda ýürek.
+const _kFavouriteStaffIds = 'favourite_staff_ids';
+
+final favouriteStaffProvider = StateNotifierProvider<FavouriteStaffNotifier, Set<int>>((ref) {
+  return FavouriteStaffNotifier();
+});
+
+class FavouriteStaffNotifier extends StateNotifier<Set<int>> {
+  FavouriteStaffNotifier() : super({}) { _load(); }
+
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_kFavouriteStaffIds);
+    if (raw == null || raw.isEmpty) return;
+    state = raw.split(',').map((e) => int.tryParse(e.trim())).whereType<int>().toSet();
+  }
+
+  Future<void> toggle(int staffId) async {
+    final next = Set<int>.from(state);
+    if (next.contains(staffId)) {
+      next.remove(staffId);
+    } else {
+      next.add(staffId);
+    }
+    state = next;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_kFavouriteStaffIds, next.join(','));
+  }
+}
+
 /// Profil ady (avatar initial üçin).
 final profileNameProvider = FutureProvider<String?>((ref) async {
   final prefs = await SharedPreferences.getInstance();
